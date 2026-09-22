@@ -304,8 +304,8 @@
       padding: 12px 10px;
       flex: 1;
       width: 100%;
-      padding-top: 72px; /* Space for fixed header */
-      padding-bottom: 72px; /* Space for fixed footer */
+      padding-top: 72px;
+      padding-bottom: 72px;
     }
     @media (min-width: 640px) { .container { max-width: 720px; padding: 16px 20px; padding-top: 80px; padding-bottom: 80px; } }
     @media (min-width: 900px) { .container { max-width: 1000px; padding: 20px 28px; padding-top: 88px; padding-bottom: 88px; } }
@@ -403,7 +403,7 @@
       padding: 16px;
       background: var(--primary);
       color: white;
-      border: none; /* Changed: removed border */
+      border: none;
       border-radius: 40px;
       font-weight: 800;
       font-size: 1.05rem;
@@ -737,7 +737,7 @@
     .btn-share { background: #7c3aed; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25); }
     .btn-share:hover { box-shadow: 0 8px 20px rgba(124, 58, 237, 0.35); }
 
-    /* ---------- AGGREGATE & RANKING BUTTONS (NEW STYLES) ---------- */
+    /* ---------- AGGREGATE & RANKING BUTTONS ---------- */
     .btn-aggregate {
       background: linear-gradient(135deg, #0d9488, #14b8a6);
       color: white;
@@ -762,7 +762,7 @@
     }
     .btn-ranking:active { transform: scale(0.96); }
 
-    /* ---------- ACTION BAR (ICON ONLY, SINGLE ROW, EQUAL SPACING) ---------- */
+    /* ---------- ACTION BAR ---------- */
     .action-bar {
       display: flex;
       gap: 10px;
@@ -1056,7 +1056,7 @@
     .framework-item:last-child { border-bottom: none; }
     .framework-item .code { color: var(--text-muted); font-weight: 700; margin-right: 6px; }
 
-    /* ---------- FOOTER (FIXED SCROLLING) ---------- */
+    /* ---------- FOOTER ---------- */
     .app-footer {
       position: fixed;
       bottom: 0;
@@ -1321,7 +1321,7 @@
     }
     .im-edit-form .im-field-row .im-field { flex: 1; }
 
-    /* ---------- RANKING MODE SELECTOR (REDESIGNED) ---------- */
+    /* ---------- RANKING MODE SELECTOR ---------- */
     .rank-mode-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -1408,7 +1408,7 @@
       gap: 4px;
     }
 
-    /* ---------- NAV CONTROL PANEL (NEW) ---------- */
+    /* ---------- NAV CONTROL PANEL ---------- */
     .nav-control-section {
       margin-bottom: 16px;
       border: 1px solid #eef2f6;
@@ -1488,6 +1488,196 @@
       transform: translateX(18px);
     }
 
+    /* ---------- AUTO-SUGGESTION ---------- */
+    .autocomplete-wrap {
+      position: relative;
+      width: 100%;
+    }
+    .autocomplete-wrap input {
+      width: 100%;
+    }
+    .autocomplete-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 2px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 var(--radius-xs) var(--radius-xs);
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 9999;
+      display: none;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+    .autocomplete-list.open { display: block; }
+    .autocomplete-list .ac-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-family: 'Times New Roman', 'Noto Sans Ethiopic', serif;
+      border-bottom: 1px solid #f1f5f9;
+      transition: background 0.15s;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+    }
+    .autocomplete-list .ac-item:last-child { border-bottom: none; }
+    .autocomplete-list .ac-item:hover,
+    .autocomplete-list .ac-item.highlighted {
+      background: #e8f0f8;
+      color: var(--primary);
+    }
+    .autocomplete-list .ac-item .ac-cat {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      margin-left: auto;
+      padding-left: 10px;
+      flex-shrink: 0;
+    }
+    .autocomplete-list .ac-empty {
+      padding: 12px 14px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* ---------- SUMMARY DASHBOARD ---------- */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    @media (min-width: 600px) { .summary-grid { grid-template-columns: repeat(4, 1fr); } }
+    @media (min-width: 900px) { .summary-grid { grid-template-columns: repeat(7, 1fr); } }
+    .summary-card {
+      background: white;
+      border-radius: var(--radius-sm);
+      padding: 14px 12px;
+      border-left: 4px solid var(--primary);
+      box-shadow: var(--shadow);
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .summary-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+    .summary-card .sc-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1.1;
+      font-family: 'Times New Roman', 'Noto Sans Ethiopic', serif;
+    }
+    .summary-card .sc-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-top: 4px;
+      font-family: 'Times New Roman', 'Noto Sans Ethiopic', serif;
+    }
+    .summary-card.total { border-left-color: var(--primary); }
+    .summary-card.planned { border-left-color: #0284c7; }
+    .summary-card.completed { border-left-color: var(--green); }
+    .summary-card.ongoing { border-left-color: var(--yellow); }
+    .summary-card.pending { border-left-color: var(--orange-red); }
+    .summary-card.overdue { border-left-color: var(--red); }
+    .summary-card.indicator { border-left-color: var(--secondary); }
+
+    /* ---------- PERIOD FILTER BAR ---------- */
+    .period-filter-bar {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 14px;
+      background: white;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow);
+    }
+    .period-filter-bar .pf-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #475569;
+      margin-right: 4px;
+      font-family: 'Times New Roman', 'Noto Sans Ethiopic', serif;
+      white-space: nowrap;
+    }
+    .period-filter-bar .pf-btn {
+      padding: 6px 12px;
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      background: white;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: 'Times New Roman', 'Noto Sans Ethiopic', serif;
+      min-height: 34px;
+      white-space: nowrap;
+    }
+    .period-filter-bar .pf-btn:hover { border-color: var(--primary-light); background: #f0f7ff; }
+    .period-filter-bar .pf-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .period-filter-bar .pf-custom {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin-left: auto;
+      flex-wrap: wrap;
+    }
+    .period-filter-bar .pf-custom input[type="date"] {
+      padding: 6px 8px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.72rem;
+      font-family: 'Times New Roman', 'Noto Sans Ethiopic', serif;
+      min-height: 34px;
+      background: var(--bg-subtle);
+    }
+    .period-filter-bar .pf-custom input[type="date"]:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      background: white;
+    }
+
+    /* ---------- DRILL-DOWN ---------- */
+    .drill-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      background: #f0f7ff;
+      padding: 8px 14px;
+      border-radius: var(--radius-xs);
+      font-size: 0.78rem;
+      font-weight: 500;
+    }
+    .drill-breadcrumb .dcrumb {
+      color: var(--primary);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: var(--transition);
+      font-weight: 600;
+      white-space: nowrap;
+      font-family: 'Times New Roman', 'Noto Sans Ethiopic', serif;
+    }
+    .drill-breadcrumb .dcrumb:hover { background: #dbeafe; }
+    .drill-breadcrumb .dcrumb.active { color: var(--secondary); font-weight: 700; cursor: default; }
+    .drill-breadcrumb .dcrumb.active:hover { background: transparent; }
+    .drill-breadcrumb .dsep { color: #cbd5e1; font-weight: 300; }
+
     /* ---------- RESPONSIVE MEDIA QUERIES ---------- */
     @media (max-width: 768px) {
       .app-header .header-title { font-size: 0.82rem; }
@@ -1514,6 +1704,8 @@
       }
       .selector-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
       .rank-mode-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+      .summary-grid { grid-template-columns: repeat(2, 1fr); }
+      .period-filter-bar .pf-custom { margin-left: 0; width: 100%; }
     }
     @media (max-width: 480px) {
       .app-header .header-title { font-size: 0.75rem; }
@@ -1534,6 +1726,10 @@
       .action-bar { flex-direction: row; }
       .action-bar .btn { width: auto; flex: 1 1 0; }
       .feedback-preview { font-size: 0.75rem; padding: 12px; }
+      .summary-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .summary-card .sc-value { font-size: 1.2rem; }
+      .summary-card .sc-label { font-size: 0.6rem; }
+      .period-filter-bar .pf-btn { font-size: 0.65rem; padding: 5px 9px; min-height: 30px; }
     }
     @media (max-width: 360px) {
       .app-header .header-title { font-size: 0.68rem; }
@@ -1547,6 +1743,8 @@
       .chart-bar .bar-label { font-size: 0.5rem; padding: 0 2px; top: -16px; }
       .rank-mode-grid { grid-template-columns: 1fr; }
       .mobile-drawer { width: 260px; }
+      .summary-grid { grid-template-columns: 1fr 1fr; }
+      .period-filter-bar .pf-btn { font-size: 0.6rem; padding: 4px 7px; min-height: 28px; }
     }
     @media (orientation: landscape) and (max-height: 500px) {
       .app-header { padding: 4px 10px; }
@@ -1627,7 +1825,7 @@
           <label for="usernameSelect">Username / የተጠቃሚ ስም</label>
           <select id="usernameSelect">
             <option value="">— Select —</option>
-            <option value="Admin / አስተዳዳሪ">Admin / አስተዳዳሪ</option>
+            <option value="Admin">Admin</option>
             <option value="Kebele 04">Kebele 04</option>
             <option value="Kebele 05">Kebele 05</option>
             <option value="Kebele 06">Kebele 06</option>
@@ -1650,7 +1848,10 @@
 
         <div class="input-group">
           <label for="nameInput">Name / ስም</label>
-          <input type="text" id="nameInput" placeholder="Enter your name" autocomplete="off">
+          <div class="autocomplete-wrap">
+            <input type="text" id="nameInput" placeholder="Enter your name" autocomplete="off">
+            <div class="autocomplete-list" id="nameAutocomplete"></div>
+          </div>
           <div class="error-msg" id="nameError">Name is required</div>
         </div>
 
@@ -1731,9 +1932,20 @@
       <button class="tab-btn" data-admintab="aggregate" title="Aggregate" aria-label="Aggregate"><i class="fas fa-chart-simple"></i></button>
       <button class="tab-btn" data-admintab="comparison" title="Comparison" aria-label="Comparison"><i class="fas fa-code-compare"></i></button>
       <button class="tab-btn" data-admintab="ranking" title="Ranking" aria-label="Ranking"><i class="fas fa-ranking-star"></i></button>
+      <button class="tab-btn" data-admintab="summary" title="Summary" aria-label="Summary"><i class="fas fa-clipboard-list"></i></button>
       <button class="tab-btn" data-admintab="feedback" title="Feedback" aria-label="Feedback"><i class="fas fa-comment-dots"></i></button>
     </div>
     <div id="adminContent"></div>
+  </div>
+
+  <!-- Summary Page -->
+  <div id="page-summary" class="page-section">
+    <div class="breadcrumb" id="summaryBreadcrumb">
+      <span class="crumb" onclick="window._goHome()">PHCU</span>
+      <span class="sep">›</span>
+      <span class="crumb active">Summary</span>
+    </div>
+    <div id="summaryContent"></div>
   </div>
 
 </div>
@@ -1759,46 +1971,38 @@
     let currentHcTab = 'overview';
     let currentHpTab = 'overview';
     let currentAdminTab = 'submissions';
+    let currentSummaryDrill = 'phcu';
+    let currentSummaryEntityId = null;
     let reportingPeriod = 'annually';
     let currentRankMode = 'hp';
+    let customFromDate = null;
+    let customToDate = null;
 
     // ---------- NAVIGATION VISIBILITY CONFIG (ADMIN CONTROLLED) ----------
-    // Admin can enable/disable any navigation item or content section.
-    // Keys match the item identifiers used throughout the system.
     let navVisibility = {
-      // Home page facility cards
       homeHC: true,
       homeHPs: true,
       homeAdmin: true,
-
-      // HC tabs
       hcOverview: true,
       hcData: true,
       hcAnalysis: true,
       hcFeedback: true,
-
-      // HPs tabs
       hpOverview: true,
       hpData: true,
       hpAnalysis: true,
       hpFeedback: true,
-
-      // Admin tabs
       adminSubmissions: true,
       adminAggregate: true,
       adminComparison: true,
       adminRanking: true,
+      adminSummary: true,
       adminFeedback: true,
-
-      // Mobile drawer sections
       drawerDashboard: true,
       drawerAllUsers: true,
       drawerAssessments: true,
       drawerAdmin: true,
       drawerHC: true,
       drawerHPs: true,
-
-      // Individual Kobo assessment nav items
       'CSC': true,
       'HEP': true,
       'HR-HPs': true,
@@ -1838,6 +2042,7 @@
       adminAggregate: { label: 'Admin Tab: Aggregate', icon: 'fa-chart-simple' },
       adminComparison: { label: 'Admin Tab: Comparison', icon: 'fa-code-compare' },
       adminRanking: { label: 'Admin Tab: Ranking', icon: 'fa-ranking-star' },
+      adminSummary: { label: 'Admin Tab: Summary', icon: 'fa-clipboard-list' },
       adminFeedback: { label: 'Admin Tab: Feedback', icon: 'fa-comment-dots' },
       drawerDashboard: { label: 'Drawer: Dashboard Section', icon: 'fa-gauge-high' },
       drawerAllUsers: { label: 'Drawer: All Users Section', icon: 'fa-users' },
@@ -1890,7 +2095,6 @@
       return isAdmin();
     }
 
-    // Navigation visibility check (admin-controlled)
     function isNavVisible(key) {
       if (!(key in navVisibility)) return true;
       return navVisibility[key] !== false;
@@ -1898,7 +2102,7 @@
 
     // ---------- ALL USERS FOR MOBILE NAVIGATION ----------
     const ALL_USERS = [
-      { id: 'admin', label: 'Admin / አስተዳዳሪ', icon: 'fa-shield-halved', role: 'admin', facility: 'All' },
+      { id: 'admin', label: 'Admin', icon: 'fa-shield-halved', role: 'admin', facility: 'All' },
       { id: 'kebele04', label: 'Kebele 04', icon: 'fa-house-medical', role: 'kebele', kebele: '04', hpId: 'hp5' },
       { id: 'kebele05', label: 'Kebele 05', icon: 'fa-house-medical', role: 'kebele', kebele: '05', hpId: 'hp1' },
       { id: 'kebele06', label: 'Kebele 06', icon: 'fa-house-medical', role: 'kebele', kebele: '06', hpId: 'hp2' },
@@ -1943,7 +2147,7 @@
     // ---------- KOBOTOOLBOX SUMMARY STORE ----------
     let koboSummaries = {};
 
-    // ---------- ADDITIONAL NAVIGATION ITEMS (FUNCTIONAL SEQUENCE) ----------
+    // ---------- ADDITIONAL NAVIGATION ITEMS ----------
     const ADDITIONAL_NAV_ITEMS = [
       { label: 'CSC', key: 'CSC', icon: 'fa-users' },
       { label: 'HEP', key: 'HEP', icon: 'fa-heart-pulse' },
@@ -1967,6 +2171,228 @@
       { label: 'Laboratory-Chapter-6', key: 'Laboratory-Chapter-6', icon: 'fa-flask' },
       { label: 'HR-Chapter-10', key: 'HR-Chapter-10', icon: 'fa-user-doctor' }
     ];
+
+    // ---------- AUTO-SUGGESTION DATA SOURCES ----------
+    const AUTO_SUGGEST_DATA = {
+      names: ['Assefa Gashaye', 'Amanuel', 'Bruktawit', 'Chala', 'Desta', 'Eden', 'Fikru', 'Hanna', 'Kebede', 'Mulu', 'Selam', 'Tigist', 'Yohannes'],
+      departments: ['Finance', 'HIT', 'QI', 'MCH Clinic', 'ART', 'TB Clinic', 'EPI Clinic', 'Under-5 Clinic', 'OPD Clinic', 'Pharmacy Department', 'Laboratory'],
+      kebeles: ['04', '05', '06', '11', '15', '17'],
+      indicators: [
+        'Reimbursement', 'Data Quality Score', 'Data Use Score', 'CSC Rate', 'EHCRIG Implementation',
+        'HC Staff Satisfaction', 'Active Professional License', 'ANC1 to Delivery DOR', 'ANC8 Coverage',
+        'ART Retention', 'Contraceptive Acceptance Rate', 'Early PNC Coverage', 'Essential Drug Availability',
+        'Essential Lab Test Availability', 'Full Immunization <1yr', 'Good Governance Index',
+        'EPHCG Implementation', 'Patient Satisfaction', 'Malaria Positivity Rate', 'TB Treatment Success',
+        'PMTCT ART Mothers', 'Viral Load Suppression', 'Skilled Delivery', 'Diabetes Screening',
+        'Hypertension Screening', 'Cervical Cancer Screening', 'Total OPD Attendance'
+      ],
+      targets: ['100%', '95%', '90%', '85%', '80%', '75%', '70%', '65%', '60%', '50%', '40%', '30%', '20%', '10%'],
+      remarks: ['On track', 'Needs improvement', 'Critical gap', 'Exceeds target', 'Under review', 'Data pending verification', 'Action required'],
+      actions: ['Conduct refresher training', 'Strengthen supervision', 'Improve data quality', 'Enhance community engagement', 'Prioritize low-performing indicators', 'Allocate additional resources', 'Conduct follow-up assessment'],
+      dates: []
+    };
+
+    // Generate date suggestions for current year
+    (function generateDateSuggestions() {
+      const now = new Date();
+      for (let m = 0; m < 12; m++) {
+        const d = new Date(now.getFullYear(), m, 1);
+        AUTO_SUGGEST_DATA.dates.push(d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }));
+      }
+    })();
+
+    // ---------- AUTO-SUGGESTION ENGINE ----------
+    function getSuggestions(input, category, maxResults) {
+      maxResults = maxResults || 8;
+      if (!input || input.length < 1) return [];
+      const query = input.toLowerCase().trim();
+      let source = [];
+      if (category === 'name') source = AUTO_SUGGEST_DATA.names;
+      else if (category === 'department') source = AUTO_SUGGEST_DATA.departments;
+      else if (category === 'kebele') source = AUTO_SUGGEST_DATA.kebeles;
+      else if (category === 'indicator') source = AUTO_SUGGEST_DATA.indicators;
+      else if (category === 'target') source = AUTO_SUGGEST_DATA.targets;
+      else if (category === 'remark') source = AUTO_SUGGEST_DATA.remarks;
+      else if (category === 'action') source = AUTO_SUGGEST_DATA.actions;
+      else if (category === 'date') source = AUTO_SUGGEST_DATA.dates;
+      else {
+        source = [].concat(
+          AUTO_SUGGEST_DATA.indicators,
+          AUTO_SUGGEST_DATA.departments,
+          AUTO_SUGGEST_DATA.kebeles,
+          AUTO_SUGGEST_DATA.actions,
+          AUTO_SUGGEST_DATA.remarks
+        );
+      }
+      const seen = {};
+      const results = [];
+      for (let i = 0; i < source.length; i++) {
+        const item = source[i];
+        if (seen[item]) continue;
+        if (item.toLowerCase().indexOf(query) !== -1) {
+          seen[item] = true;
+          results.push(item);
+          if (results.length >= maxResults) break;
+        }
+      }
+      return results;
+    }
+
+    function setupAutocomplete(inputEl, listEl, category) {
+      if (!inputEl || !listEl) return;
+      let currentHighlight = -1;
+
+      inputEl.addEventListener('input', function() {
+        const val = this.value;
+        const suggestions = getSuggestions(val, category);
+        renderAutocompleteList(listEl, suggestions, inputEl);
+      });
+
+      inputEl.addEventListener('keydown', function(e) {
+        const items = listEl.querySelectorAll('.ac-item');
+        if (!listEl.classList.contains('open') || items.length === 0) {
+          if (e.key === 'Enter') return;
+          return;
+        }
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          currentHighlight = Math.min(currentHighlight + 1, items.length - 1);
+          updateHighlight(items, currentHighlight);
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          currentHighlight = Math.max(currentHighlight - 1, 0);
+          updateHighlight(items, currentHighlight);
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (currentHighlight >= 0 && items[currentHighlight]) {
+            inputEl.value = items[currentHighlight].dataset.value;
+            closeAutocomplete(listEl);
+            inputEl.dispatchEvent(new Event('change'));
+          }
+        } else if (e.key === 'Escape') {
+          closeAutocomplete(listEl);
+        }
+      });
+
+      inputEl.addEventListener('blur', function() {
+        setTimeout(function() { closeAutocomplete(listEl); }, 200);
+      });
+
+      inputEl.addEventListener('focus', function() {
+        if (this.value.length >= 1) {
+          const suggestions = getSuggestions(this.value, category);
+          renderAutocompleteList(listEl, suggestions, inputEl);
+        }
+      });
+    }
+
+    function renderAutocompleteList(listEl, suggestions, inputEl) {
+      if (!suggestions || suggestions.length === 0) {
+        listEl.innerHTML = '<div class="ac-empty">No suggestions</div>';
+        listEl.classList.add('open');
+        return;
+      }
+      listEl.innerHTML = suggestions.map(function(s) {
+        return '<div class="ac-item" data-value="' + escapeHtml(s) + '">' + escapeHtml(s) + '</div>';
+      }).join('');
+      listEl.classList.add('open');
+      listEl.querySelectorAll('.ac-item').forEach(function(item) {
+        item.addEventListener('mousedown', function(e) {
+          e.preventDefault();
+          inputEl.value = this.dataset.value;
+          closeAutocomplete(listEl);
+          inputEl.dispatchEvent(new Event('change'));
+        });
+        item.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+          inputEl.value = this.dataset.value;
+          closeAutocomplete(listEl);
+          inputEl.dispatchEvent(new Event('change'));
+        });
+      });
+    }
+
+    function updateHighlight(items, idx) {
+      items.forEach(function(item, i) {
+        item.classList.toggle('highlighted', i === idx);
+      });
+      if (items[idx]) items[idx].scrollIntoView({ block: 'nearest' });
+    }
+
+    function closeAutocomplete(listEl) {
+      listEl.classList.remove('open');
+    }
+
+    // ---------- PERIOD FILTER ----------
+    function getPeriodFilterLabel() {
+      const labels = {
+        daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly',
+        quarterly: 'Quarterly', semi_annually: 'Semi-Annual',
+        annually: 'Annual', custom: 'Custom'
+      };
+      return labels[reportingPeriod] || 'Annual';
+    }
+
+    function getPeriodMultiplier() {
+      const mult = {
+        daily: 1 / 365, weekly: 1 / 52, monthly: 1 / 12,
+        quarterly: 1 / 4, semi_annually: 1 / 2, annually: 1
+      };
+      if (reportingPeriod === 'custom' && customFromDate && customToDate) {
+        const from = new Date(customFromDate);
+        const to = new Date(customToDate);
+        const days = Math.max(1, Math.round((to - from) / (1000 * 60 * 60 * 24)));
+        return days / 365;
+      }
+      return mult[reportingPeriod] || 1;
+    }
+
+    function renderPeriodFilterBar(context) {
+      const periods = [
+        { id: 'daily', label: 'Daily' },
+        { id: 'weekly', label: 'Weekly' },
+        { id: 'monthly', label: 'Monthly' },
+        { id: 'quarterly', label: 'Quarterly' },
+        { id: 'semi_annually', label: 'Semi-Annual' },
+        { id: 'annually', label: 'Annual' },
+        { id: 'custom', label: 'Custom' }
+      ];
+      let html = '<div class="period-filter-bar">';
+      html += '<span class="pf-label"><i class="fas fa-calendar-alt"></i> Period:</span>';
+      periods.forEach(function(p) {
+        html += '<button class="pf-btn ' + (reportingPeriod === p.id ? 'active' : '') + '" onclick="window._setPeriod(\'' + p.id + '\',\'' + context + '\')">' + p.label + '</button>';
+      });
+      if (reportingPeriod === 'custom') {
+        html += '<div class="pf-custom">';
+        html += '<input type="date" id="customFromDate" value="' + (customFromDate || '') + '" onchange="window._setCustomDate(\'from\',this.value)">';
+        html += '<span style="font-size:0.72rem;color:#64748b;">to</span>';
+        html += '<input type="date" id="customToDate" value="' + (customToDate || '') + '" onchange="window._setCustomDate(\'to\',this.value)">';
+        html += '</div>';
+      }
+      html += '</div>';
+      return html;
+    }
+
+    window._setPeriod = function(period, context) {
+      reportingPeriod = period;
+      if (period !== 'custom') {
+        customFromDate = null;
+        customToDate = null;
+      }
+      if (context === 'hc') renderHCTab(currentHcTab);
+      else if (context === 'hp') renderHPDetail(currentHpId, currentHpTab);
+      else if (context === 'admin') renderAdminTab(currentAdminTab);
+      else if (context === 'summary') renderSummary();
+      showToast('Period set to ' + getPeriodFilterLabel(), 'info');
+    };
+
+    window._setCustomDate = function(type, value) {
+      if (type === 'from') customFromDate = value;
+      else customToDate = value;
+      if (customFromDate && customToDate) {
+        renderSummary();
+      }
+    };
 
     // ---------- CENTRALIZED CONFIGURATION ----------
     let hcAgendas = [
@@ -2208,103 +2634,198 @@
       return Math.round(hcScore * 0.6 + hpAvg * 0.4);
     }
 
-    // ---------- KOBOTOOLBOX DATA INTEGRATION ----------
-    function fetchKoboSummary(sourceKey, facilityId) {
-      const source = KOBOTOOLBOX_SOURCES[sourceKey];
-      if (!source) return 0;
-      let hash = 0;
-      const seed = sourceKey + (facilityId || 'hc');
-      for (let i = 0; i < seed.length; i++) {
-        hash = ((hash << 5) - hash) + seed.charCodeAt(i);
-        hash |= 0;
-      }
-      const absHash = Math.abs(hash);
-      return 45 + (absHash % 54);
-    }
-
-    function integrateKoboData() {
-      Object.keys(KOBOTOOLBOX_SOURCES).forEach(sourceKey => {
-        const source = KOBOTOOLBOX_SOURCES[sourceKey];
-        if (!koboSummaries[sourceKey]) koboSummaries[sourceKey] = { hc: null, hp: {} };
-
-        if (source.level === 'hc' || source.level === 'both') {
-          koboSummaries[sourceKey].hc = fetchKoboSummary(sourceKey, 'hc');
-        }
-        if (source.level === 'hp' || source.level === 'both') {
-          healthPosts.forEach(hp => {
-            koboSummaries[sourceKey].hp[hp.id] = fetchKoboSummary(sourceKey, hp.id);
-          });
-        }
+    // ---------- SUMMARY CALCULATIONS ----------
+    function getSummaryStats() {
+      const periodMult = getPeriodMultiplier();
+      let totalIndicators = hcIndicators.length;
+      healthPosts.forEach(hp => {
+        totalIndicators += (hpIndicators[hp.id] || []).length;
       });
-    }
 
-    function getKoboScoreForIndicator(indicatorName, facilityId) {
-      let bestMatch = null;
-      let bestScore = -1;
-      Object.keys(KOBOTOOLBOX_SOURCES).forEach(sourceKey => {
-        const source = KOBOTOOLBOX_SOURCES[sourceKey];
-        if (!source.indicatorMatch) return;
-        const match = indicatorName.toLowerCase().includes(source.indicatorMatch.toLowerCase()) ||
-                      source.indicatorMatch.toLowerCase().includes(indicatorName.toLowerCase());
-        if (match) {
-          const summary = koboSummaries[sourceKey];
-          if (summary) {
-            let score = null;
-            if (facilityId === 'hc' && summary.hc !== null) score = summary.hc;
-            else if (facilityId && summary.hp && summary.hp[facilityId] !== undefined) score = summary.hp[facilityId];
-            if (score !== null && score > bestScore) {
-              bestScore = score;
-              bestMatch = sourceKey;
-            }
-          }
-        }
-      });
-      if (bestMatch && bestScore >= 0) return bestScore;
-      return null;
-    }
+      let plannedCount = 0, completedCount = 0, ongoingCount = 0, pendingCount = 0, overdueCount = 0;
+      let totalTarget = 0, totalAchievement = 0;
+      let indicatorsList = [];
 
-    function applyKoboOverrides() {
+      // HC indicators
       hcIndicators.forEach(k => {
-        const koboScore = getKoboScoreForIndicator(k.name, 'hc');
-        if (koboScore !== null) {
-          k.achievement = koboScore;
-        }
+        let perf = calcPerformance(k.plan, k.achievement, k.direction || 'higher');
+        let plan = k.plan * (periodMult > 0 ? 1 : 0);
+        let ach = k.achievement * (periodMult > 0 ? 1 : 0);
+        totalTarget += plan;
+        totalAchievement += ach;
+        indicatorsList.push({
+          name: k.name, type: 'HC', plan: plan, achievement: ach, perf: perf,
+          responsible: 'HC', department: k.agenda, kebele: '—'
+        });
+        if (perf >= 100) completedCount++;
+        else if (perf >= 50) ongoingCount++;
+        else pendingCount++;
       });
-      Object.keys(hpIndicators).forEach(hpId => {
-        hpIndicators[hpId].forEach(k => {
-          const koboScore = getKoboScoreForIndicator(k.name, hpId);
-          if (koboScore !== null) {
-            k.achievement = koboScore;
-          }
+
+      // HP indicators
+      healthPosts.forEach(hp => {
+        (hpIndicators[hp.id] || []).forEach(k => {
+          let perf = calcPerformance(k.plan, k.achievement, k.direction || 'higher');
+          let plan = k.plan * (periodMult > 0 ? 1 : 0);
+          let ach = k.achievement * (periodMult > 0 ? 1 : 0);
+          totalTarget += plan;
+          totalAchievement += ach;
+          indicatorsList.push({
+            name: k.name, type: 'HP', plan: plan, achievement: ach, perf: perf,
+            responsible: hp.responsible, department: k.agenda, kebele: hp.kebele
+          });
+          if (perf >= 100) completedCount++;
+          else if (perf >= 50) ongoingCount++;
+          else pendingCount++;
         });
       });
-      updateAllIndicators();
+
+      plannedCount = totalIndicators;
+      let achievementPct = totalTarget > 0 ? Math.round((totalAchievement / totalTarget) * 100) : 0;
+
+      return {
+        total: totalIndicators,
+        planned: plannedCount,
+        completed: completedCount,
+        ongoing: ongoingCount,
+        pending: pendingCount,
+        overdue: overdueCount,
+        totalTarget: Math.round(totalTarget),
+        totalAchievement: Math.round(totalAchievement),
+        achievementPct: achievementPct,
+        indicatorsList: indicatorsList
+      };
     }
 
-    function openKoboSource(sourceKey, targetLevel, facilityId) {
-      if (!isNavVisible(sourceKey)) {
-        showToast('This assessment is currently disabled by Admin.', 'warning');
-        return;
-      }
-      const source = KOBOTOOLBOX_SOURCES[sourceKey];
-      if (!source) {
-        showToast('Unknown Kobo source: ' + sourceKey, 'error');
-        return;
-      }
-      window.open(source.url, '_blank');
+    // ---------- RENDER SUMMARY ----------
+    function renderSummary() {
+      const container = document.getElementById('summaryContent');
+      if (!container) return;
 
-      if (!koboSummaries[sourceKey]) koboSummaries[sourceKey] = { hc: null, hp: {} };
-      if (targetLevel === 'hc') {
-        koboSummaries[sourceKey].hc = fetchKoboSummary(sourceKey, 'hc');
-      } else if (targetLevel === 'hp' && facilityId) {
-        koboSummaries[sourceKey].hp[facilityId] = fetchKoboSummary(sourceKey, facilityId);
+      const stats = getSummaryStats();
+      const periodLabel = getPeriodFilterLabel();
+
+      // Drill-down state
+      let drillTitle = 'Total PHCU';
+      let drillData = [];
+
+      if (currentSummaryDrill === 'phcu') {
+        drillData = [
+          { name: 'Debremarkos HC', type: 'HC', score: getHCScore(), kebele: '—', indicatorCount: hcIndicators.length, responsible: 'HC Team' }
+        ];
+        healthPosts.forEach(hp => {
+          drillData.push({
+            name: hp.name, type: 'HP', score: hp.overall, kebele: hp.kebele,
+            indicatorCount: (hpIndicators[hp.id] || []).length, responsible: hp.responsible
+          });
+        });
+      } else if (currentSummaryDrill === 'hc') {
+        hcIndicators.forEach(k => {
+          let perf = calcPerformance(k.plan, k.achievement, k.direction || 'higher');
+          drillData.push({
+            name: k.name, type: 'Indicator', score: perf,
+            target: k.plan, actual: k.achievement, responsible: k.agenda, kebele: '—'
+          });
+        });
+      } else if (currentSummaryDrill === 'kebele' && currentSummaryEntityId) {
+        const hp = healthPosts.find(h => h.id === currentSummaryEntityId);
+        if (hp) {
+          (hpIndicators[hp.id] || []).forEach(k => {
+            let perf = calcPerformance(k.plan, k.achievement, k.direction || 'higher');
+            drillData.push({
+              name: k.name, type: 'Indicator', score: perf,
+              target: k.plan, actual: k.achievement, responsible: hp.responsible, kebele: hp.kebele
+            });
+          });
+        }
       }
-      applyKoboOverrides();
-      if (currentPage === 'hc') renderHC();
-      if (currentPage === 'hp' && currentHpId) renderHPDetail(currentHpId, currentHpTab);
-      if (currentPage === 'admin') renderAdmin();
-      showToast('Kobo source opened: ' + sourceKey, 'info');
+
+      let html = renderPeriodFilterBar('summary');
+
+      // Breadcrumb
+      html += '<div class="drill-breadcrumb">';
+      html += '<span class="dcrumb ' + (currentSummaryDrill === 'phcu' ? 'active' : '') + '" onclick="window._summaryDrill(\'phcu\')">Total PHCU</span>';
+      if (currentSummaryDrill === 'hc') {
+        html += '<span class="dsep">›</span><span class="dcrumb active">HC</span>';
+      }
+      if (currentSummaryDrill === 'kebele' && currentSummaryEntityId) {
+        const hp = healthPosts.find(h => h.id === currentSummaryEntityId);
+        if (hp) html += '<span class="dsep">›</span><span class="dcrumb active">' + hp.name + '</span>';
+      }
+      html += '</div>';
+
+      // Summary KPI cards
+      html += '<div class="summary-grid">';
+      html += '<div class="summary-card total" onclick="window._summaryDrill(\'phcu\')"><div class="sc-value">' + stats.total + '</div><div class="sc-label">Total</div></div>';
+      html += '<div class="summary-card planned"><div class="sc-value">' + stats.planned + '</div><div class="sc-label">Planned</div></div>';
+      html += '<div class="summary-card completed"><div class="sc-value">' + stats.completed + '</div><div class="sc-label">Completed</div></div>';
+      html += '<div class="summary-card ongoing"><div class="sc-value">' + stats.ongoing + '</div><div class="sc-label">Ongoing</div></div>';
+      html += '<div class="summary-card pending"><div class="sc-value">' + stats.pending + '</div><div class="sc-label">Pending</div></div>';
+      html += '<div class="summary-card overdue"><div class="sc-value">' + stats.overdue + '</div><div class="sc-label">Overdue</div></div>';
+      html += '<div class="summary-card indicator"><div class="sc-value">' + stats.achievementPct + '%</div><div class="sc-label">Achievement</div></div>';
+      html += '</div>';
+
+      // Achievement summary
+      html += '<div class="card"><div class="card-header">📊 ' + drillTitle + ' — ' + periodLabel + ' Summary</div>';
+      html += '<div class="flex-between" style="padding:8px 0;"><span>Total Target: <strong>' + stats.totalTarget.toLocaleString() + '</strong></span><span>Total Achievement: <strong>' + stats.totalAchievement.toLocaleString() + '</strong></span><span>Achievement: <strong>' + stats.achievementPct + '%</strong></span></div>';
+
+      // Bar chart
+      html += '<div class="chart-box" style="height:140px;">';
+      html += '<div class="chart-bar" style="height:' + Math.min(100, stats.achievementPct) + '%;background:' + (stats.achievementPct >= 85 ? '#2e7d32' : stats.achievementPct >= 75 ? '#f9a825' : stats.achievementPct >= 50 ? '#e65100' : '#b71c1c') + ';"><span class="bar-label">' + stats.achievementPct + '%</span></div>';
+      html += '</div>';
+      html += '<div class="chart-label-row"><span>Overall Achievement</span></div></div>';
+
+      // Drill-down table
+      html += '<div class="card"><div class="card-header">📋 ' + drillTitle + ' Breakdown</div>';
+      html += '<div class="table-wrap"><table><thead><tr><th>Name</th><th>Type</th><th>Score</th><th>Indicators</th><th>Responsible</th><th>Status</th></tr></thead><tbody>';
+      drillData.forEach(function(item) {
+        html += '<tr style="cursor:pointer;" onclick="window._summaryEntityClick(\'' + (item.type === 'HP' ? 'kebele' : item.type === 'HC' ? 'hc' : 'indicator') + '\',\'' + escapeHtml(item.name) + '\')">';
+        html += '<td>' + escapeHtml(item.name) + '</td>';
+        html += '<td>' + item.type + '</td>';
+        html += '<td><strong>' + item.score + '%</strong></td>';
+        html += '<td>' + (item.indicatorCount || '—') + '</td>';
+        html += '<td>' + escapeHtml(item.responsible || '—') + '</td>';
+        html += '<td><span class="status-badge ' + getStatusClass(item.score) + '">' + getStatusText(item.score) + '</span></td>';
+        html += '</tr>';
+      });
+      html += '</tbody></table></div></div>';
+
+      // Indicator list for HC or kebele drill
+      if (currentSummaryDrill === 'hc' || currentSummaryDrill === 'kebele') {
+        html += '<div class="card"><div class="card-header">📋 Indicator Details</div>';
+        html += '<div class="table-wrap"><table><thead><tr><th>Indicator</th><th>Target</th><th>Achievement</th><th>Performance</th><th>Status</th></tr></thead><tbody>';
+        drillData.forEach(function(item) {
+          if (item.target !== undefined) {
+            html += '<tr><td>' + escapeHtml(item.name) + '</td><td>' + item.target + '</td><td>' + item.actual + '</td><td><strong>' + item.score + '%</strong></td><td><span class="status-badge ' + getStatusClass(item.score) + '">' + getStatusText(item.score) + '</span></td></tr>';
+          }
+        });
+        html += '</tbody></table></div></div>';
+      }
+
+      container.innerHTML = html;
     }
+
+    window._summaryDrill = function(level) {
+      if (level === 'phcu') {
+        currentSummaryDrill = 'phcu';
+        currentSummaryEntityId = null;
+      }
+      renderSummary();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window._summaryEntityClick = function(level, id) {
+      if (level === 'hc') {
+        currentSummaryDrill = 'hc';
+        currentSummaryEntityId = null;
+      } else if (level === 'kebele') {
+        currentSummaryDrill = 'kebele';
+        const hp = healthPosts.find(h => h.name === id);
+        currentSummaryEntityId = hp ? hp.id : null;
+      }
+      renderSummary();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     // ---------- HEADER TITLE UPDATE ----------
     function updateHeaderTitle(title, subtitle) {
@@ -2329,8 +2850,10 @@
           updateHeaderTitle('HPs · Health Posts', 'Facility-level performance & data entry');
         }
       } else if (page === 'admin') {
-        const tabLabels = { submissions: 'Submissions', aggregate: 'Aggregate', comparison: 'Comparison', ranking: 'Ranking & Championship', feedback: 'Feedback' };
+        const tabLabels = { submissions: 'Submissions', aggregate: 'Aggregate', comparison: 'Comparison', ranking: 'Ranking & Championship', summary: 'Summary', feedback: 'Feedback' };
         updateHeaderTitle('Admin Dashboard', tabLabels[extra.tab] || 'Submissions');
+      } else if (page === 'summary') {
+        updateHeaderTitle('Summary', 'PHCU-wide consolidated summary');
       }
     }
 
@@ -2393,6 +2916,15 @@
       currentAdminTab = 'submissions';
       renderAdmin();
       updateSectionForPage('admin', { tab: 'submissions' });
+      updateDrawerNav();
+    }
+
+    function openSummary() {
+      showPage('summary');
+      currentSummaryDrill = 'phcu';
+      currentSummaryEntityId = null;
+      renderSummary();
+      updateSectionForPage('summary');
       updateDrawerNav();
     }
 
@@ -2502,7 +3034,6 @@
       updateSectionForPage('hc', { tab: tab, sub: tabLabels[tab] });
       updateDrawerNav();
 
-      // Nav visibility check
       const tabKeyMap = { overview: 'hcOverview', data: 'hcData', analysis: 'hcAnalysis', feedback: 'hcFeedback' };
       if (!isNavVisible(tabKeyMap[tab]) && !isAdmin()) {
         container.innerHTML = `<div class="card"><div class="no-data">🔒 This section is currently disabled by Admin.</div></div>`;
@@ -2511,9 +3042,12 @@
 
       const canEditHc = canEditData('hc', 'hc');
       const canSubmitHc = canSubmitData('hc', 'hc');
+      const periodLabel = getPeriodFilterLabel();
+      const periodMult = getPeriodMultiplier();
 
       if (tab === 'overview') {
         container.innerHTML = `
+          ${renderPeriodFilterBar('hc')}
           <div class="card">
             <div class="card-header">📊 Agenda Performance</div>
             ${hcAgendas.map(a => {
@@ -2565,7 +3099,7 @@
           </div>
         `;
       } else if (tab === 'data') {
-        let html = '<div class="card"><div class="card-header">📋 HC Indicator Data</div>';
+        let html = renderPeriodFilterBar('hc') + '<div class="card"><div class="card-header">📋 HC Indicator Data — ' + periodLabel + '</div>';
         hcAgendas.forEach(a => {
           let items = userIndicators.filter(i => i.agenda === a.id);
           if (!items.length) return;
@@ -2622,8 +3156,9 @@
           else if (p < 50) threats.push({ name: k.name, perf: p });
         });
         container.innerHTML = `
+          ${renderPeriodFilterBar('hc')}
           <div class="card">
-            <div class="card-header">📊 Performance Analysis (SWOT)</div>
+            <div class="card-header">📊 Performance Analysis (SWOT) — ${periodLabel}</div>
             <div class="swot-grid">
               <div class="swot-card" style="background:#e8f5e9;">
                 <h4 style="color:#1e4a1e;"><i class="fas fa-thumbs-up"></i> Strengths (${strengths.length})</h4>
@@ -2700,21 +3235,11 @@
         '📌 Prioritize low-performing indicators'
       ];
 
-      let periodLabel = reportingPeriod.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+      let periodLabel = getPeriodFilterLabel();
 
-      let html = `
+      let html = renderPeriodFilterBar(context) + `
         <div class="card">
           <div class="card-header">📝 Feedback &amp; Reporting — ${periodLabel}</div>
-          <div class="feedback-toolbar">
-            <select class="period-select" id="feedbackPeriod" onchange="window._changePeriod(this.value)">
-              <option value="daily" ${reportingPeriod === 'daily' ? 'selected' : ''}>Daily</option>
-              <option value="weekly" ${reportingPeriod === 'weekly' ? 'selected' : ''}>Weekly</option>
-              <option value="monthly" ${reportingPeriod === 'monthly' ? 'selected' : ''}>Monthly</option>
-              <option value="quarterly" ${reportingPeriod === 'quarterly' ? 'selected' : ''}>Quarterly</option>
-              <option value="semi_annually" ${reportingPeriod === 'semi_annually' ? 'selected' : ''}>Semi-Annually</option>
-              <option value="annually" ${reportingPeriod === 'annually' ? 'selected' : ''}>Annually</option>
-            </select>
-          </div>
 
           <div class="feedback-preview" id="feedbackPreview">
             <div class="fb-section-title">📊 Performance Summary (${periodLabel})</div>
@@ -2744,14 +3269,6 @@
     }
 
     // Global feedback functions
-    window._changePeriod = function(period) {
-      reportingPeriod = period;
-      if (currentPage === 'hc') renderHCTab('feedback');
-      else if (currentPage === 'hp' && currentHpId) renderHPDetail(currentHpId, 'feedback');
-      else if (currentPage === 'admin') renderAdminTab('feedback');
-      showToast('Period changed to ' + period, 'info');
-    };
-
     window._copyFeedback = function() {
       const preview = document.getElementById('feedbackPreview');
       if (preview) {
@@ -2767,7 +3284,7 @@
     };
 
     window._copyAll = function() {
-      const container = document.getElementById('hcContent') || document.getElementById('hpContent') || document.getElementById('adminContent');
+      const container = document.getElementById('hcContent') || document.getElementById('hpContent') || document.getElementById('adminContent') || document.getElementById('summaryContent');
       if (container) {
         copyToClipboard(container.innerText, 'All dashboard content copied!');
       }
@@ -2870,7 +3387,6 @@
       updateSectionForPage('hp', { hpName: hp.name, kebele: hp.kebele, tab: tab });
       updateDrawerNav();
 
-      // Nav visibility check
       const tabKeyMap = { overview: 'hpOverview', data: 'hpData', analysis: 'hpAnalysis', feedback: 'hpFeedback' };
       if (!isNavVisible(tabKeyMap[tab]) && !isAdmin()) {
         container.innerHTML = `<div class="card"><div class="no-data">🔒 This section is currently disabled by Admin.</div></div>`;
@@ -2879,18 +3395,19 @@
 
       const canEditHp = canEditData(hpId, 'hp');
       const canSubmitHp = canSubmitData(hpId, 'hp');
+      const periodLabel = getPeriodFilterLabel();
 
       let backHtml = `<div class="mb-2">
         <button class="btn btn-sm btn-outline" onclick="window._hpGoToList()"><i class="fas fa-arrow-left"></i> ወደ ጤና ኬላዎች ዝርዝር</button>
       </div>`;
 
       if (tab === 'overview') {
-        container.innerHTML = backHtml + `
+        container.innerHTML = backHtml + renderPeriodFilterBar('hp') + `
           <div class="card" style="border-left:6px solid var(--secondary);">
             <div class="flex-between">
               <div>
                 <div class="amharic" style="font-weight:800;font-size:1.05rem;color:var(--secondary);text-align:center;">${hp.name} <span style="font-size:0.75rem;color:#64748b;">(${hp.code})</span></div>
-                <div class="amharic text-muted" style="font-size:0.75rem;text-align:center;">ቀበሌ ${hp.kebele} · ኃላፊ: ${hp.responsible} · አጠቃላይ: <strong>${hp.overall}%</strong></div>
+                <div class="amharic text-muted" style="font-size:0.75rem;text-align:center;">ቀበሌ ${hp.kebele} · ኃላፊ: ${hp.responsible} · አጠቃላይ: <strong>${hp.overall}%</strong> · ${periodLabel}</div>
               </div>
               <span class="status-badge ${getStatusClass(hp.overall)} amharic">${getStatusTextAm(hp.overall)}</span>
             </div>
@@ -2907,7 +3424,7 @@
             </div>
           </div>
           <div class="card">
-            <div class="card-header amharic">📊 የአፈጻጸም ማጠቃለያ</div>
+            <div class="card-header amharic">📊 የአፈጻጸም ማጠቃለያ — ${periodLabel}</div>
             <div class="chart-box">
               <div class="chart-bar" style="height:${Math.max(20,hp.irScore)}%;background:var(--primary);" onclick="window._hpIndicatorClick('${hpId}','ir')"><span class="bar-label">${hp.irScore}%</span></div>
               <div class="chart-bar" style="height:${Math.max(20,hp.lgScore)}%;background:var(--secondary);" onclick="window._hpIndicatorClick('${hpId}','lg')"><span class="bar-label">${hp.lgScore}%</span></div>
@@ -2952,8 +3469,8 @@
         const lgItems = indicators.filter(i => i.agenda === 'lg');
         const qeItems = indicators.filter(i => i.agenda === 'qe');
 
-        let html = backHtml + `<div class="card" style="border-left:6px solid var(--secondary);">
-          <div class="amharic" style="font-weight:800;font-size:1rem;color:var(--secondary);text-align:center;">${hp.name} — ማስገቢያ</div>
+        let html = backHtml + renderPeriodFilterBar('hp') + `<div class="card" style="border-left:6px solid var(--secondary);">
+          <div class="amharic" style="font-weight:800;font-size:1rem;color:var(--secondary);text-align:center;">${hp.name} — ማስገቢያ (${periodLabel})</div>
           <div class="amharic text-muted" style="font-size:0.75rem;text-align:center;">ቀበሌ ${hp.kebele} · ኃላፊ: ${hp.responsible}</div>
         </div>`;
 
@@ -3018,9 +3535,9 @@
           else if (p < 50) threats.push({ name: k.name, perf: p });
         });
 
-        container.innerHTML = backHtml + `
+        container.innerHTML = backHtml + renderPeriodFilterBar('hp') + `
           <div class="card" style="border-left:6px solid var(--secondary);">
-            <div class="amharic" style="font-weight:800;font-size:1rem;color:var(--secondary);text-align:center;">${hp.name} — ትንተና</div>
+            <div class="amharic" style="font-weight:800;font-size:1rem;color:var(--secondary);text-align:center;">${hp.name} — ትንተና (${periodLabel})</div>
             <div class="amharic text-muted" style="font-size:0.75rem;text-align:center;">ቀበሌ ${hp.kebele} · አጠቃላይ: <strong>${hp.overall}%</strong></div>
           </div>
           <div class="swot-grid">
@@ -3092,14 +3609,12 @@
       const container = document.getElementById('adminContent');
       if (!container) return;
 
-      const tabLabels = { submissions: 'Submissions', aggregate: 'Aggregate', comparison: 'Comparison', ranking: 'Ranking & Championship', feedback: 'Feedback' };
+      const tabLabels = { submissions: 'Submissions', aggregate: 'Aggregate', comparison: 'Comparison', ranking: 'Ranking & Championship', summary: 'Summary', feedback: 'Feedback' };
       updateSectionForPage('admin', { tab: tab });
       updateDrawerNav();
 
       const adminAccess = canAccessAdmin();
-
-      // Nav visibility check
-      const tabKeyMap = { submissions: 'adminSubmissions', aggregate: 'adminAggregate', comparison: 'adminComparison', ranking: 'adminRanking', feedback: 'adminFeedback' };
+      const tabKeyMap = { submissions: 'adminSubmissions', aggregate: 'adminAggregate', comparison: 'adminComparison', ranking: 'adminRanking', summary: 'adminSummary', feedback: 'adminFeedback' };
       if (!isNavVisible(tabKeyMap[tab]) && !isAdmin()) {
         container.innerHTML = `<div class="card"><div class="no-data">🔒 This section is currently disabled by Admin.</div></div>`;
         return;
@@ -3169,9 +3684,9 @@
         const avgLg = Math.round(totalLg / n);
         const avgQe = Math.round(totalQe / n);
 
-        container.innerHTML = `
+        container.innerHTML = renderPeriodFilterBar('admin') + `
           <div class="card" style="border-left:6px solid var(--teal);">
-            <div style="font-weight:800;font-size:1.05rem;color:var(--teal-dark);text-align:center;">📊 PHCU Aggregate Performance</div>
+            <div style="font-weight:800;font-size:1.05rem;color:var(--teal-dark);text-align:center;">📊 PHCU Aggregate Performance — ${getPeriodFilterLabel()}</div>
           </div>
           <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);">
             <div class="kpi-card" style="border-left-color:var(--primary);">
@@ -3237,9 +3752,9 @@
         const avgLg = Math.round(totalLg / n);
         const avgQe = Math.round(totalQe / n);
 
-        container.innerHTML = `
+        container.innerHTML = renderPeriodFilterBar('admin') + `
           <div class="card" style="border-left:6px solid #6d28d9;">
-            <div style="font-weight:800;font-size:1.05rem;color:#6d28d9;text-align:center;">📊 Kebele / HP Comparison</div>
+            <div style="font-weight:800;font-size:1.05rem;color:#6d28d9;text-align:center;">📊 Kebele / HP Comparison — ${getPeriodFilterLabel()}</div>
           </div>
           <div class="card">
             <div class="card-header">📈 Overall Performance by Kebele</div>
@@ -3306,9 +3821,9 @@
           { id: 'overall', label: '🏆 Overall Performance', icon: 'fa-trophy', desc: 'Combined PHCU performance summary' }
         ];
 
-        container.innerHTML = `
+        container.innerHTML = renderPeriodFilterBar('admin') + `
           <div class="card" style="border-left:6px solid var(--gold);">
-            <div style="font-weight:800;font-size:1.05rem;color:var(--gold-dark);text-align:center;">🏆 Ranking &amp; Championship</div>
+            <div style="font-weight:800;font-size:1.05rem;color:var(--gold-dark);text-align:center;">🏆 Ranking &amp; Championship — ${getPeriodFilterLabel()}</div>
             <div style="font-size:0.72rem;color:var(--text-muted);text-align:center;margin-top:4px;">Facility / Organizational Performance — Not Individual</div>
           </div>
 
@@ -3349,7 +3864,7 @@
               <div class="rank-info-banner">
                 <div class="ri-title"><i class="fas fa-info-circle"></i> Ranking Criteria — Health Post Level</div>
                 <div class="ri-detail">
-                  <span><i class="fas fa-calendar"></i> Period: Annual 2026</span>
+                  <span><i class="fas fa-calendar"></i> Period: ${getPeriodFilterLabel()}</span>
                   <span><i class="fas fa-list-ol"></i> Indicators: 25 per HP</span>
                   <span><i class="fas fa-weight-hanging"></i> IR 20% · LG 30% · Q&E 50%</span>
                   <span><i class="fas fa-arrow-up"></i> Ranked by Overall %</span>
@@ -3386,7 +3901,7 @@
               <div class="rank-info-banner">
                 <div class="ri-title"><i class="fas fa-info-circle"></i> Ranking Criteria — Health Center Level</div>
                 <div class="ri-detail">
-                  <span><i class="fas fa-calendar"></i> Period: Annual 2026</span>
+                  <span><i class="fas fa-calendar"></i> Period: ${getPeriodFilterLabel()}</span>
                   <span><i class="fas fa-list-ol"></i> Indicators: 42</span>
                   <span><i class="fas fa-weight-hanging"></i> 5 Agendas (Finance 5%, IR 15%, LG 20%, MCC 10%, Q&E 50%)</span>
                   <span><i class="fas fa-arrow-up"></i> Ranked by Overall %</span>
@@ -3418,7 +3933,7 @@
               <div class="rank-info-banner">
                 <div class="ri-title"><i class="fas fa-info-circle"></i> Overall PHCU Performance Summary</div>
                 <div class="ri-detail">
-                  <span><i class="fas fa-calendar"></i> Period: Annual 2026</span>
+                  <span><i class="fas fa-calendar"></i> Period: ${getPeriodFilterLabel()}</span>
                   <span><i class="fas fa-weight-hanging"></i> HC 60% + HP Avg 40%</span>
                   <span><i class="fas fa-trophy"></i> Overall PHCU Score: <strong>${phcuScore}%</strong></span>
                 </div>
@@ -3464,6 +3979,9 @@
 
         window._setRankMode(currentRankMode || 'hp');
 
+      } else if (tab === 'summary') {
+        // Redirect to the summary page
+        openSummary();
       } else if (tab === 'feedback') {
         const userIndicators = getUserIndicators(currentUser, hcIndicators, hcAgendas);
         renderFeedbackSection('admin', container, userIndicators);
@@ -3501,6 +4019,7 @@
     });
 
     window._goHome = goHome;
+    window._openSummary = openSummary;
 
     window._hpGoToList = function() {
       currentHpId = null;
@@ -3847,7 +4366,7 @@
       };
     }
 
-    // ---------- MOBILE DRAWER (UPDATED: All Users, No HPs, Icons) ----------
+    // ---------- MOBILE DRAWER ----------
     function updateDrawerNav() {
       const nav = document.getElementById('drawerNav');
       if (!nav) return;
@@ -3860,6 +4379,15 @@
       // Dashboard group
       if (isNavVisible('drawerDashboard')) {
         items.push({ type: 'label', text: 'Dashboard' });
+
+        // Summary nav item
+        items.push({
+          type: 'item',
+          label: 'Summary',
+          icon: 'fa-clipboard-list',
+          active: currentPage === 'summary',
+          action: () => { openSummary(); }
+        });
 
         if (isAdminUser || !isKebele) {
           if (isNavVisible('adminAggregate')) {
@@ -3903,7 +4431,7 @@
         }
       }
 
-      // ---------- ALL USERS (FUNCTIONAL SEQUENCE) ----------
+      // ---------- ALL USERS ----------
       if (isNavVisible('drawerAllUsers')) {
         items.push({ type: 'divider' });
         items.push({ type: 'label', text: 'All Users' });
@@ -3936,7 +4464,7 @@
         });
       }
 
-      // ---------- ASSESSMENTS & SERVICES (Kobo sources) ----------
+      // ---------- ASSESSMENTS & SERVICES ----------
       if (isNavVisible('drawerAssessments')) {
         items.push({ type: 'divider' });
         items.push({ type: 'label', text: 'Assessments & Services' });
@@ -4067,7 +4595,6 @@
         </button>`;
       }).join('');
 
-      // Bind actions
       const buttons = nav.querySelectorAll('.drawer-item');
       let itemIndex = 0;
       items.forEach(item => {
@@ -4095,6 +4622,105 @@
       document.getElementById('drawerOverlay').classList.remove('open');
       document.body.style.overflow = '';
     };
+
+    // ---------- KOBOTOOLBOX DATA INTEGRATION ----------
+    function fetchKoboSummary(sourceKey, facilityId) {
+      const source = KOBOTOOLBOX_SOURCES[sourceKey];
+      if (!source) return 0;
+      let hash = 0;
+      const seed = sourceKey + (facilityId || 'hc');
+      for (let i = 0; i < seed.length; i++) {
+        hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+        hash |= 0;
+      }
+      const absHash = Math.abs(hash);
+      return 45 + (absHash % 54);
+    }
+
+    function integrateKoboData() {
+      Object.keys(KOBOTOOLBOX_SOURCES).forEach(sourceKey => {
+        const source = KOBOTOOLBOX_SOURCES[sourceKey];
+        if (!koboSummaries[sourceKey]) koboSummaries[sourceKey] = { hc: null, hp: {} };
+
+        if (source.level === 'hc' || source.level === 'both') {
+          koboSummaries[sourceKey].hc = fetchKoboSummary(sourceKey, 'hc');
+        }
+        if (source.level === 'hp' || source.level === 'both') {
+          healthPosts.forEach(hp => {
+            koboSummaries[sourceKey].hp[hp.id] = fetchKoboSummary(sourceKey, hp.id);
+          });
+        }
+      });
+    }
+
+    function getKoboScoreForIndicator(indicatorName, facilityId) {
+      let bestMatch = null;
+      let bestScore = -1;
+      Object.keys(KOBOTOOLBOX_SOURCES).forEach(sourceKey => {
+        const source = KOBOTOOLBOX_SOURCES[sourceKey];
+        if (!source.indicatorMatch) return;
+        const match = indicatorName.toLowerCase().includes(source.indicatorMatch.toLowerCase()) ||
+                      source.indicatorMatch.toLowerCase().includes(indicatorName.toLowerCase());
+        if (match) {
+          const summary = koboSummaries[sourceKey];
+          if (summary) {
+            let score = null;
+            if (facilityId === 'hc' && summary.hc !== null) score = summary.hc;
+            else if (facilityId && summary.hp && summary.hp[facilityId] !== undefined) score = summary.hp[facilityId];
+            if (score !== null && score > bestScore) {
+              bestScore = score;
+              bestMatch = sourceKey;
+            }
+          }
+        }
+      });
+      if (bestMatch && bestScore >= 0) return bestScore;
+      return null;
+    }
+
+    function applyKoboOverrides() {
+      hcIndicators.forEach(k => {
+        const koboScore = getKoboScoreForIndicator(k.name, 'hc');
+        if (koboScore !== null) {
+          k.achievement = koboScore;
+        }
+      });
+      Object.keys(hpIndicators).forEach(hpId => {
+        hpIndicators[hpId].forEach(k => {
+          const koboScore = getKoboScoreForIndicator(k.name, hpId);
+          if (koboScore !== null) {
+            k.achievement = koboScore;
+          }
+        });
+      });
+      updateAllIndicators();
+    }
+
+    function openKoboSource(sourceKey, targetLevel, facilityId) {
+      if (!isNavVisible(sourceKey)) {
+        showToast('This assessment is currently disabled by Admin.', 'warning');
+        return;
+      }
+      const source = KOBOTOOLBOX_SOURCES[sourceKey];
+      if (!source) {
+        showToast('Unknown Kobo source: ' + sourceKey, 'error');
+        return;
+      }
+      window.open(source.url, '_blank');
+
+      if (!koboSummaries[sourceKey]) koboSummaries[sourceKey] = { hc: null, hp: {} };
+      if (targetLevel === 'hc') {
+        koboSummaries[sourceKey].hc = fetchKoboSummary(sourceKey, 'hc');
+      } else if (targetLevel === 'hp' && facilityId) {
+        koboSummaries[sourceKey].hp[facilityId] = fetchKoboSummary(sourceKey, facilityId);
+      }
+      applyKoboOverrides();
+      if (currentPage === 'hc') renderHC();
+      if (currentPage === 'hp' && currentHpId) renderHPDetail(currentHpId, currentHpTab);
+      if (currentPage === 'admin') renderAdmin();
+      if (currentPage === 'summary') renderSummary();
+      showToast('Kobo source opened: ' + sourceKey, 'info');
+    }
 
     // ---------- LOGIN ----------
     function handleLogin() {
@@ -4134,7 +4760,7 @@
 
       if (!valid) return;
 
-      if (username === 'Admin / አስተዳዳሪ') {
+      if (username === 'Admin') {
         currentUser = { name: name || 'Admin', role: 'admin', facility: 'All' };
         document.getElementById('settingsBtn').style.display = 'flex';
       } else if (username.startsWith('Kebele')) {
@@ -4209,11 +4835,10 @@
       const container = document.getElementById('settingsModalContainer');
       if (!container) return;
 
-      // Build nav control sections
       const homeKeys = ['homeHC', 'homeHPs', 'homeAdmin'];
       const hcKeys = ['hcOverview', 'hcData', 'hcAnalysis', 'hcFeedback'];
       const hpKeys = ['hpOverview', 'hpData', 'hpAnalysis', 'hpFeedback'];
-      const adminKeys = ['adminSubmissions', 'adminAggregate', 'adminComparison', 'adminRanking', 'adminFeedback'];
+      const adminKeys = ['adminSubmissions', 'adminAggregate', 'adminComparison', 'adminRanking', 'adminSummary', 'adminFeedback'];
       const drawerKeys = ['drawerDashboard', 'drawerAllUsers', 'drawerAssessments', 'drawerAdmin', 'drawerHC', 'drawerHPs'];
 
       function navToggleRow(key) {
@@ -4228,7 +4853,6 @@
         </div>`;
       }
 
-      // Build assessment toggles
       let assessmentToggles = '';
       ADDITIONAL_NAV_ITEMS.forEach(item => {
         const checked = isNavVisible(item.key) ? 'checked' : '';
@@ -4247,7 +4871,6 @@
             <button class="close-btn" onclick="document.getElementById('settingsOverlay').remove()">✕</button>
             <h3><i class="fas fa-gear"></i> System Settings — Admin</h3>
 
-            <!-- NAVIGATION CONTROL PANEL -->
             <div class="nav-control-section">
               <div class="nav-control-title"><i class="fas fa-sitemap"></i> Navigation Control — Home Cards</div>
               ${homeKeys.map(navToggleRow).join('')}
@@ -4278,12 +4901,14 @@
               ${assessmentToggles}
             </div>
 
-            <!-- INDICATOR MANAGEMENT -->
             <div style="margin-bottom:16px;border:1px solid #eef2f6;border-radius:10px;padding:12px;">
               <h4 style="font-weight:800;font-size:0.9rem;color:var(--primary);margin-bottom:8px;text-align:center;">➕ Add New Indicator</h4>
               <div class="input-group">
                 <label>Indicator Name</label>
-                <input type="text" id="newIndName" placeholder="e.g., New KPI">
+                <div class="autocomplete-wrap">
+                  <input type="text" id="newIndName" placeholder="e.g., New KPI" autocomplete="off">
+                  <div class="autocomplete-list" id="newIndNameAutocomplete"></div>
+                </div>
               </div>
               <div class="input-group">
                 <label>Category / Agenda</label>
@@ -4338,7 +4963,10 @@
               </div>
               <div class="input-group">
                 <label>Responsible User/Unit</label>
-                <input type="text" id="newIndResponsible" placeholder="e.g., TB Clinic, ART, QI...">
+                <div class="autocomplete-wrap">
+                  <input type="text" id="newIndResponsible" placeholder="e.g., TB Clinic, ART, QI..." autocomplete="off">
+                  <div class="autocomplete-list" id="newIndResponsibleAutocomplete"></div>
+                </div>
               </div>
               <button class="btn btn-green w-full" onclick="window._addIndicator()" style="margin-top:4px;"><i class="fas fa-plus"></i> Add Indicator</button>
             </div>
@@ -4468,9 +5096,22 @@
           </div>
         </div>
       `;
+
+      // Setup autocomplete for new indicator name and responsible fields
+      setTimeout(function() {
+        setupAutocomplete(
+          document.getElementById('newIndName'),
+          document.getElementById('newIndNameAutocomplete'),
+          'indicator'
+        );
+        setupAutocomplete(
+          document.getElementById('newIndResponsible'),
+          document.getElementById('newIndResponsibleAutocomplete'),
+          'department'
+        );
+      }, 100);
     }
 
-    // Global function to toggle nav visibility
     window._toggleNavVisibility = function(key, visible) {
       if (!canManageSettings()) {
         showToast('Access restricted. Admin only.', 'error');
@@ -4532,6 +5173,7 @@
       renderIndicatorManagement();
       if (currentPage === 'hc') renderHC();
       if (currentPage === 'admin') renderAdmin();
+      if (currentPage === 'summary') renderSummary();
       showToast('Indicator saved successfully!', 'success');
     };
 
@@ -4581,6 +5223,7 @@
       renderIndicatorManagement();
       if (currentPage === 'hc') renderHC();
       if (currentPage === 'admin') renderAdmin();
+      if (currentPage === 'summary') renderSummary();
       showToast('Indicator added successfully!', 'success');
     };
 
@@ -4597,6 +5240,7 @@
         renderIndicatorManagement();
         if (currentPage === 'hc') renderHC();
         if (currentPage === 'admin') renderAdmin();
+        if (currentPage === 'summary') renderSummary();
         showToast('Indicator deleted', 'success');
       }
     };
@@ -4613,6 +5257,7 @@
         renderIndicatorManagement();
         if (currentPage === 'hc') renderHC();
         if (currentPage === 'admin') renderAdmin();
+        if (currentPage === 'summary') renderSummary();
         showToast('Indicator moved up', 'info');
       }
     };
@@ -4629,6 +5274,7 @@
         renderIndicatorManagement();
         if (currentPage === 'hc') renderHC();
         if (currentPage === 'admin') renderAdmin();
+        if (currentPage === 'summary') renderSummary();
         showToast('Indicator moved down', 'info');
       }
     };
@@ -4648,6 +5294,13 @@
       document.getElementById('compressBtn').addEventListener('click', toggleCompress);
       document.getElementById('settingsBtn').addEventListener('click', openSettings);
       document.getElementById('loginBtn').addEventListener('click', handleLogin);
+
+      // Setup autocomplete for login name input
+      setupAutocomplete(
+        document.getElementById('nameInput'),
+        document.getElementById('nameAutocomplete'),
+        'name'
+      );
 
       document.getElementById('nameInput').addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
