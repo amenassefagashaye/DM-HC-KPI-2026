@@ -51,6 +51,8 @@
       --teal: #0d9488;
       --teal-light: #14b8a6;
       --teal-dark: #0f766e;
+      --sidebar-width: 300px;
+      --header-height: 72px;
     }
 
     /* ---------- FULLSCREEN / COMPRESS ---------- */
@@ -77,6 +79,8 @@
     body.compressed .login-card h2 { font-size: 1rem; }
     body.compressed .login-btn { padding: 10px; font-size: 0.85rem; min-height: 40px; }
     body.compressed .home-grid { gap: 8px; }
+    body.compressed .sidebar-nav { font-size: 0.75rem; }
+    body.compressed .sidebar-nav .drawer-item { padding: 8px 10px; min-height: 36px; }
 
     /* ---------- HEADER (FIXED SCROLLING) ---------- */
     .app-header {
@@ -90,6 +94,9 @@
       right: 0;
       z-index: 1000;
       width: 100%;
+      height: var(--header-height);
+      display: flex;
+      align-items: center;
     }
     .app-header .header-inner {
       max-width: 1400px;
@@ -99,6 +106,7 @@
       justify-content: space-between;
       gap: 10px;
       flex-wrap: wrap;
+      width: 100%;
     }
     .app-header .header-brand {
       display: flex;
@@ -143,7 +151,8 @@
     }
     .app-header .fullscreen-btn,
     .app-header .compress-btn,
-    .app-header .settings-btn {
+    .app-header .settings-btn,
+    .app-header .sidebar-toggle-btn {
       background: none;
       border: none;
       color: white;
@@ -160,7 +169,8 @@
     }
     .app-header .fullscreen-btn:hover,
     .app-header .compress-btn:hover,
-    .app-header .settings-btn:hover { background: rgba(255, 255, 255, 0.2); }
+    .app-header .settings-btn:hover,
+    .app-header .sidebar-toggle-btn:hover { background: rgba(255, 255, 255, 0.2); }
 
     /* ---------- MOBILE MENU BUTTON ---------- */
     .menu-btn {
@@ -180,7 +190,122 @@
     }
     .menu-btn:hover { background: rgba(255, 255, 255, 0.2); }
 
-    /* ---------- MOBILE DRAWER ---------- */
+    /* ---------- SIDEBAR (DESKTOP) ---------- */
+    .sidebar {
+      position: fixed;
+      top: var(--header-height);
+      left: 0;
+      bottom: var(--footer-height);
+      width: var(--sidebar-width);
+      background: white;
+      z-index: 900;
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 4px 0 24px rgba(0,0,0,0.08);
+      overflow: hidden;
+      border-right: 1px solid #eef2f6;
+    }
+    .sidebar.open {
+      transform: translateX(0);
+    }
+    .sidebar .sidebar-header {
+      background: linear-gradient(135deg, #0b3b5c, #2c7a7b);
+      color: white;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .sidebar .sidebar-header .sidebar-title {
+      font-weight: 800;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Times New Roman', 'Noto Sans Ethiopic', serif;
+    }
+    .sidebar .sidebar-close {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+    .sidebar .sidebar-close:hover { background: rgba(255,255,255,0.35); }
+    .sidebar .sidebar-nav {
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+    .sidebar .sidebar-nav::-webkit-scrollbar { width: 4px; }
+    .sidebar .sidebar-nav::-webkit-scrollbar-track { background: #f1f5f9; }
+    .sidebar .sidebar-nav::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 10px; }
+
+    .sidebar .drawer-section-label {
+      font-size: 0.6rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      padding: 10px 10px 4px;
+      font-family: 'Times New Roman', 'Noto Sans Ethiopic', serif;
+    }
+    .sidebar .drawer-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: 'Times New Roman', 'Noto Sans Ethiopic', serif;
+      border: 2px solid transparent;
+      background: none;
+      width: 100%;
+      text-align: left;
+      min-height: 40px;
+    }
+    .sidebar .drawer-item:hover { background: #f0f7ff; color: var(--primary); }
+    .sidebar .drawer-item.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(11,59,92,0.25);
+    }
+    .sidebar .drawer-item i { width: 18px; text-align: center; font-size: 0.9rem; flex-shrink: 0; }
+    .sidebar .drawer-divider {
+      height: 1px;
+      background: #eef2f6;
+      margin: 6px 4px;
+    }
+    .sidebar .sidebar-footer {
+      padding: 10px 16px;
+      border-top: 1px solid #eef2f6;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-align: center;
+      font-family: 'Times New Roman', 'Noto Sans Ethiopic', serif;
+      flex-shrink: 0;
+    }
+
+    /* ---------- MOBILE DRAWER (for small screens) ---------- */
     .mobile-drawer-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -306,11 +431,23 @@
       width: 100%;
       padding-top: 72px;
       padding-bottom: 72px;
+      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     @media (min-width: 640px) { .container { max-width: 720px; padding: 16px 20px; padding-top: 80px; padding-bottom: 80px; } }
     @media (min-width: 900px) { .container { max-width: 1000px; padding: 20px 28px; padding-top: 88px; padding-bottom: 88px; } }
     @media (min-width: 1200px) { .container { max-width: 1200px; padding: 24px 36px; padding-top: 92px; padding-bottom: 92px; } }
     @media (min-width: 1500px) { .container { max-width: 1400px; } }
+
+    /* When sidebar is open on desktop, push content */
+    body.sidebar-open .container {
+      margin-left: var(--sidebar-width);
+      max-width: calc(100% - var(--sidebar-width));
+    }
+    @media (min-width: 1200px) {
+      body.sidebar-open .container {
+        max-width: calc(100% - var(--sidebar-width));
+      }
+    }
 
     .page-section { display: none; animation: fadeIn 0.3s ease; }
     .page-section.active { display: block; }
@@ -1071,6 +1208,10 @@
       align-items: center;
       box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
       min-height: var(--footer-height);
+      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body.sidebar-open .app-footer {
+      margin-left: var(--sidebar-width);
     }
     .app-footer .footer-inner {
       max-width: 100%;
@@ -1679,7 +1820,22 @@
     .drill-breadcrumb .dsep { color: #cbd5e1; font-weight: 300; }
 
     /* ---------- RESPONSIVE MEDIA QUERIES ---------- */
-    @media (max-width: 768px) {
+    /* Tablet and below: sidebar toggleable, use mobile drawer */
+    @media (max-width: 991px) {
+      .sidebar {
+        display: none;
+      }
+      .sidebar-toggle-btn {
+        display: none !important;
+      }
+      .menu-btn {
+        display: flex;
+      }
+      body.sidebar-open .container,
+      body.sidebar-open .app-footer {
+        margin-left: 0 !important;
+        max-width: 100% !important;
+      }
       .app-header .header-title { font-size: 0.82rem; }
       .app-header .header-subtitle { font-size: 0.6rem; }
       .kpi-card .value { font-size: 1.3rem; }
@@ -1687,7 +1843,6 @@
       .pie-chart { width: 130px; height: 130px; }
       .app-footer .footer-section { font-size: 0.85rem; }
       .app-footer .footer-inner { gap: 6px; }
-      .menu-btn { display: flex; }
       .tab-bar { 
         overflow-x: auto; 
         flex-wrap: nowrap; 
@@ -1707,6 +1862,41 @@
       .summary-grid { grid-template-columns: repeat(2, 1fr); }
       .period-filter-bar .pf-custom { margin-left: 0; width: 100%; }
     }
+
+    /* Desktop: sidebar visible by default */
+    @media (min-width: 992px) {
+      .sidebar {
+        transform: translateX(0);
+      }
+      .sidebar.closed {
+        transform: translateX(-100%);
+      }
+      .menu-btn {
+        display: none;
+      }
+      .sidebar-toggle-btn {
+        display: flex;
+      }
+      body.sidebar-open .container {
+        margin-left: var(--sidebar-width);
+        max-width: calc(100% - var(--sidebar-width));
+      }
+      body.sidebar-open .app-footer {
+        margin-left: var(--sidebar-width);
+      }
+      body:not(.sidebar-open) .container {
+        margin-left: 0;
+        max-width: 100%;
+      }
+      body:not(.sidebar-open) .app-footer {
+        margin-left: 0;
+      }
+      .app-header {
+        padding-left: calc(var(--sidebar-width) + 14px);
+        padding-right: 14px;
+      }
+    }
+
     @media (max-width: 480px) {
       .app-header .header-title { font-size: 0.75rem; }
       .app-header .header-subtitle { font-size: 0.55rem; }
@@ -1760,9 +1950,27 @@
     }
   </style>
 </head>
-<body class="compressed">
+<body class="compressed sidebar-open">
 
 <div id="toast" class="toast"></div>
+
+<!-- Desktop Sidebar (visible on desktop) -->
+<aside class="sidebar" id="desktopSidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-title">
+      <i class="fas fa-chart-pie"></i> DM PHCU
+    </div>
+    <button class="sidebar-close" id="sidebarCloseBtn" aria-label="Close sidebar">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  <div class="sidebar-nav" id="desktopSidebarNav">
+    <!-- Populated dynamically -->
+  </div>
+  <div class="sidebar-footer">
+    By: Assefa Gashaye, 0918203416 | 2026
+  </div>
+</aside>
 
 <!-- Mobile Drawer Overlay -->
 <div class="mobile-drawer-overlay" id="drawerOverlay" onclick="window._closeDrawer()"></div>
@@ -1803,6 +2011,9 @@
       </div>
     </div>
     <div class="header-actions">
+      <button class="sidebar-toggle-btn" id="sidebarToggleBtn" title="Toggle sidebar" aria-label="Toggle sidebar">
+        <i class="fas fa-bars"></i>
+      </button>
       <button class="compress-btn" id="compressBtn" title="Compress dashboard" aria-label="Compress dashboard">
         <i class="fas fa-expand-alt"></i>
       </button>
@@ -2023,9 +2234,10 @@
       'ME-Chapter-9': true,
       'Laboratory-Chapter-6': true,
       'HR-Chapter-10': true,
-      'Chapter-4 MNCH': true,
-      'Client Satisfaction KF': true,
-      'CSC KF': true
+      // New Kobo links
+      'Chapter-4': true,
+      'Client Satisfaction-2': true,
+      'CSC-2': true
     };
 
     // Labels & icons for nav control UI
@@ -2145,9 +2357,10 @@
       'ME-Chapter-9':          { url: 'https://ee.kobotoolbox.org/x/s1hqpYEg', level: 'hc',   indicatorMatch: 'Data Use Score' },
       'Laboratory-Chapter-6':  { url: 'https://ee.kobotoolbox.org/x/noqY62I9', level: 'hc',   indicatorMatch: 'Essential Lab Test Availability' },
       'HR-Chapter-10':         { url: 'https://ee.kobotoolbox.org/x/pBEa7Qo1', level: 'hc',   indicatorMatch: 'Active Professional License' },
-      'Chapter-4 MNCH':        { url: 'https://kf.kobotoolbox.org/#/forms/awWuwXHDrghPiJxLrJbhey/landing', level: 'hc', indicatorMatch: '' },
-      'Client Satisfaction KF':{ url: 'https://kf.kobotoolbox.org/#/forms/aZ8v6p7jvBA58L8uNPgmUj/landing', level: 'hc', indicatorMatch: 'Patient Satisfaction' },
-      'CSC KF':                { url: 'https://kf.kobotoolbox.org/#/forms/aEKgZyevYLBTEkR3TmFKwh/landing', level: 'hp', indicatorMatch: 'CSC Rate' }
+      // New Kobo links
+      'Chapter-4': { url: 'https://kf.kobotoolbox.org/#/forms/awWuwXHDrghPiJxLrJbhey/landing', level: 'hc', indicatorMatch: 'Chapter 4' },
+      'Client Satisfaction-2': { url: 'https://kf.kobotoolbox.org/#/forms/aZ8v6p7jvBA58L8uNPgmUj/landing', level: 'hc', indicatorMatch: 'Client Satisfaction' },
+      'CSC-2': { url: 'https://kf.kobotoolbox.org/#/forms/aEKgZyevYLBTEkR3TmFKwh/landing', level: 'hc', indicatorMatch: 'CSC' }
     };
 
     // ---------- KOBOTOOLBOX SUMMARY STORE ----------
@@ -2176,9 +2389,10 @@
       { label: 'ME-Chapter-9', key: 'ME-Chapter-9', icon: 'fa-chart-line' },
       { label: 'Laboratory-Chapter-6', key: 'Laboratory-Chapter-6', icon: 'fa-flask' },
       { label: 'HR-Chapter-10', key: 'HR-Chapter-10', icon: 'fa-user-doctor' },
-      { label: 'Chapter-4 MNCH', key: 'Chapter-4 MNCH', icon: 'fa-baby' },
-      { label: 'Client Satisfaction', key: 'Client Satisfaction KF', icon: 'fa-face-smile' },
-      { label: 'CSC (የማህበረሰብ አስተያየት ምዘና ስርዓት)', key: 'CSC KF', icon: 'fa-users' }
+      // New Kobo links
+      { label: 'Chapter -4 ', key: 'Chapter-4', icon: 'fa-book-medical' },
+      { label: 'Client Satisfaction', key: 'Client Satisfaction-2', icon: 'fa-face-smile' },
+      { label: 'CSC (የማህበረሰብ አስተያየት ምዘና ስርዓት)', key: 'CSC-2', icon: 'fa-users' }
     ];
 
     // ---------- AUTO-SUGGESTION DATA SOURCES ----------
@@ -2880,6 +3094,7 @@
       updateHomeCounts();
       updateSectionForPage('home');
       updateDrawerNav();
+      updateDesktopSidebarNav();
     }
 
     function updateHomeCounts() {
@@ -2901,6 +3116,7 @@
       renderHC();
       updateSectionForPage('hc', { tab: 'overview' });
       updateDrawerNav();
+      updateDesktopSidebarNav();
     }
 
     function openHPs() {
@@ -2914,6 +3130,7 @@
       renderHPs();
       updateSectionForPage('hp', {});
       updateDrawerNav();
+      updateDesktopSidebarNav();
     }
 
     function openAdmin() {
@@ -2926,6 +3143,7 @@
       renderAdmin();
       updateSectionForPage('admin', { tab: 'submissions' });
       updateDrawerNav();
+      updateDesktopSidebarNav();
     }
 
     function openSummary() {
@@ -2935,6 +3153,7 @@
       renderSummary();
       updateSectionForPage('summary');
       updateDrawerNav();
+      updateDesktopSidebarNav();
     }
 
     // ---------- ROLE FILTERING ----------
@@ -3042,6 +3261,7 @@
       const tabLabels = { overview: 'Overview', data: 'Data', analysis: 'Analysis', feedback: 'Feedback' };
       updateSectionForPage('hc', { tab: tab, sub: tabLabels[tab] });
       updateDrawerNav();
+      updateDesktopSidebarNav();
 
       const tabKeyMap = { overview: 'hcOverview', data: 'hcData', analysis: 'hcAnalysis', feedback: 'hcFeedback' };
       if (!isNavVisible(tabKeyMap[tab]) && !isAdmin()) {
@@ -3312,6 +3532,7 @@
 
       updateSectionForPage('hp', {});
       updateDrawerNav();
+      updateDesktopSidebarNav();
 
       const frameworkHtml = `
         <div class="framework-section" onclick="window._hpFrameworkClick('ir')">
@@ -3395,6 +3616,7 @@
       const tabLabels = { overview: 'Overview', data: 'Data Entry', analysis: 'Analysis', feedback: 'Feedback' };
       updateSectionForPage('hp', { hpName: hp.name, kebele: hp.kebele, tab: tab });
       updateDrawerNav();
+      updateDesktopSidebarNav();
 
       const tabKeyMap = { overview: 'hpOverview', data: 'hpData', analysis: 'hpAnalysis', feedback: 'hpFeedback' };
       if (!isNavVisible(tabKeyMap[tab]) && !isAdmin()) {
@@ -3621,6 +3843,7 @@
       const tabLabels = { submissions: 'Submissions', aggregate: 'Aggregate', comparison: 'Comparison', ranking: 'Ranking & Championship', summary: 'Summary', feedback: 'Feedback' };
       updateSectionForPage('admin', { tab: tab });
       updateDrawerNav();
+      updateDesktopSidebarNav();
 
       const adminAccess = canAccessAdmin();
       const tabKeyMap = { submissions: 'adminSubmissions', aggregate: 'adminAggregate', comparison: 'adminComparison', ranking: 'adminRanking', summary: 'adminSummary', feedback: 'adminFeedback' };
@@ -4038,6 +4261,7 @@
       renderHPs();
       updateSectionForPage('hp', {});
       updateDrawerNav();
+      updateDesktopSidebarNav();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -4620,6 +4844,271 @@
       });
     }
 
+    // ---------- DESKTOP SIDEBAR ----------
+    function updateDesktopSidebarNav() {
+      const nav = document.getElementById('desktopSidebarNav');
+      if (!nav) return;
+
+      // Reuse the same logic as updateDrawerNav but without the mobile drawer close
+      const isAdminUser = isAdmin();
+      const isKebele = currentUser.role === 'kebele';
+
+      let items = [];
+
+      // Dashboard group
+      if (isNavVisible('drawerDashboard')) {
+        items.push({ type: 'label', text: 'Dashboard' });
+
+        // Summary nav item
+        items.push({
+          type: 'item',
+          label: 'Summary',
+          icon: 'fa-clipboard-list',
+          active: currentPage === 'summary',
+          action: () => { openSummary(); }
+        });
+
+        if (isAdminUser || !isKebele) {
+          if (isNavVisible('adminAggregate')) {
+            items.push({
+              type: 'item',
+              label: 'Aggregate',
+              icon: 'fa-chart-simple',
+              active: currentPage === 'admin' && currentAdminTab === 'aggregate',
+              action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="aggregate"]')?.click(); }, 50); }
+            });
+          }
+          if (isNavVisible('adminRanking')) {
+            items.push({
+              type: 'item',
+              label: 'Ranking & Championship',
+              icon: 'fa-ranking-star',
+              active: currentPage === 'admin' && currentAdminTab === 'ranking',
+              action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="ranking"]')?.click(); }, 50); }
+            });
+          }
+        }
+
+        if ((isAdminUser || !isKebele) && isNavVisible('homeHC')) {
+          items.push({
+            type: 'item',
+            label: 'HC',
+            icon: 'fa-hospital',
+            active: currentPage === 'hc',
+            action: () => { openHC(); }
+          });
+        }
+
+        if ((isAdminUser || !isKebele) && isNavVisible('hcData')) {
+          items.push({
+            type: 'item',
+            label: `${hcIndicators.length} Indicators`,
+            icon: 'fa-list-check',
+            active: currentPage === 'hc' && currentHcTab === 'data',
+            action: () => { openHC(); setTimeout(() => { renderHCTab('data'); }, 100); }
+          });
+        }
+      }
+
+      // ---------- ALL USERS ----------
+      if (isNavVisible('drawerAllUsers')) {
+        items.push({ type: 'divider' });
+        items.push({ type: 'label', text: 'All Users' });
+
+        ALL_USERS.forEach(function(user) {
+          let isActive = false;
+          if (user.id === 'admin' && isAdminUser) isActive = true;
+          if (user.id === 'kebele' + currentUser.kebele && isKebele) isActive = true;
+          if (user.role === currentUser.role && user.facility === 'HC' && currentUser.facility === 'HC') isActive = true;
+
+          items.push({
+            type: 'item',
+            label: user.label,
+            icon: user.icon,
+            active: isActive,
+            action: () => {
+              if (user.role === 'admin') {
+                openAdmin();
+              } else if (user.role === 'kebele') {
+                openHPs();
+                if (user.hpId) {
+                  setTimeout(() => { window._hpSelect(user.hpId, 'overview'); }, 100);
+                }
+              } else {
+                openHC();
+              }
+              showToast('Viewing as: ' + user.label, 'info');
+            }
+          });
+        });
+      }
+
+      // ---------- ASSESSMENTS & SERVICES ----------
+      if (isNavVisible('drawerAssessments')) {
+        items.push({ type: 'divider' });
+        items.push({ type: 'label', text: 'Assessments & Services' });
+
+        ADDITIONAL_NAV_ITEMS.forEach(function(navItem) {
+          if (!isNavVisible(navItem.key)) return;
+
+          let icon = navItem.icon;
+          if (!icon) {
+            if (navItem.label === 'WDA') icon = 'fa-people-group';
+            else if (navItem.label === 'IP-Chapter-7') icon = 'fa-shield-halved';
+            else if (navItem.label === 'HEP-Chapter-2') icon = 'fa-heart-pulse';
+            else if (navItem.label.includes('Chapter')) icon = 'fa-book-medical';
+            else icon = 'fa-clipboard-list';
+          }
+
+          items.push({
+            type: 'item',
+            label: navItem.label,
+            icon: icon,
+            active: false,
+            action: () => {
+              let targetLevel = 'hc';
+              let facilityId = 'hc';
+              if (currentPage === 'hp' && currentHpId) {
+                targetLevel = 'hp';
+                facilityId = currentHpId;
+              } else if (currentPage === 'hp') {
+                targetLevel = 'hc';
+                facilityId = 'hc';
+              }
+              openKoboSource(navItem.key, targetLevel, facilityId);
+            }
+          });
+        });
+      }
+
+      // Admin section
+      if (isAdminUser && isNavVisible('drawerAdmin')) {
+        items.push({ type: 'divider' });
+        items.push({ type: 'label', text: 'Admin' });
+        if (isNavVisible('adminSubmissions')) {
+          items.push({
+            type: 'item',
+            label: 'Submissions',
+            icon: 'fa-inbox',
+            active: currentPage === 'admin' && currentAdminTab === 'submissions',
+            action: () => { openAdmin(); }
+          });
+        }
+        if (isNavVisible('adminComparison')) {
+          items.push({
+            type: 'item',
+            label: 'Comparison',
+            icon: 'fa-code-compare',
+            active: currentPage === 'admin' && currentAdminTab === 'comparison',
+            action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="comparison"]')?.click(); }, 50); }
+          });
+        }
+        if (isNavVisible('adminFeedback')) {
+          items.push({
+            type: 'item',
+            label: 'Feedback',
+            icon: 'fa-comment-dots',
+            active: currentPage === 'admin' && currentAdminTab === 'feedback',
+            action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="feedback"]')?.click(); }, 50); }
+          });
+        }
+      }
+
+      // HP detail sections
+      if (currentPage === 'hp' && currentHpId && isNavVisible('drawerHPs')) {
+        const hp = healthPosts.find(h => h.id === currentHpId);
+        if (hp) {
+          items.push({ type: 'divider' });
+          items.push({ type: 'label', text: hp.name });
+          const tabs = [
+            { id: 'overview', label: 'Overview', icon: 'fa-chart-pie', key: 'hpOverview' },
+            { id: 'data', label: 'Data Entry', icon: 'fa-database', key: 'hpData' },
+            { id: 'analysis', label: 'Analysis', icon: 'fa-chart-line', key: 'hpAnalysis' },
+            { id: 'feedback', label: 'Feedback', icon: 'fa-comment-dots', key: 'hpFeedback' }
+          ];
+          tabs.forEach(t => {
+            if (!isNavVisible(t.key)) return;
+            items.push({
+              type: 'item',
+              label: t.label,
+              icon: t.icon,
+              active: currentHpTab === t.id,
+              action: () => { window._hpSelect(currentHpId, t.id); }
+            });
+          });
+        }
+      }
+
+      // HC detail sections
+      if (currentPage === 'hc' && isNavVisible('drawerHC')) {
+        items.push({ type: 'divider' });
+        items.push({ type: 'label', text: 'Health Center' });
+        const tabs = [
+          { id: 'overview', label: 'Overview', icon: 'fa-chart-pie', key: 'hcOverview' },
+          { id: 'data', label: 'Data', icon: 'fa-database', key: 'hcData' },
+          { id: 'analysis', label: 'Analysis', icon: 'fa-chart-line', key: 'hcAnalysis' },
+          { id: 'feedback', label: 'Feedback', icon: 'fa-comment-dots', key: 'hcFeedback' }
+        ];
+        tabs.forEach(t => {
+          if (!isNavVisible(t.key)) return;
+          items.push({
+            type: 'item',
+            label: t.label,
+            icon: t.icon,
+            active: currentHcTab === t.id,
+            action: () => { renderHCTab(t.id); }
+          });
+        });
+      }
+
+      nav.innerHTML = items.map(item => {
+        if (item.type === 'label') {
+          return `<div class="drawer-section-label">${item.text}</div>`;
+        }
+        if (item.type === 'divider') {
+          return `<div class="drawer-divider"></div>`;
+        }
+        return `<button class="drawer-item ${item.active ? 'active' : ''}" data-action>
+          <i class="fas ${item.icon}"></i>
+          <span>${item.label}</span>
+        </button>`;
+      }).join('');
+
+      const buttons = nav.querySelectorAll('.drawer-item');
+      let itemIndex = 0;
+      items.forEach(item => {
+        if (item.type === 'item') {
+          const btn = buttons[itemIndex];
+          if (btn && item.action) {
+            btn.addEventListener('click', () => {
+              item.action();
+            });
+          }
+          itemIndex++;
+        }
+      });
+    }
+
+    // Sidebar toggle and close for desktop
+    function toggleSidebar() {
+      const sidebar = document.getElementById('desktopSidebar');
+      const body = document.body;
+      if (!sidebar) return;
+      
+      if (window.innerWidth >= 992) {
+        // Desktop: toggle the sidebar-open class
+        body.classList.toggle('sidebar-open');
+        if (body.classList.contains('sidebar-open')) {
+          sidebar.classList.remove('closed');
+        } else {
+          sidebar.classList.add('closed');
+        }
+      } else {
+        // Mobile/tablet: use drawer
+        window._openDrawer();
+      }
+    }
+
     window._openDrawer = function() {
       document.getElementById('mobileDrawer').classList.add('open');
       document.getElementById('drawerOverlay').classList.add('open');
@@ -4801,6 +5290,7 @@
 
       updateHomeCounts();
       updateDrawerNav();
+      updateDesktopSidebarNav();
     }
 
     // ---------- FULLSCREEN / COMPRESS ----------
@@ -5292,6 +5782,13 @@
     document.addEventListener('DOMContentLoaded', function() {
       document.body.classList.add('compressed');
 
+      // Set initial sidebar state based on screen size
+      if (window.innerWidth >= 992) {
+        document.body.classList.add('sidebar-open');
+      } else {
+        document.body.classList.remove('sidebar-open');
+      }
+
       document.body.addEventListener('click', function _firstClick() {
         if (!document.fullscreenElement) {
           document.documentElement.requestFullscreen().catch(() => {});
@@ -5303,6 +5800,28 @@
       document.getElementById('compressBtn').addEventListener('click', toggleCompress);
       document.getElementById('settingsBtn').addEventListener('click', openSettings);
       document.getElementById('loginBtn').addEventListener('click', handleLogin);
+      document.getElementById('sidebarToggleBtn').addEventListener('click', toggleSidebar);
+      document.getElementById('sidebarCloseBtn').addEventListener('click', function() {
+        if (window.innerWidth >= 992) {
+          document.body.classList.remove('sidebar-open');
+          document.getElementById('desktopSidebar').classList.add('closed');
+        }
+      });
+
+      // Handle window resize
+      window.addEventListener('resize', function() {
+        if (window.innerWidth >= 992) {
+          // On desktop, ensure sidebar is visible by default
+          if (!document.body.classList.contains('sidebar-open') && 
+              !document.getElementById('desktopSidebar').classList.contains('closed')) {
+            document.body.classList.add('sidebar-open');
+          }
+        } else {
+          // On mobile/tablet, close sidebar and use drawer
+          document.body.classList.remove('sidebar-open');
+          document.getElementById('desktopSidebar').classList.add('closed');
+        }
+      });
 
       // Setup autocomplete for login name input
       setupAutocomplete(
@@ -5354,6 +5873,7 @@
       updateHomeCounts();
       updateSectionForPage('home');
       updateDrawerNav();
+      updateDesktopSidebarNav();
       console.log('Debremarkos PHCU KPI initialized with responsive enhancements, Kobo integration & Admin navigation control.');
     });
 
