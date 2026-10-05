@@ -1819,6 +1819,30 @@
     .drill-breadcrumb .dcrumb.active:hover { background: transparent; }
     .drill-breadcrumb .dsep { color: #cbd5e1; font-weight: 300; }
 
+    /* ---------- SECTION MODULE BADGE ---------- */
+    .section-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      font-family: 'Times New Roman', 'Noto Sans Ethiopic', serif;
+      background: #e8f0f8;
+      color: var(--primary);
+      margin-right: 8px;
+      white-space: nowrap;
+    }
+    .section-badge .sb-close {
+      cursor: pointer;
+      font-size: 0.9rem;
+      opacity: 0.6;
+      transition: var(--transition);
+      margin-left: 2px;
+    }
+    .section-badge .sb-close:hover { opacity: 1; color: var(--red); }
+
     /* ---------- RESPONSIVE MEDIA QUERIES ---------- */
     /* Tablet and below: sidebar toggleable, use mobile drawer */
     @media (max-width: 991px) {
@@ -2026,6 +2050,9 @@
 
 <div id="appMain" class="container">
 
+  <!-- Active Section Indicator (floating badge) -->
+  <div id="activeSectionBadgeContainer" style="position:fixed;top:80px;right:16px;z-index:990;display:none;"></div>
+
   <div id="page-login" class="page-section active">
     <div class="login-wrapper">
       <div class="login-card">
@@ -2052,6 +2079,7 @@
             <option value="EPI Clinic">EPI Clinic</option>
             <option value="Under-5 Clinic">Under-5 Clinic</option>
             <option value="OPD Clinic">OPD Clinic</option>
+            <option value="KP Clinic">KP Clinic</option>
             <option value="Pharmacy Department">Pharmacy Department</option>
           </select>
           <div class="error-msg" id="usernameError">Please select a user type</div>
@@ -2159,6 +2187,16 @@
     <div id="summaryContent"></div>
   </div>
 
+  <!-- Section Module Page (independent service modules: Finance, HIT, QI, MCH, ART, TB, EPI, Under-5, OPD, KP, Pharmacy) -->
+  <div id="page-section-module" class="page-section">
+    <div class="breadcrumb" id="sectionModuleBreadcrumb">
+      <span class="crumb" onclick="window._goHome()">PHCU</span>
+      <span class="sep">›</span>
+      <span class="crumb active" id="sectionModuleCrumb">Section</span>
+    </div>
+    <div id="sectionModuleContent"></div>
+  </div>
+
 </div>
 
 <footer class="app-footer" id="appFooter">
@@ -2174,7 +2212,181 @@
   (function() {
     'use strict';
 
-    // ---------- STATE ----------
+    // ====================================================================
+    // SECTION MODULE DEFINITIONS — Independent service sections
+    // ====================================================================
+    // Each section has its own indicator set, filtered from the master
+    // hcIndicators list by a section-tag. QI is special: it accesses ALL.
+    const SECTION_MODULES = {
+      finance: {
+        id: 'finance',
+        label: 'Finance',
+        labelAm: 'ፋይናንስ',
+        icon: 'fa-coins',
+        color: '#2e7d32',
+        filter: function(ind) {
+          // Finance indicators: Reimbursement and any with agenda 'finance'
+          return ind.agenda === 'finance' || ind.name === 'Reimbursement';
+        }
+      },
+      hit: {
+        id: 'hit',
+        label: 'HIT',
+        labelAm: 'ኤች አይ ቲ',
+        icon: 'fa-chart-simple',
+        color: '#0b3b5c',
+        filter: function(ind) {
+          // HIT: Data Quality, Data Use, HIS Capacity & Infrastructure
+          return ind.agenda === 'ir' && (
+            ind.name === 'Data Quality Score' ||
+            ind.name === 'Data Use Score' ||
+            ind.name === 'HIS Capacity & Infrastructure'
+          );
+        }
+      },
+      qi: {
+        id: 'qi',
+        label: 'QI',
+        labelAm: 'የጥራት ማሻሻያ',
+        icon: 'fa-scale-balanced',
+        color: '#6d28d9',
+        special: 'all', // QI has access to ALL indicators
+        filter: function() { return true; }
+      },
+      mch: {
+        id: 'mch',
+        label: 'MCH Clinic',
+        labelAm: 'የእናቶችና ህፃናት ክሊኒክ',
+        icon: 'fa-baby',
+        color: '#e91e63',
+        filter: function(ind) {
+          const names = [
+            'ANC8 Coverage', 'Contraceptive Acceptance Rate', 'Early PNC Coverage',
+            'PMTCT ART Mothers', 'PMTCT Testing', 'Skilled Delivery',
+            'Pregnant Women MMS', 'Syphilis Screening Pregnant', 'ANC Early (<12 wks)',
+            'ANC1 to Delivery DOR'
+          ];
+          return names.includes(ind.name) || ind.agenda === 'mch';
+        }
+      },
+      art: {
+        id: 'art',
+        label: 'ART Clinic',
+        labelAm: 'የኤች አይ ቪ ክሊኒክ',
+        icon: 'fa-heart-pulse',
+        color: '#c62828',
+        filter: function(ind) {
+          const names = [
+            'ART Retention', 'Viral Load Suppression', 'First 95', 'Second 95', 'Third 95',
+            'OPD Attendance Screened for HIV', 'Number of HIV Tested from Screened OPD Attendants',
+            'Number of HIV Positives from Tested', 'Number of Positive from CDC Outreach',
+            'Number of Positive from OSSAD Outreach', 'Number of Positive from KP Outreach',
+            'HIV Case Detection'
+          ];
+          return names.includes(ind.name) || ind.agenda === 'art';
+        }
+      },
+      tb: {
+        id: 'tb',
+        label: 'TB Clinic',
+        labelAm: 'የቲቢ ክሊኒክ',
+        icon: 'fa-lungs',
+        color: '#00695c',
+        filter: function(ind) {
+          const names = [
+            'Total OPD Attendance', 'OPD Attendance Screened for TB',
+            'TB Cases Notified from OPD Attendants Screened',
+            'Number of TB Detected from OPD Attendants',
+            'Number of Community TB Suspect Referrals',
+            'Number of TB Detected from Community TB Referrals',
+            'Total Number of TB Detected (OPD + Community)',
+            'TB Treatment Success (TSR)'
+          ];
+          return names.includes(ind.name) || ind.agenda === 'tb';
+        }
+      },
+      epi: {
+        id: 'epi',
+        label: 'EPI Clinic',
+        labelAm: 'የክትባት ክሊኒክ',
+        icon: 'fa-syringe',
+        color: '#0277bd',
+        filter: function(ind) {
+          const names = [
+            'Full Immunization <1yr', 'Penta1 to MCV1 Dropout'
+          ];
+          return names.includes(ind.name) || ind.agenda === 'epi';
+        }
+      },
+      under5: {
+        id: 'under5',
+        label: 'Under-5 Clinic',
+        labelAm: 'ከ5 አመት በታች ክሊኒክ',
+        icon: 'fa-child',
+        color: '#ef6c00',
+        filter: function(ind) {
+          const names = [
+            'Children <2 GMP', 'Under5 Pneumonia Treated',
+            'Two Doses Vitamin A', 'OTP Cured'
+          ];
+          return names.includes(ind.name) || ind.agenda === 'under5';
+        }
+      },
+      opd: {
+        id: 'opd',
+        label: 'OPD Clinic',
+        labelAm: 'የተመላላሽ ታካሚ ክሊኒክ',
+        icon: 'fa-stethoscope',
+        color: '#2e7d32',
+        filter: function(ind) {
+          const names = [
+            'Total OPD Attendance', 'OPD Attendance Screened for TB',
+            'OPD Attendance Screened for HIV', 'Number of TB Detected from OPD Attendants',
+            'Total OPD Attendants Tested for HIV', 'Number of HIV Positives from OPD Attendance Tested',
+            'Number of HIV Tested from Screened OPD Attendants'
+          ];
+          return names.includes(ind.name) || ind.agenda === 'opd';
+        }
+      },
+      kp: {
+        id: 'kp',
+        label: 'KP Clinic',
+        labelAm: 'የቁልፍ ተጋላጭ ክሊኒክ',
+        icon: 'fa-people-group',
+        color: '#7b1fa2',
+        filter: function(ind) {
+          const names = [
+            'Total KP Visit the Clinic', 'Number of Positive from Clinic',
+            'Number of Positive from CDC Outreach', 'Number of Positive from OSSAD Outreach',
+            'Number of Positive from HC Outreach', 'Total HIV Positive from KP Clinic',
+            'Number of Positive from KP Outreach'
+          ];
+          return names.includes(ind.name) || ind.agenda === 'kp';
+        }
+      },
+      pharmacy: {
+        id: 'pharmacy',
+        label: 'Pharmacy Department',
+        labelAm: 'የፋርማሲ ክፍል',
+        icon: 'fa-prescription-bottle',
+        color: '#4e342e',
+        filter: function(ind) {
+          const names = [
+            'Essential Drug Availability', '100% Prescribed Drugs Filled'
+          ];
+          return names.includes(ind.name) || ind.agenda === 'pharmacy';
+        }
+      }
+    };
+
+    // List for menu iteration (ordered)
+    const SECTION_MODULE_LIST = [
+      'finance', 'hit', 'qi', 'mch', 'art', 'tb', 'epi', 'under5', 'opd', 'kp', 'pharmacy'
+    ];
+
+    // ====================================================================
+    // STATE
+    // ====================================================================
     let currentUser = { name: '', role: '', facility: '' };
     let currentPage = 'login';
     let currentHpId = null;
@@ -2189,7 +2401,12 @@
     let customFromDate = null;
     let customToDate = null;
 
-    // ---------- NAVIGATION VISIBILITY CONFIG (ADMIN CONTROLLED) ----------
+    // Section module state (independent service module)
+    let currentSectionModuleId = null;
+
+    // ====================================================================
+    // NAVIGATION VISIBILITY CONFIG (ADMIN CONTROLLED)
+    // ====================================================================
     let navVisibility = {
       homeHC: true,
       homeHPs: true,
@@ -2234,10 +2451,21 @@
       'ME-Chapter-9': true,
       'Laboratory-Chapter-6': true,
       'HR-Chapter-10': true,
-      // New Kobo links
       'Chapter-4': true,
       'Client Satisfaction-2': true,
-      'CSC-2': true
+      'CSC-2': true,
+      // Section module visibility
+      'section-finance': true,
+      'section-hit': true,
+      'section-qi': true,
+      'section-mch': true,
+      'section-art': true,
+      'section-tb': true,
+      'section-epi': true,
+      'section-under5': true,
+      'section-opd': true,
+      'section-kp': true,
+      'section-pharmacy': true
     };
 
     // Labels & icons for nav control UI
@@ -2264,10 +2492,23 @@
       drawerAssessments: { label: 'Drawer: Assessments & Services', icon: 'fa-clipboard-list' },
       drawerAdmin: { label: 'Drawer: Admin Section', icon: 'fa-shield-halved' },
       drawerHC: { label: 'Drawer: HC Section', icon: 'fa-hospital' },
-      drawerHPs: { label: 'Drawer: HPs Section', icon: 'fa-house-medical' }
+      drawerHPs: { label: 'Drawer: HPs Section', icon: 'fa-house-medical' },
+      'section-finance': { label: 'Section: Finance', icon: 'fa-coins' },
+      'section-hit': { label: 'Section: HIT', icon: 'fa-chart-simple' },
+      'section-qi': { label: 'Section: QI', icon: 'fa-scale-balanced' },
+      'section-mch': { label: 'Section: MCH Clinic', icon: 'fa-baby' },
+      'section-art': { label: 'Section: ART Clinic', icon: 'fa-heart-pulse' },
+      'section-tb': { label: 'Section: TB Clinic', icon: 'fa-lungs' },
+      'section-epi': { label: 'Section: EPI Clinic', icon: 'fa-syringe' },
+      'section-under5': { label: 'Section: Under-5 Clinic', icon: 'fa-child' },
+      'section-opd': { label: 'Section: OPD Clinic', icon: 'fa-stethoscope' },
+      'section-kp': { label: 'Section: KP Clinic', icon: 'fa-people-group' },
+      'section-pharmacy': { label: 'Section: Pharmacy Department', icon: 'fa-prescription-bottle' }
     };
 
-    // ---------- ROLE PERMISSION SYSTEM ----------
+    // ====================================================================
+    // ROLE PERMISSION SYSTEM
+    // ====================================================================
     function isAdmin() {
       return currentUser.role === 'admin';
     }
@@ -2315,7 +2556,9 @@
       return navVisibility[key] !== false;
     }
 
-    // ---------- ALL USERS FOR MOBILE NAVIGATION ----------
+    // ====================================================================
+    // ALL USERS FOR MOBILE NAVIGATION
+    // ====================================================================
     const ALL_USERS = [
       { id: 'admin', label: 'Admin', icon: 'fa-shield-halved', role: 'admin', facility: 'All' },
       { id: 'kebele04', label: 'Kebele 04', icon: 'fa-house-medical', role: 'kebele', kebele: '04', hpId: 'hp5' },
@@ -2333,10 +2576,13 @@
       { id: 'epi', label: 'EPI Clinic', icon: 'fa-syringe', role: 'epi', facility: 'HC' },
       { id: 'under5', label: 'Under-5 Clinic', icon: 'fa-child', role: 'under5', facility: 'HC' },
       { id: 'opd', label: 'OPD Clinic', icon: 'fa-stethoscope', role: 'opd', facility: 'HC' },
+      { id: 'kp', label: 'KP Clinic', icon: 'fa-people-group', role: 'kp', facility: 'HC' },
       { id: 'pharmacy', label: 'Pharmacy Department', icon: 'fa-prescription-bottle', role: 'pharmacy', facility: 'HC' }
     ];
 
-    // ---------- KOBOTOOLBOX SOURCE CONFIGURATION ----------
+    // ====================================================================
+    // KOBOTOOLBOX SOURCE CONFIGURATION
+    // ====================================================================
     const KOBOTOOLBOX_SOURCES = {
       'CSC':                   { url: 'https://ee.kobotoolbox.org/x/m7IWSF7i', level: 'hp',   indicatorMatch: 'CSC Rate' },
       'HEP':                   { url: 'https://ee.kobotoolbox.org/x/oMhdV4Hm', level: 'hp',   indicatorMatch: 'HEP' },
@@ -2357,7 +2603,6 @@
       'ME-Chapter-9':          { url: 'https://ee.kobotoolbox.org/x/s1hqpYEg', level: 'hc',   indicatorMatch: 'Data Use Score' },
       'Laboratory-Chapter-6':  { url: 'https://ee.kobotoolbox.org/x/noqY62I9', level: 'hc',   indicatorMatch: 'Essential Lab Test Availability' },
       'HR-Chapter-10':         { url: 'https://ee.kobotoolbox.org/x/pBEa7Qo1', level: 'hc',   indicatorMatch: 'Active Professional License' },
-      // New Kobo links
       'Chapter-4': { url: 'https://kf.kobotoolbox.org/#/forms/awWuwXHDrghPiJxLrJbhey/landing', level: 'hc', indicatorMatch: 'Chapter 4' },
       'Client Satisfaction-2': { url: 'https://kf.kobotoolbox.org/#/forms/aZ8v6p7jvBA58L8uNPgmUj/landing', level: 'hc', indicatorMatch: 'Client Satisfaction' },
       'CSC-2': { url: 'https://kf.kobotoolbox.org/#/forms/aEKgZyevYLBTEkR3TmFKwh/landing', level: 'hc', indicatorMatch: 'CSC' }
@@ -2366,7 +2611,9 @@
     // ---------- KOBOTOOLBOX SUMMARY STORE ----------
     let koboSummaries = {};
 
-    // ---------- ADDITIONAL NAVIGATION ITEMS ----------
+    // ====================================================================
+    // ADDITIONAL NAVIGATION ITEMS (Assessments & Services)
+    // ====================================================================
     const ADDITIONAL_NAV_ITEMS = [
       { label: 'CSC', key: 'CSC', icon: 'fa-users' },
       { label: 'HEP', key: 'HEP', icon: 'fa-heart-pulse' },
@@ -2389,16 +2636,17 @@
       { label: 'ME-Chapter-9', key: 'ME-Chapter-9', icon: 'fa-chart-line' },
       { label: 'Laboratory-Chapter-6', key: 'Laboratory-Chapter-6', icon: 'fa-flask' },
       { label: 'HR-Chapter-10', key: 'HR-Chapter-10', icon: 'fa-user-doctor' },
-      // New Kobo links
       { label: 'Chapter -4 ', key: 'Chapter-4', icon: 'fa-book-medical' },
       { label: 'Client Satisfaction', key: 'Client Satisfaction-2', icon: 'fa-face-smile' },
       { label: 'CSC (የማህበረሰብ አስተያየት ምዘና ስርዓት)', key: 'CSC-2', icon: 'fa-users' }
     ];
 
-    // ---------- AUTO-SUGGESTION DATA SOURCES ----------
+    // ====================================================================
+    // AUTO-SUGGESTION DATA SOURCES
+    // ====================================================================
     const AUTO_SUGGEST_DATA = {
       names: ['Assefa Gashaye', 'Amanuel', 'Bruktawit', 'Chala', 'Desta', 'Eden', 'Fikru', 'Hanna', 'Kebede', 'Mulu', 'Selam', 'Tigist', 'Yohannes'],
-      departments: ['Finance', 'HIT', 'QI', 'MCH Clinic', 'ART', 'TB Clinic', 'EPI Clinic', 'Under-5 Clinic', 'OPD Clinic', 'Pharmacy Department', 'Laboratory'],
+      departments: ['Finance', 'HIT', 'QI', 'MCH Clinic', 'ART', 'TB Clinic', 'EPI Clinic', 'Under-5 Clinic', 'OPD Clinic', 'KP Clinic', 'Pharmacy Department', 'Laboratory'],
       kebeles: ['04', '05', '06', '11', '15', '17'],
       indicators: [
         'Reimbursement', 'Data Quality Score', 'Data Use Score', 'CSC Rate', 'EHCRIG Implementation',
@@ -2415,7 +2663,6 @@
       dates: []
     };
 
-    // Generate date suggestions for current year
     (function generateDateSuggestions() {
       const now = new Date();
       for (let m = 0; m < 12; m++) {
@@ -2424,7 +2671,9 @@
       }
     })();
 
-    // ---------- AUTO-SUGGESTION ENGINE ----------
+    // ====================================================================
+    // AUTO-SUGGESTION ENGINE
+    // ====================================================================
     function getSuggestions(input, category, maxResults) {
       maxResults = maxResults || 8;
       if (!input || input.length < 1) return [];
@@ -2546,7 +2795,9 @@
       listEl.classList.remove('open');
     }
 
-    // ---------- PERIOD FILTER ----------
+    // ====================================================================
+    // PERIOD FILTER
+    // ====================================================================
     function getPeriodFilterLabel() {
       const labels = {
         daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly',
@@ -2606,6 +2857,7 @@
       else if (context === 'hp') renderHPDetail(currentHpId, currentHpTab);
       else if (context === 'admin') renderAdminTab(currentAdminTab);
       else if (context === 'summary') renderSummary();
+      else if (context === 'section-module') renderSectionModule(currentSectionModuleId);
       showToast('Period set to ' + getPeriodFilterLabel(), 'info');
     };
 
@@ -2613,11 +2865,14 @@
       if (type === 'from') customFromDate = value;
       else customToDate = value;
       if (customFromDate && customToDate) {
-        renderSummary();
+        if (currentPage === 'section-module') renderSectionModule(currentSectionModuleId);
+        else renderSummary();
       }
     };
 
-    // ---------- CENTRALIZED CONFIGURATION ----------
+    // ====================================================================
+    // CENTRALIZED CONFIGURATION
+    // ====================================================================
     let hcAgendas = [
       { id: 'finance', name: 'Health Financing', weight: 5, score: 81, icon: 'fa-coins', color: '#2e7d32' },
       { id: 'ir', name: 'Information Revolution', weight: 15, score: 74, icon: 'fa-chart-simple', color: '#f9a825' },
@@ -2682,7 +2937,16 @@
       { id: 53, agenda: 'qe', name: 'Number of HIV Positives from Tested', weight: 2, plan: 60, achievement: 42, unit: 'cases', direction: 'higher', verified: false, category: 'art' },
       { id: 54, agenda: 'qe', name: 'Number of Positive from CDC Outreach', weight: 2, plan: 30, achievement: 22, unit: 'cases', direction: 'higher', verified: false, category: 'art' },
       { id: 55, agenda: 'qe', name: 'Number of Positive from OSSAD Outreach', weight: 2, plan: 25, achievement: 18, unit: 'cases', direction: 'higher', verified: false, category: 'art' },
-      { id: 56, agenda: 'qe', name: 'Number of Positive from KP Outreach', weight: 2, plan: 20, achievement: 14, unit: 'cases', direction: 'higher', verified: false, category: 'art' }
+      { id: 56, agenda: 'qe', name: 'Number of Positive from KP Outreach', weight: 2, plan: 20, achievement: 14, unit: 'cases', direction: 'higher', verified: false, category: 'art' },
+      // KP-specific indicators
+      { id: 57, agenda: 'qe', name: 'Total KP Visit the Clinic', weight: 2, plan: 500, achievement: 380, unit: 'visits', direction: 'higher', verified: false, category: 'kp' },
+      { id: 58, agenda: 'qe', name: 'Number of Positive from Clinic', weight: 2, plan: 30, achievement: 21, unit: 'cases', direction: 'higher', verified: false, category: 'kp' },
+      { id: 59, agenda: 'qe', name: 'Number of Positive from HC Outreach', weight: 2, plan: 25, achievement: 17, unit: 'cases', direction: 'higher', verified: false, category: 'kp' },
+      { id: 60, agenda: 'qe', name: 'Total HIV Positive from KP Clinic', weight: 2, plan: 50, achievement: 36, unit: 'cases', direction: 'higher', verified: false, category: 'kp' },
+      { id: 61, agenda: 'qe', name: 'Total OPD Attendants Tested for HIV', weight: 2, plan: 3000, achievement: 2400, unit: 'tests', direction: 'higher', verified: false, category: 'art' },
+      { id: 62, agenda: 'qe', name: 'Number of HIV Positives from OPD Attendance Tested', weight: 2, plan: 50, achievement: 35, unit: 'cases', direction: 'higher', verified: false, category: 'art' },
+      { id: 63, agenda: 'qe', name: 'TB Cases Screened for HIV', weight: 2, plan: 100, achievement: 78, unit: 'cases', direction: 'higher', verified: false, category: 'tb' },
+      { id: 64, agenda: 'qe', name: 'ART Cases screened for cx ca', weight: 1, plan: 80, achievement: 62, unit: '%', direction: 'higher', verified: false, category: 'art' }
     ];
 
     let healthPosts = [
@@ -2743,7 +3007,9 @@
 
     let submissions = [];
 
-    // ---------- HELPERS ----------
+    // ====================================================================
+    // HELPERS
+    // ====================================================================
     function showToast(message, type = 'success') {
       const toast = document.getElementById('toast');
       toast.textContent = message;
@@ -2793,7 +3059,9 @@
       });
     }
 
-    // ---------- CHAMPIONSHIP HELPERS ----------
+    // ====================================================================
+    // CHAMPIONSHIP HELPERS
+    // ====================================================================
     function getChampionshipBadge(rank) {
       if (rank === 1) return '<span class="champ-badge champ-gold">🥇 Gold</span>';
       if (rank === 2) return '<span class="champ-badge champ-silver">🥈 Silver</span>';
@@ -2808,7 +3076,308 @@
       return '#' + rank;
     }
 
-    // ---------- UPDATE ALL ----------
+    // ====================================================================
+    // SECTION MODULE — CORE FUNCTIONS
+    // ====================================================================
+
+    /**
+     * Get all indicators that belong to a given section module.
+     * For QI, returns ALL indicators (special handling).
+     * For others, applies the section's filter function.
+     */
+    function getSectionIndicators(sectionId) {
+      const section = SECTION_MODULES[sectionId];
+      if (!section) return [];
+      if (section.special === 'all') {
+        // QI: all indicators, no duplicates
+        return hcIndicators.slice(); // shallow copy, original unchanged
+      }
+      return hcIndicators.filter(section.filter);
+    }
+
+    /**
+     * Calculate section score (weighted average of performance).
+     */
+    function getSectionScore(sectionId) {
+      const inds = getSectionIndicators(sectionId);
+      if (!inds.length) return 0;
+      let totalWeight = 0;
+      let weightedSum = 0;
+      inds.forEach(k => {
+        const perf = calcPerformance(k.plan, k.achievement, k.direction || 'higher');
+        const w = k.weight || 1;
+        weightedSum += perf * w;
+        totalWeight += w;
+      });
+      return totalWeight > 0 ? Math.round(weightedSum / totalWeight) : 0;
+    }
+
+    /**
+     * Calculate period-adjusted achievements for section indicators.
+     * Returns a new array with plan/achievement scaled by period multiplier.
+     * Original indicators remain unchanged.
+     */
+    function getSectionIndicatorsWithPeriod(sectionId) {
+      const inds = getSectionIndicators(sectionId);
+      const periodMult = getPeriodMultiplier();
+      return inds.map(k => {
+        const plan = Math.round(k.plan * (periodMult > 0 ? 1 : 0));
+        const ach = Math.round((k.achievement || 0) * (periodMult > 0 ? 1 : 0));
+        return {
+          ...k,
+          plan: plan,
+          achievement: ach,
+          performance: calcPerformance(plan, ach, k.direction || 'higher')
+        };
+      });
+    }
+
+    // ====================================================================
+    // SECTION MODULE RENDERING
+    // ====================================================================
+
+    function openSectionModule(sectionId) {
+      // Check nav visibility
+      const navKey = 'section-' + sectionId;
+      if (!isNavVisible(navKey) && !isAdmin()) {
+        showToast('This section is currently disabled by Admin.', 'warning');
+        return;
+      }
+      const section = SECTION_MODULES[sectionId];
+      if (!section) {
+        showToast('Unknown section: ' + sectionId, 'error');
+        return;
+      }
+
+      currentSectionModuleId = sectionId;
+      currentPage = 'section-module';
+      showPage('section-module');
+
+      // Update breadcrumb
+      const crumb = document.getElementById('sectionModuleCrumb');
+      if (crumb) crumb.textContent = section.label;
+
+      renderSectionModule(sectionId);
+      updateSectionForPage('section-module', { sectionId: sectionId });
+      updateDrawerNav();
+      updateDesktopSidebarNav();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderSectionModule(sectionId) {
+      const container = document.getElementById('sectionModuleContent');
+      if (!container) return;
+
+      const section = SECTION_MODULES[sectionId];
+      if (!section) {
+        container.innerHTML = '<div class="card"><div class="no-data">Section not found.</div></div>';
+        return;
+      }
+
+      const navKey = 'section-' + sectionId;
+      if (!isNavVisible(navKey) && !isAdmin()) {
+        container.innerHTML = '<div class="card"><div class="no-data">🔒 This section is currently disabled by Admin.</div></div>';
+        return;
+      }
+
+      const periodLabel = getPeriodFilterLabel();
+      const indicators = getSectionIndicatorsWithPeriod(sectionId);
+      const score = getSectionScore(sectionId);
+
+      // Update header
+      updateHeaderTitle('DM PHCU · ' + section.label, section.labelAm + ' — ' + periodLabel);
+
+      // Section info card
+      let html = renderPeriodFilterBar('section-module');
+
+      html += `<div class="card" style="border-left:6px solid ${section.color};">
+        <div class="flex-between">
+          <div>
+            <div style="font-weight:800;font-size:1.05rem;color:${section.color};text-align:center;">
+              <i class="fas ${section.icon}"></i> ${section.label} 
+              <span style="font-size:0.75rem;color:#64748b;">(${section.labelAm})</span>
+            </div>
+            <div class="text-muted" style="font-size:0.78rem;text-align:center;">
+              ${indicators.length} indicators · Period: <strong>${periodLabel}</strong> · Score: <strong style="font-size:1rem;">${score}%</strong>
+            </div>
+          </div>
+          <span class="status-badge ${getStatusClass(score)}">${getStatusText(score)}</span>
+        </div>
+      </div>`;
+
+      // If no indicators, show message
+      if (indicators.length === 0) {
+        html += `<div class="card"><div class="no-data">No indicators assigned to this section for the selected period.</div></div>`;
+        container.innerHTML = html;
+        return;
+      }
+
+      // KPI summary cards
+      const totalPlan = indicators.reduce((s, k) => s + k.plan, 0);
+      const totalAch = indicators.reduce((s, k) => s + k.achievement, 0);
+      const avgPerf = indicators.length ? Math.round(indicators.reduce((s, k) => s + k.performance, 0) / indicators.length) : 0;
+      const excellentCount = indicators.filter(k => k.performance >= 85).length;
+      const criticalCount = indicators.filter(k => k.performance < 50).length;
+
+      html += `<div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(100px,1fr));">
+        <div class="kpi-card" style="border-left-color:${section.color};">
+          <div class="label">Score</div><div class="value" style="color:${section.color};">${score}%</div><div class="sub">${periodLabel}</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#2e7d32;">
+          <div class="label">Excellent</div><div class="value">${excellentCount}</div><div class="sub">≥85%</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#b71c1c;">
+          <div class="label">Critical</div><div class="value">${criticalCount}</div><div class="sub">&lt;50%</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#0b3b5c;">
+          <div class="label">Total Plan</div><div class="value">${totalPlan.toLocaleString()}</div><div class="sub">Targets</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#2c7a7b;">
+          <div class="label">Total Actual</div><div class="value">${totalAch.toLocaleString()}</div><div class="sub">Achieved</div>
+        </div>
+      </div>`;
+
+      // Indicator performance table
+      html += `<div class="card">
+        <div class="card-header">📋 ${section.label} Indicator Performance — ${periodLabel}</div>
+        <div class="table-wrap"><table class="indicator-table">
+          <thead><tr>
+            <th>Indicator</th>
+            <th>Weight</th>
+            <th>Target</th>
+            <th>Achievement</th>
+            <th>Performance</th>
+            <th>Status</th>
+          </tr></thead>
+          <tbody>`;
+
+      indicators.forEach(k => {
+        const editable = canEditData('hc', 'hc') && currentUser.facility === 'HC';
+        html += `<tr>
+          <td>${escapeHtml(k.name)}</td>
+          <td>${k.weight}%</td>
+          <td>${k.plan}</td>
+          <td>${editable
+            ? `<input type="number" class="section-ach-input" data-id="${k.id}" data-section="${sectionId}" value="${k.achievement || ''}" style="width:60px;padding:5px;border-radius:6px;border:2px solid #d1d9e6;text-align:center;font-size:0.8rem;">`
+            : `<span>${k.achievement}</span>`}</td>
+          <td><strong>${k.performance}%</strong></td>
+          <td><span class="status-badge ${getStatusClass(k.performance)}">${getStatusText(k.performance)}</span></td>
+        </tr>`;
+      });
+
+      html += `</tbody></table></div></div>`;
+
+      // Bar chart of indicator performance
+      const chartIndicators = indicators.slice(0, 12);
+      html += `<div class="card">
+        <div class="card-header">📈 ${section.label} — Indicator Performance Chart</div>
+        <div class="chart-box">
+          ${chartIndicators.map(k => `
+            <div class="chart-bar" style="height:${Math.max(5, k.performance)}%;background:${k.performance >= 85 ? '#2e7d32' : k.performance >= 75 ? '#f9a825' : k.performance >= 50 ? '#e65100' : '#b71c1c'};" title="${escapeHtml(k.name)}: ${k.performance}%">
+              <span class="bar-label">${k.performance}%</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="chart-label-row" style="font-size:0.6rem;">
+          ${chartIndicators.map((k,i) => `<span>${i+1}</span>`).join('')}
+        </div>
+      </div>`;
+
+      // Action bar
+      html += `<div class="action-bar">
+        ${canSubmitData('hc', 'hc') && currentUser.facility === 'HC' ? `<button class="btn btn-green" onclick="window._sectionSubmit('${sectionId}')"><i class="fas fa-paper-plane"></i></button>` : ''}
+        <button class="btn btn-copy" onclick="window._sectionCopy('${sectionId}')"><i class="fas fa-copy"></i></button>
+        <button class="btn btn-share" onclick="window._sectionShare('${sectionId}')"><i class="fas fa-share-nodes"></i></button>
+      </div>`;
+
+      container.innerHTML = html;
+
+      // Attach input change handlers
+      container.querySelectorAll('.section-ach-input').forEach(inp => {
+        inp.addEventListener('change', function() {
+          const id = parseInt(this.dataset.id);
+          const sectionId = this.dataset.section;
+          const val = parseFloat(this.value);
+          const ind = hcIndicators.find(d => d.id === id);
+          if (ind && !isNaN(val)) {
+            ind.achievement = val;
+            updateAllIndicators();
+            renderSectionModule(sectionId);
+            showToast('Data updated', 'success');
+          }
+        });
+      });
+    }
+
+    window._sectionSubmit = function(sectionId) {
+      if (!canSubmitData('hc', 'hc')) {
+        showToast('You do not have permission to submit data.', 'error');
+        return;
+      }
+      const section = SECTION_MODULES[sectionId];
+      if (!section) return;
+      if (!confirm(`Submit ${section.label} data to Admin for review?`)) return;
+      submissions.push({
+        facility: 'Debremarkos HC — ' + section.label,
+        facilityType: 'HC',
+        section: sectionId,
+        kebele: '—',
+        user: currentUser.name,
+        role: currentUser.role,
+        period: new Date().toISOString().slice(0, 7),
+        enteredAt: new Date().toLocaleString(),
+        submittedAt: new Date().toLocaleString(),
+        status: 'Submitted',
+        adminReviewer: '',
+        reviewDate: '',
+        adminComments: '',
+        approval: 'Pending'
+      });
+      updateHomeCounts();
+      showToast(section.label + ' data submitted to Admin', 'success');
+    };
+
+    window._sectionCopy = function(sectionId) {
+      const section = SECTION_MODULES[sectionId];
+      if (!section) return;
+      const indicators = getSectionIndicators(sectionId);
+      const score = getSectionScore(sectionId);
+      const periodLabel = getPeriodFilterLabel();
+      let text = `DM PHCU Performance Dashboard 2026\n`;
+      text += `=====================================\n`;
+      text += `Section: ${section.label} (${section.labelAm})\n`;
+      text += `Period: ${periodLabel}\n`;
+      text += `Score: ${score}%\n`;
+      text += `Indicators: ${indicators.length}\n`;
+      text += `Date: ${new Date().toLocaleString()}\n`;
+      text += `=====================================\n`;
+      indicators.forEach(k => {
+        let perf = calcPerformance(k.plan, k.achievement, k.direction || 'higher');
+        text += `${k.name}: Target=${k.plan}, Actual=${k.achievement}, Perf=${perf}%\n`;
+      });
+      copyToClipboard(text, section.label + ' data copied!');
+    };
+
+    window._sectionShare = function(sectionId) {
+      const section = SECTION_MODULES[sectionId];
+      if (!section) return;
+      const indicators = getSectionIndicators(sectionId);
+      const score = getSectionScore(sectionId);
+      const periodLabel = getPeriodFilterLabel();
+      let text = `DM PHCU Performance Dashboard 2026\n`;
+      text += `Section: ${section.label}\n`;
+      text += `Period: ${periodLabel} | Score: ${score}%\n`;
+      text += `---\n`;
+      indicators.slice(0, 10).forEach(k => {
+        let perf = calcPerformance(k.plan, k.achievement, k.direction || 'higher');
+        text += `${k.name}: ${perf}%\n`;
+      });
+      shareContent(text, section.label + ' Performance Report');
+    };
+
+    // ====================================================================
+    // UPDATE ALL INDICATORS
+    // ====================================================================
     function updateAllIndicators() {
       hcIndicators.forEach(k => {
         k.performance = calcPerformance(k.plan, k.achievement, k.direction || 'higher');
@@ -2857,7 +3426,9 @@
       return Math.round(hcScore * 0.6 + hpAvg * 0.4);
     }
 
-    // ---------- SUMMARY CALCULATIONS ----------
+    // ====================================================================
+    // SUMMARY CALCULATIONS
+    // ====================================================================
     function getSummaryStats() {
       const periodMult = getPeriodMultiplier();
       let totalIndicators = hcIndicators.length;
@@ -2869,7 +3440,6 @@
       let totalTarget = 0, totalAchievement = 0;
       let indicatorsList = [];
 
-      // HC indicators
       hcIndicators.forEach(k => {
         let perf = calcPerformance(k.plan, k.achievement, k.direction || 'higher');
         let plan = k.plan * (periodMult > 0 ? 1 : 0);
@@ -2885,7 +3455,6 @@
         else pendingCount++;
       });
 
-      // HP indicators
       healthPosts.forEach(hp => {
         (hpIndicators[hp.id] || []).forEach(k => {
           let perf = calcPerformance(k.plan, k.achievement, k.direction || 'higher');
@@ -2920,7 +3489,9 @@
       };
     }
 
-    // ---------- RENDER SUMMARY ----------
+    // ====================================================================
+    // RENDER SUMMARY
+    // ====================================================================
     function renderSummary() {
       const container = document.getElementById('summaryContent');
       if (!container) return;
@@ -2928,7 +3499,6 @@
       const stats = getSummaryStats();
       const periodLabel = getPeriodFilterLabel();
 
-      // Drill-down state
       let drillTitle = 'Total PHCU';
       let drillData = [];
 
@@ -2965,7 +3535,6 @@
 
       let html = renderPeriodFilterBar('summary');
 
-      // Breadcrumb
       html += '<div class="drill-breadcrumb">';
       html += '<span class="dcrumb ' + (currentSummaryDrill === 'phcu' ? 'active' : '') + '" onclick="window._summaryDrill(\'phcu\')">Total PHCU</span>';
       if (currentSummaryDrill === 'hc') {
@@ -2977,7 +3546,6 @@
       }
       html += '</div>';
 
-      // Summary KPI cards
       html += '<div class="summary-grid">';
       html += '<div class="summary-card total" onclick="window._summaryDrill(\'phcu\')"><div class="sc-value">' + stats.total + '</div><div class="sc-label">Total</div></div>';
       html += '<div class="summary-card planned"><div class="sc-value">' + stats.planned + '</div><div class="sc-label">Planned</div></div>';
@@ -2988,17 +3556,14 @@
       html += '<div class="summary-card indicator"><div class="sc-value">' + stats.achievementPct + '%</div><div class="sc-label">Achievement</div></div>';
       html += '</div>';
 
-      // Achievement summary
       html += '<div class="card"><div class="card-header">📊 ' + drillTitle + ' — ' + periodLabel + ' Summary</div>';
       html += '<div class="flex-between" style="padding:8px 0;"><span>Total Target: <strong>' + stats.totalTarget.toLocaleString() + '</strong></span><span>Total Achievement: <strong>' + stats.totalAchievement.toLocaleString() + '</strong></span><span>Achievement: <strong>' + stats.achievementPct + '%</strong></span></div>';
 
-      // Bar chart
       html += '<div class="chart-box" style="height:140px;">';
       html += '<div class="chart-bar" style="height:' + Math.min(100, stats.achievementPct) + '%;background:' + (stats.achievementPct >= 85 ? '#2e7d32' : stats.achievementPct >= 75 ? '#f9a825' : stats.achievementPct >= 50 ? '#e65100' : '#b71c1c') + ';"><span class="bar-label">' + stats.achievementPct + '%</span></div>';
       html += '</div>';
       html += '<div class="chart-label-row"><span>Overall Achievement</span></div></div>';
 
-      // Drill-down table
       html += '<div class="card"><div class="card-header">📋 ' + drillTitle + ' Breakdown</div>';
       html += '<div class="table-wrap"><table><thead><tr><th>Name</th><th>Type</th><th>Score</th><th>Indicators</th><th>Responsible</th><th>Status</th></tr></thead><tbody>';
       drillData.forEach(function(item) {
@@ -3013,7 +3578,6 @@
       });
       html += '</tbody></table></div></div>';
 
-      // Indicator list for HC or kebele drill
       if (currentSummaryDrill === 'hc' || currentSummaryDrill === 'kebele') {
         html += '<div class="card"><div class="card-header">📋 Indicator Details</div>';
         html += '<div class="table-wrap"><table><thead><tr><th>Indicator</th><th>Target</th><th>Achievement</th><th>Performance</th><th>Status</th></tr></thead><tbody>';
@@ -3050,7 +3614,9 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // ---------- HEADER TITLE UPDATE ----------
+    // ====================================================================
+    // HEADER TITLE UPDATE
+    // ====================================================================
     function updateHeaderTitle(title, subtitle) {
       const t = document.getElementById('headerTitle');
       const s = document.getElementById('headerSubtitle');
@@ -3077,10 +3643,17 @@
         updateHeaderTitle('Admin Dashboard', tabLabels[extra.tab] || 'Submissions');
       } else if (page === 'summary') {
         updateHeaderTitle('Summary', 'PHCU-wide consolidated summary');
+      } else if (page === 'section-module') {
+        const section = SECTION_MODULES[extra.sectionId];
+        if (section) {
+          updateHeaderTitle('DM PHCU · ' + section.label, section.labelAm + ' — ' + getPeriodFilterLabel());
+        }
       }
     }
 
-    // ---------- PAGE NAVIGATION ----------
+    // ====================================================================
+    // PAGE NAVIGATION
+    // ====================================================================
     function showPage(pageId) {
       document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
       const target = document.getElementById('page-' + pageId);
@@ -3095,6 +3668,7 @@
       updateSectionForPage('home');
       updateDrawerNav();
       updateDesktopSidebarNav();
+      currentSectionModuleId = null;
     }
 
     function updateHomeCounts() {
@@ -3156,7 +3730,9 @@
       updateDesktopSidebarNav();
     }
 
-    // ---------- ROLE FILTERING ----------
+    // ====================================================================
+    // ROLE FILTERING
+    // ====================================================================
     function getUserIndicators(user, indicators, allAgendas) {
       if (user.role === 'admin') return indicators;
       if (user.role === 'kebele') return indicators;
@@ -3185,7 +3761,9 @@
           'First 95', 'Second 95', 'Third 95', 'HIV Case Detection',
           'OPD Attendance Screened for HIV', 'Number of HIV Tested from Screened OPD Attendants',
           'Number of HIV Positives from Tested', 'Number of Positive from CDC Outreach',
-          'Number of Positive from OSSAD Outreach', 'Number of Positive from KP Outreach'
+          'Number of Positive from OSSAD Outreach', 'Number of Positive from KP Outreach',
+          'ART Retention', 'Viral Load Suppression', 'Total OPD Attendants Tested for HIV',
+          'Number of HIV Positives from OPD Attendance Tested', 'ART Cases screened for cx ca'
         ];
         return indicators.filter(i => artNames.includes(i.name));
       }
@@ -3196,18 +3774,29 @@
           'Number of TB Detected from OPD Attendants',
           'Number of Community TB Suspect Referrals',
           'Number of TB Detected from Community TB Referrals',
-          'Total Number of TB Detected (OPD + Community)', 'TB Treatment Success (TSR)'
+          'Total Number of TB Detected (OPD + Community)', 'TB Treatment Success (TSR)',
+          'TB Cases Screened for HIV'
         ];
         return indicators.filter(i => tbIndicatorNames.includes(i.name));
       }
       if (dept === 'epi') return indicators.filter(i => i.name.includes('Immunization') || i.name.includes('Penta') || i.name.includes('MCV'));
       if (dept === 'under5') return indicators.filter(i => i.name.includes('OTP') || i.name.includes('Pneumonia') || i.name.includes('Vitamin A') || i.name.includes('GMP'));
       if (dept === 'opd') return indicators.filter(i => i.name.includes('Malaria') || i.name.includes('OPD') || i.name.includes('Diabetes') || i.name.includes('Hypertension') || i.name.includes('Cervical'));
+      if (dept === 'kp') {
+        const kpNames = [
+          'Total KP Visit the Clinic', 'Number of Positive from Clinic',
+          'Number of Positive from HC Outreach', 'Total HIV Positive from KP Clinic',
+          'Number of Positive from KP Outreach'
+        ];
+        return indicators.filter(i => kpNames.includes(i.name) || i.category === 'kp');
+      }
       if (dept === 'pharmacy') return indicators.filter(i => i.name.includes('Drug') || i.name.includes('Lab') || i.name.includes('Prescribed'));
       return indicators;
     }
 
-    // ---------- RENDER HC ----------
+    // ====================================================================
+    // RENDER HC
+    // ====================================================================
     function renderHC() {
       updateAllIndicators();
       const hcScore = getHCScore();
@@ -3447,7 +4036,9 @@
       }
     }
 
-    // ---------- FEEDBACK SECTION ----------
+    // ====================================================================
+    // FEEDBACK SECTION
+    // ====================================================================
     function renderFeedbackSection(context, container, indicators) {
       let strengths = [], weaknesses = [], threats = [], wayForward = [];
       indicators.forEach(k => {
@@ -3513,13 +4104,15 @@
     };
 
     window._copyAll = function() {
-      const container = document.getElementById('hcContent') || document.getElementById('hpContent') || document.getElementById('adminContent') || document.getElementById('summaryContent');
+      const container = document.getElementById('hcContent') || document.getElementById('hpContent') || document.getElementById('adminContent') || document.getElementById('summaryContent') || document.getElementById('sectionModuleContent');
       if (container) {
         copyToClipboard(container.innerText, 'All dashboard content copied!');
       }
     };
 
-    // ---------- RENDER HPs ----------
+    // ====================================================================
+    // RENDER HPs
+    // ====================================================================
     function renderHPs() {
       updateAllIndicators();
       const container = document.getElementById('hpContent');
@@ -3828,7 +4421,9 @@
       }
     }
 
-    // ---------- RENDER ADMIN ----------
+    // ====================================================================
+    // RENDER ADMIN
+    // ====================================================================
     function renderAdmin() {
       const container = document.getElementById('adminContent');
       if (!container) return;
@@ -3869,11 +4464,11 @@
           <div class="card">
             <div class="card-header">📥 Submitted Data</div>
             <div class="table-wrap"><table>
-              <thead><tr><th>Facility</th><th>Type</th><th>Kebele</th><th>Submitted By</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Facility</th><th>Type</th><th>Section</th><th>Kebele</th><th>Submitted By</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody>
         `;
         if (submissions.length === 0) {
-          html += '<tr><td colspan="7" class="no-data">No submissions yet. Data submitted from HC or HP will appear here.</td></tr>';
+          html += '<tr><td colspan="8" class="no-data">No submissions yet. Data submitted from HC or HP will appear here.</td></tr>';
         } else {
           submissions.forEach((s, idx) => {
             const statusClass = s.status === 'Approved' ? 'status-approved'
@@ -3884,6 +4479,7 @@
             html += `<tr>
               <td><strong>${escapeHtml(s.facility)}</strong></td>
               <td>${s.facilityType}</td>
+              <td>${s.section ? (SECTION_MODULES[s.section]?.label || s.section) : '—'}</td>
               <td>${s.kebele || '—'}</td>
               <td>${escapeHtml(s.user)}</td>
               <td style="font-size:0.72rem;">${escapeHtml(s.submittedAt)}</td>
@@ -4134,7 +4730,7 @@
                 <div class="ri-title"><i class="fas fa-info-circle"></i> Ranking Criteria — Health Center Level</div>
                 <div class="ri-detail">
                   <span><i class="fas fa-calendar"></i> Period: ${getPeriodFilterLabel()}</span>
-                  <span><i class="fas fa-list-ol"></i> Indicators: 42</span>
+                  <span><i class="fas fa-list-ol"></i> Indicators: 64</span>
                   <span><i class="fas fa-weight-hanging"></i> 5 Agendas (Finance 5%, IR 15%, LG 20%, MCC 10%, Q&E 50%)</span>
                   <span><i class="fas fa-arrow-up"></i> Ranked by Overall %</span>
                 </div>
@@ -4212,7 +4808,6 @@
         window._setRankMode(currentRankMode || 'hp');
 
       } else if (tab === 'summary') {
-        // Redirect to the summary page
         openSummary();
       } else if (tab === 'feedback') {
         const userIndicators = getUserIndicators(currentUser, hcIndicators, hcAgendas);
@@ -4220,7 +4815,9 @@
       }
     }
 
-    // ---------- EVENT BINDINGS ----------
+    // ====================================================================
+    // EVENT BINDINGS
+    // ====================================================================
     document.querySelectorAll('#hcTabBar .tab-btn').forEach(btn => {
       btn.addEventListener('click', function() {
         document.querySelectorAll('#hcTabBar .tab-btn').forEach(b => b.classList.remove('active'));
@@ -4599,7 +5196,9 @@
       };
     }
 
-    // ---------- MOBILE DRAWER ----------
+    // ====================================================================
+    // MOBILE DRAWER & DESKTOP SIDEBAR NAV
+    // ====================================================================
     function updateDrawerNav() {
       const nav = document.getElementById('drawerNav');
       if (!nav) return;
@@ -4613,7 +5212,6 @@
       if (isNavVisible('drawerDashboard')) {
         items.push({ type: 'label', text: 'Dashboard' });
 
-        // Summary nav item
         items.push({
           type: 'item',
           label: 'Summary',
@@ -4662,6 +5260,27 @@
             action: () => { openHC(); setTimeout(() => { renderHCTab('data'); }, 100); }
           });
         }
+      }
+
+      // ---------- SECTION MODULES (Independent Service Sections) ----------
+      if (isNavVisible('drawerDashboard')) {
+        items.push({ type: 'divider' });
+        items.push({ type: 'label', text: 'Service Sections' });
+
+        SECTION_MODULE_LIST.forEach(sectionId => {
+          const section = SECTION_MODULES[sectionId];
+          const navKey = 'section-' + sectionId;
+          if (!isNavVisible(navKey) && !isAdmin()) return;
+
+          const isActive = currentPage === 'section-module' && currentSectionModuleId === sectionId;
+          items.push({
+            type: 'item',
+            label: section.label,
+            icon: section.icon,
+            active: isActive,
+            action: () => { openSectionModule(sectionId); }
+          });
+        });
       }
 
       // ---------- ALL USERS ----------
@@ -4844,12 +5463,10 @@
       });
     }
 
-    // ---------- DESKTOP SIDEBAR ----------
     function updateDesktopSidebarNav() {
       const nav = document.getElementById('desktopSidebarNav');
       if (!nav) return;
 
-      // Reuse the same logic as updateDrawerNav but without the mobile drawer close
       const isAdminUser = isAdmin();
       const isKebele = currentUser.role === 'kebele';
 
@@ -4859,7 +5476,6 @@
       if (isNavVisible('drawerDashboard')) {
         items.push({ type: 'label', text: 'Dashboard' });
 
-        // Summary nav item
         items.push({
           type: 'item',
           label: 'Summary',
@@ -4908,6 +5524,27 @@
             action: () => { openHC(); setTimeout(() => { renderHCTab('data'); }, 100); }
           });
         }
+      }
+
+      // ---------- SECTION MODULES ----------
+      if (isNavVisible('drawerDashboard')) {
+        items.push({ type: 'divider' });
+        items.push({ type: 'label', text: 'Service Sections' });
+
+        SECTION_MODULE_LIST.forEach(sectionId => {
+          const section = SECTION_MODULES[sectionId];
+          const navKey = 'section-' + sectionId;
+          if (!isNavVisible(navKey) && !isAdmin()) return;
+
+          const isActive = currentPage === 'section-module' && currentSectionModuleId === sectionId;
+          items.push({
+            type: 'item',
+            label: section.label,
+            icon: section.icon,
+            active: isActive,
+            action: () => { openSectionModule(sectionId); }
+          });
+        });
       }
 
       // ---------- ALL USERS ----------
@@ -5096,7 +5733,6 @@
       if (!sidebar) return;
       
       if (window.innerWidth >= 992) {
-        // Desktop: toggle the sidebar-open class
         body.classList.toggle('sidebar-open');
         if (body.classList.contains('sidebar-open')) {
           sidebar.classList.remove('closed');
@@ -5104,7 +5740,6 @@
           sidebar.classList.add('closed');
         }
       } else {
-        // Mobile/tablet: use drawer
         window._openDrawer();
       }
     }
@@ -5121,7 +5756,9 @@
       document.body.style.overflow = '';
     };
 
-    // ---------- KOBOTOOLBOX DATA INTEGRATION ----------
+    // ====================================================================
+    // KOBOTOOLBOX DATA INTEGRATION
+    // ====================================================================
     function fetchKoboSummary(sourceKey, facilityId) {
       const source = KOBOTOOLBOX_SOURCES[sourceKey];
       if (!source) return 0;
@@ -5217,10 +5854,13 @@
       if (currentPage === 'hp' && currentHpId) renderHPDetail(currentHpId, currentHpTab);
       if (currentPage === 'admin') renderAdmin();
       if (currentPage === 'summary') renderSummary();
+      if (currentPage === 'section-module' && currentSectionModuleId) renderSectionModule(currentSectionModuleId);
       showToast('Kobo source opened: ' + sourceKey, 'info');
     }
 
-    // ---------- LOGIN ----------
+    // ====================================================================
+    // LOGIN
+    // ====================================================================
     function handleLogin() {
       const username = document.getElementById('usernameSelect').value;
       const name = document.getElementById('nameInput').value.trim();
@@ -5266,7 +5906,7 @@
         const hp = healthPosts.find(h => h.kebele === kebeleNum);
         currentUser = { name: name || username, role: 'kebele', facility: hp ? hp.name : 'HP', hpId: hp ? hp.id : null, kebele: kebeleNum };
         document.getElementById('settingsBtn').style.display = 'none';
-      } else if (['Finance', 'HIT', 'QI', 'MCH Clinic', 'ART', 'TB Clinic', 'EPI Clinic', 'Under-5 Clinic', 'OPD Clinic', 'Pharmacy Department'].includes(username)) {
+      } else if (['Finance', 'HIT', 'QI', 'MCH Clinic', 'ART', 'TB Clinic', 'EPI Clinic', 'Under-5 Clinic', 'OPD Clinic', 'KP Clinic', 'Pharmacy Department'].includes(username)) {
         currentUser = { name: name || username, role: username.toLowerCase().replace(' clinic', '').replace(' department', ''), facility: 'HC' };
         document.getElementById('settingsBtn').style.display = 'none';
       } else {
@@ -5293,7 +5933,9 @@
       updateDesktopSidebarNav();
     }
 
-    // ---------- FULLSCREEN / COMPRESS ----------
+    // ====================================================================
+    // FULLSCREEN / COMPRESS
+    // ====================================================================
     function toggleFullscreen() {
       const doc = document.documentElement;
       const btn = document.getElementById('fullscreenBtn');
@@ -5320,7 +5962,9 @@
       }
     }
 
-    // ---------- SETTINGS MODAL / INDICATOR MANAGEMENT ----------
+    // ====================================================================
+    // SETTINGS MODAL / INDICATOR MANAGEMENT
+    // ====================================================================
     function openSettings() {
       const container = document.getElementById('settingsModalContainer');
       if (!canManageSettings()) {
@@ -5339,6 +5983,7 @@
       const hpKeys = ['hpOverview', 'hpData', 'hpAnalysis', 'hpFeedback'];
       const adminKeys = ['adminSubmissions', 'adminAggregate', 'adminComparison', 'adminRanking', 'adminSummary', 'adminFeedback'];
       const drawerKeys = ['drawerDashboard', 'drawerAllUsers', 'drawerAssessments', 'drawerAdmin', 'drawerHC', 'drawerHPs'];
+      const sectionKeys = SECTION_MODULE_LIST.map(id => 'section-' + id);
 
       function navToggleRow(key) {
         const info = NAV_CONTROL_LABELS[key] || { label: key, icon: 'fa-circle' };
@@ -5393,6 +6038,11 @@
             <div class="nav-control-section">
               <div class="nav-control-title"><i class="fas fa-bars"></i> Navigation Control — Drawer Sections</div>
               ${drawerKeys.map(navToggleRow).join('')}
+            </div>
+
+            <div class="nav-control-section">
+              <div class="nav-control-title"><i class="fas fa-layer-group"></i> Navigation Control — Service Sections</div>
+              ${sectionKeys.map(navToggleRow).join('')}
             </div>
 
             <div class="nav-control-section">
@@ -5596,7 +6246,6 @@
         </div>
       `;
 
-      // Setup autocomplete for new indicator name and responsible fields
       setTimeout(function() {
         setupAutocomplete(
           document.getElementById('newIndName'),
@@ -5618,6 +6267,8 @@
       }
       navVisibility[key] = visible;
       showToast((visible ? 'Enabled' : 'Disabled') + ': ' + (NAV_CONTROL_LABELS[key]?.label || key), visible ? 'success' : 'warning');
+      updateDrawerNav();
+      updateDesktopSidebarNav();
     };
 
     window._editIndicatorFull = function(id) {
@@ -5673,6 +6324,7 @@
       if (currentPage === 'hc') renderHC();
       if (currentPage === 'admin') renderAdmin();
       if (currentPage === 'summary') renderSummary();
+      if (currentPage === 'section-module' && currentSectionModuleId) renderSectionModule(currentSectionModuleId);
       showToast('Indicator saved successfully!', 'success');
     };
 
@@ -5723,6 +6375,7 @@
       if (currentPage === 'hc') renderHC();
       if (currentPage === 'admin') renderAdmin();
       if (currentPage === 'summary') renderSummary();
+      if (currentPage === 'section-module' && currentSectionModuleId) renderSectionModule(currentSectionModuleId);
       showToast('Indicator added successfully!', 'success');
     };
 
@@ -5740,6 +6393,7 @@
         if (currentPage === 'hc') renderHC();
         if (currentPage === 'admin') renderAdmin();
         if (currentPage === 'summary') renderSummary();
+        if (currentPage === 'section-module' && currentSectionModuleId) renderSectionModule(currentSectionModuleId);
         showToast('Indicator deleted', 'success');
       }
     };
@@ -5757,6 +6411,7 @@
         if (currentPage === 'hc') renderHC();
         if (currentPage === 'admin') renderAdmin();
         if (currentPage === 'summary') renderSummary();
+        if (currentPage === 'section-module' && currentSectionModuleId) renderSectionModule(currentSectionModuleId);
         showToast('Indicator moved up', 'info');
       }
     };
@@ -5774,15 +6429,17 @@
         if (currentPage === 'hc') renderHC();
         if (currentPage === 'admin') renderAdmin();
         if (currentPage === 'summary') renderSummary();
+        if (currentPage === 'section-module' && currentSectionModuleId) renderSectionModule(currentSectionModuleId);
         showToast('Indicator moved down', 'info');
       }
     };
 
-    // ---------- INIT ----------
+    // ====================================================================
+    // INIT
+    // ====================================================================
     document.addEventListener('DOMContentLoaded', function() {
       document.body.classList.add('compressed');
 
-      // Set initial sidebar state based on screen size
       if (window.innerWidth >= 992) {
         document.body.classList.add('sidebar-open');
       } else {
@@ -5808,22 +6465,18 @@
         }
       });
 
-      // Handle window resize
       window.addEventListener('resize', function() {
         if (window.innerWidth >= 992) {
-          // On desktop, ensure sidebar is visible by default
           if (!document.body.classList.contains('sidebar-open') && 
               !document.getElementById('desktopSidebar').classList.contains('closed')) {
             document.body.classList.add('sidebar-open');
           }
         } else {
-          // On mobile/tablet, close sidebar and use drawer
           document.body.classList.remove('sidebar-open');
           document.getElementById('desktopSidebar').classList.add('closed');
         }
       });
 
-      // Setup autocomplete for login name input
       setupAutocomplete(
         document.getElementById('nameInput'),
         document.getElementById('nameAutocomplete'),
@@ -5874,7 +6527,7 @@
       updateSectionForPage('home');
       updateDrawerNav();
       updateDesktopSidebarNav();
-      console.log('Debremarkos PHCU KPI initialized with responsive enhancements, Kobo integration & Admin navigation control.');
+      console.log('Debremarkos PHCU KPI initialized with independent section modules, QI all-access, KP Clinic, and full responsive enhancements.');
     });
 
   })();
