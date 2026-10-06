@@ -461,7 +461,7 @@
       padding: 32px 24px;
       width: 100%;
       max-width: 520px;
-      border-top: 6px solid var(--primary);
+      /* REMOVED: border-top: 6px solid var(--primary); */
     }
     .login-card h2 {
       font-size: 1.4rem;
@@ -1826,16 +1826,16 @@
       .pie-chart { width: 130px; height: 130px; }
       .app-footer .footer-section { font-size: 0.85rem; }
       .app-footer .footer-inner { gap: 6px; }
-      .tab-bar { 
-        overflow-x: auto; 
-        flex-wrap: nowrap; 
+      .tab-bar {
+        overflow-x: auto;
+        flex-wrap: nowrap;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
         padding: 4px;
       }
       .tab-bar::-webkit-scrollbar { display: none; }
-      .tab-btn { 
-        min-width: 90px; 
+      .tab-btn {
+        min-width: 90px;
         flex: 0 0 auto;
         padding: 10px 12px;
         font-size: 0.78rem;
@@ -1924,11 +1924,11 @@
 
 <div id="toast" class="toast"></div>
 
-<!-- Desktop Sidebar -->
+<!-- Desktop Sidebar (content will be dynamically populated based on role) -->
 <aside class="sidebar" id="desktopSidebar">
   <div class="sidebar-header">
     <div class="sidebar-title">
-      <i class="fas fa-chart-pie"></i> DM PHCU
+      <i class="fas fa-chart-pie"></i> <span id="sidebarRoleTitle">DM PHCU</span>
     </div>
     <button class="sidebar-close" id="sidebarCloseBtn" aria-label="Close sidebar">
       <i class="fas fa-times"></i>
@@ -1943,11 +1943,11 @@
 <!-- Mobile Drawer Overlay -->
 <div class="mobile-drawer-overlay" id="drawerOverlay" onclick="window._closeDrawer()"></div>
 
-<!-- Mobile Drawer -->
+<!-- Mobile Drawer (content will be dynamically populated based on role) -->
 <div class="mobile-drawer" id="mobileDrawer">
   <div class="drawer-header">
     <div class="drawer-title">
-      <i class="fas fa-chart-pie"></i> DM PHCU
+      <i class="fas fa-chart-pie"></i> <span id="drawerRoleTitle">DM PHCU</span>
     </div>
     <button class="drawer-close" onclick="window._closeDrawer()" aria-label="Close menu">
       <i class="fas fa-times"></i>
@@ -1992,7 +1992,7 @@
 
 <div id="appMain" class="container">
 
-  <!-- Login Page -->
+  <!-- Login Page (only page accessible before login) -->
   <div id="page-login" class="page-section active">
     <div class="login-wrapper">
       <div class="login-card">
@@ -2052,7 +2052,7 @@
     </div>
   </div>
 
-  <!-- Home Page -->
+  <!-- Home Page (hidden until login, but role-aware) -->
   <div id="page-home" class="page-section">
     <div class="home-grid">
       <div class="facility-card" id="hcCard" tabindex="0" role="button" aria-label="Open Health Center dashboard">
@@ -2146,7 +2146,7 @@
     <div id="summaryContent"></div>
   </div>
 
-  <!-- KP Clinic Page (NEW INDEPENDENT SECTION) -->
+  <!-- KP Clinic Page -->
   <div id="page-kp" class="page-section">
     <div class="breadcrumb" id="kpBreadcrumb">
       <span class="crumb" onclick="window._goHome()">PHCU</span>
@@ -2191,6 +2191,7 @@
     let currentRankMode = 'hp';
     let customFromDate = null;
     let customToDate = null;
+    let isLoggedIn = false;
 
     // ---------- PASSWORD & DEVICE VERIFICATION ----------
     const ADMIN_PASSWORD = 'kpi2123';
@@ -2199,39 +2200,23 @@
     const STORAGE_KEY_DEVICES = 'dm_phcu_devices';
 
     function loadUserPasswords() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY_USERS)) || {};
-      } catch (e) { return {}; }
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY_USERS)) || {}; }
+      catch (e) { return {}; }
     }
-    function saveUserPasswords(data) {
-      localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(data));
-    }
-    function getUserPassword(username) {
-      const users = loadUserPasswords();
-      return users[username] || null;
-    }
+    function saveUserPasswords(data) { localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(data)); }
+    function getUserPassword(username) { const users = loadUserPasswords(); return users[username] || null; }
     function setUserPassword(username, password) {
-      const users = loadUserPasswords();
-      users[username] = password;
-      saveUserPasswords(users);
+      const users = loadUserPasswords(); users[username] = password; saveUserPasswords(users);
     }
 
     function loadVerifiedDevices() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY_DEVICES)) || {};
-      } catch (e) { return {}; }
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY_DEVICES)) || {}; }
+      catch (e) { return {}; }
     }
-    function saveVerifiedDevices(data) {
-      localStorage.setItem(STORAGE_KEY_DEVICES, JSON.stringify(data));
-    }
-    function isDeviceVerified(username) {
-      const devices = loadVerifiedDevices();
-      return devices[username] === true;
-    }
+    function saveVerifiedDevices(data) { localStorage.setItem(STORAGE_KEY_DEVICES, JSON.stringify(data)); }
+    function isDeviceVerified(username) { const devices = loadVerifiedDevices(); return devices[username] === true; }
     function markDeviceVerified(username) {
-      const devices = loadVerifiedDevices();
-      devices[username] = true;
-      saveVerifiedDevices(devices);
+      const devices = loadVerifiedDevices(); devices[username] = true; saveVerifiedDevices(devices);
     }
 
     // ---------- SELECTED SECTION (for section filter) ----------
@@ -2239,62 +2224,23 @@
 
     // ---------- NAVIGATION VISIBILITY CONFIG ----------
     let navVisibility = {
-      homeHC: true,
-      homeHPs: true,
-      homeAdmin: true,
-      homeKP: true,
-      hcOverview: true,
-      hcData: true,
-      hcAnalysis: true,
-      hcFeedback: true,
-      hpOverview: true,
-      hpData: true,
-      hpAnalysis: true,
-      hpFeedback: true,
-      adminSubmissions: true,
-      adminAggregate: true,
-      adminComparison: true,
-      adminRanking: true,
-      adminSupervisor: true,
-      adminSummary: true,
-      adminFeedback: true,
-      adminKobotool: true,
-      kpOverview: true,
-      kpData: true,
-      kpAnalysis: true,
-      kpFeedback: true,
-      drawerDashboard: true,
-      drawerAllUsers: true,
-      drawerAssessments: true,
-      drawerAdmin: true,
-      drawerHC: true,
-      drawerHPs: true,
-      drawerKP: true,
-      drawerSupervisor: true,
-      drawerKoboTool: true,
-      'CSC': true,
-      'HEP': true,
-      'HR-HPs': true,
-      'Model': true,
-      'WDA': true,
-      'Laboratory': true,
-      'Client Satisfaction': true,
-      'LG-Chapter-1': true,
-      'MCH-Chapter-2': true,
-      'Staff Satisfaction': true,
-      'Pharmacy-Chapter-5': true,
-      'HIR-Chapter-12': true,
-      'IP-Chapter-7': true,
-      'HEP-Chapter-2': true,
-      'Patient Flow-Chapter-3': true,
-      'GGI': true,
-      'IFM-Chapter-8': true,
-      'ME-Chapter-9': true,
-      'Laboratory-Chapter-6': true,
-      'HR-Chapter-10': true,
-      'Chapter-4': true,
-      'Client Satisfaction-2': true,
-      'CSC-2': true
+      homeHC: true, homeHPs: true, homeAdmin: true, homeKP: true,
+      hcOverview: true, hcData: true, hcAnalysis: true, hcFeedback: true,
+      hpOverview: true, hpData: true, hpAnalysis: true, hpFeedback: true,
+      adminSubmissions: true, adminAggregate: true, adminComparison: true,
+      adminRanking: true, adminSupervisor: true, adminSummary: true,
+      adminFeedback: true, adminKobotool: true,
+      kpOverview: true, kpData: true, kpAnalysis: true, kpFeedback: true,
+      drawerDashboard: true, drawerAllUsers: true, drawerAssessments: true,
+      drawerAdmin: true, drawerHC: true, drawerHPs: true, drawerKP: true,
+      drawerSupervisor: true, drawerKoboTool: true,
+      'CSC': true, 'HEP': true, 'HR-HPs': true, 'Model': true, 'WDA': true,
+      'Laboratory': true, 'Client Satisfaction': true, 'LG-Chapter-1': true,
+      'MCH-Chapter-2': true, 'Staff Satisfaction': true, 'Pharmacy-Chapter-5': true,
+      'HIR-Chapter-12': true, 'IP-Chapter-7': true, 'HEP-Chapter-2': true,
+      'Patient Flow-Chapter-3': true, 'GGI': true, 'IFM-Chapter-8': true,
+      'ME-Chapter-9': true, 'Laboratory-Chapter-6': true, 'HR-Chapter-10': true,
+      'Chapter-4': true, 'Client Satisfaction-2': true, 'CSC-2': true
     };
 
     const NAV_CONTROL_LABELS = {
@@ -2335,8 +2281,18 @@
 
     // ---------- SUPERVISOR DATA ----------
     let supervisors = [
-      { id: 'sup1', name: 'Supervisor A', group: 1, kebeles: ['04', '06', '15'] },
-      { id: 'sup2', name: 'Supervisor B', group: 2, kebeles: ['05 Urban', '05 Rural', '11', '17'] }
+      {
+        id: 'sup1', name: 'Supervisor A', group: 1, kebeles: ['04', '06', '15'],
+        meetingsTarget: 12, meetingsActual: 10,
+        supervisionsTarget: 8, supervisionsActual: 7,
+        feedbackTarget: 10, feedbackActual: 9
+      },
+      {
+        id: 'sup2', name: 'Supervisor B', group: 2, kebeles: ['05 Urban', '05 Rural', '11', '17'],
+        meetingsTarget: 12, meetingsActual: 9,
+        supervisionsTarget: 8, supervisionsActual: 6,
+        feedbackTarget: 10, feedbackActual: 8
+      }
     ];
 
     // ---------- ROLE PERMISSION SYSTEM ----------
@@ -2344,7 +2300,6 @@
     function isQI() { return currentUser.role === 'qi'; }
     function isKP() { return currentUser.role === 'kp'; }
 
-    // Returns the section the user is allowed to edit based on role
     function getUserEditSection() {
       if (isAdmin()) return 'all';
       if (currentUser.role === 'kebele') return 'hp';
@@ -2358,6 +2313,7 @@
     }
 
     function canEditData(facilityId, facilityType) {
+      if (!isLoggedIn) return false;
       if (isAdmin()) return true;
       if (currentUser.role === 'kebele') {
         return facilityType === 'hp' && facilityId === currentUser.hpId;
@@ -2368,6 +2324,7 @@
     }
 
     function canSubmitData(facilityId, facilityType) {
+      if (!isLoggedIn) return false;
       if (isAdmin()) return true;
       if (currentUser.role === 'kebele') {
         return facilityType === 'hp' && facilityId === currentUser.hpId;
@@ -2377,13 +2334,14 @@
       return false;
     }
 
-    function canApproveSubmissions() { return isAdmin(); }
-    function canManageIndicators() { return isAdmin(); }
-    function canAccessAdmin() { return isAdmin(); }
-    function canManageSettings() { return isAdmin(); }
-    function canManageSupervisors() { return isAdmin(); }
+    function canApproveSubmissions() { return isAdmin() && isLoggedIn; }
+    function canManageIndicators() { return isAdmin() && isLoggedIn; }
+    function canAccessAdmin() { return isAdmin() && isLoggedIn; }
+    function canManageSettings() { return isAdmin() && isLoggedIn; }
+    function canManageSupervisors() { return isAdmin() && isLoggedIn; }
 
     function isNavVisible(key) {
+      if (!isLoggedIn) return false;
       if (!(key in navVisibility)) return true;
       return navVisibility[key] !== false;
     }
@@ -2439,31 +2397,28 @@
 
     let koboSummaries = {};
 
-    // ---------- ADDITIONAL NAV ITEMS ----------
+    // ---------- ADDITIONAL NAV ITEMS (for HC sidebar) ----------
     const ADDITIONAL_NAV_ITEMS = [
       { label: 'CSC', key: 'CSC', icon: 'fa-users' },
       { label: 'HEP', key: 'HEP', icon: 'fa-heart-pulse' },
-      { label: 'HR-HPs', key: 'HR-HPs', icon: 'fa-user-doctor' },
+      { label: 'HR-HEPs', key: 'HR-HPs', icon: 'fa-user-doctor' },
       { label: 'Model', key: 'Model', icon: 'fa-star' },
       { label: 'WDA', key: 'WDA', icon: 'fa-people-group' },
       { label: 'Laboratory', key: 'Laboratory', icon: 'fa-flask' },
       { label: 'Client Satisfaction', key: 'Client Satisfaction', icon: 'fa-face-smile' },
-      { label: 'LG-Chapter-1', key: 'LG-Chapter-1', icon: 'fa-landmark' },
-      { label: 'MCH-Chapter-2', key: 'MCH-Chapter-2', icon: 'fa-baby' },
+      { label: 'LG – Chapter 1', key: 'LG-Chapter-1', icon: 'fa-landmark' },
+      { label: 'MCH – Chapter 4', key: 'Chapter-4', icon: 'fa-baby' },
       { label: 'Staff Satisfaction', key: 'Staff Satisfaction', icon: 'fa-face-smile' },
-      { label: 'Pharmacy-Chapter-5', key: 'Pharmacy-Chapter-5', icon: 'fa-prescription-bottle' },
-      { label: 'HIR-Chapter-12', key: 'HIR-Chapter-12', icon: 'fa-file-medical' },
-      { label: 'IP-Chapter-7', key: 'IP-Chapter-7', icon: 'fa-shield-halved' },
-      { label: 'HEP-Chapter-2', key: 'HEP-Chapter-2', icon: 'fa-heart-pulse' },
-      { label: 'Patient Flow-Chapter-3', key: 'Patient Flow-Chapter-3', icon: 'fa-route' },
+      { label: 'Pharmacy – Chapter 5', key: 'Pharmacy-Chapter-5', icon: 'fa-prescription-bottle' },
+      { label: 'HIR – Chapter 12', key: 'HIR-Chapter-12', icon: 'fa-file-medical' },
+      { label: 'IP – Chapter 12', key: 'IP-Chapter-7', icon: 'fa-shield-halved' },
+      { label: 'HEP – Chapter 2', key: 'HEP-Chapter-2', icon: 'fa-heart-pulse' },
+      { label: 'Patient Flow – Chapter 3', key: 'Patient Flow-Chapter-3', icon: 'fa-route' },
       { label: 'GGI', key: 'GGI', icon: 'fa-scale-balanced' },
-      { label: 'IFM-Chapter-8', key: 'IFM-Chapter-8', icon: 'fa-coins' },
-      { label: 'ME-Chapter-9', key: 'ME-Chapter-9', icon: 'fa-chart-line' },
-      { label: 'Laboratory-Chapter-6', key: 'Laboratory-Chapter-6', icon: 'fa-flask' },
-      { label: 'HR-Chapter-10', key: 'HR-Chapter-10', icon: 'fa-user-doctor' },
-      { label: 'Chapter -4 ', key: 'Chapter-4', icon: 'fa-book-medical' },
-      { label: 'Client Satisfaction', key: 'Client Satisfaction-2', icon: 'fa-face-smile' },
-      { label: 'CSC (የማህበረሰብ አስተያየት ምዘና ስርዓት)', key: 'CSC-2', icon: 'fa-users' }
+      { label: 'IFM – Chapter 8', key: 'IFM-Chapter-8', icon: 'fa-coins' },
+      { label: 'ME – Chapter 9', key: 'ME-Chapter-9', icon: 'fa-chart-line' },
+      { label: 'Laboratory – Chapter 6', key: 'Laboratory-Chapter-6', icon: 'fa-flask' },
+      { label: 'HR – Chapter 10', key: 'HR-Chapter-10', icon: 'fa-user-doctor' }
     ];
 
     // ---------- AUTO-SUGGESTION ----------
@@ -2481,7 +2436,8 @@
         'Hypertension Screening', 'Cervical Cancer Screening', 'Total OPD Attendance',
         'Total KP Visit the Clinic', 'Number of Positive from Clinic',
         'Number of Positive from CDC Outreach', 'Number of Positive from OSSAD Outreach',
-        'Number of Positive from HC Outreach', 'Total HIV Positive from KP Clinic'
+        'Number of Positive from HC Outreach', 'Total HIV Positive from KP Clinic',
+        'Number of Meetings Held', 'Number of Written Supervisions Held', 'Number of Feedback Given'
       ],
       targets: ['100%', '95%', '90%', '85%', '80%', '75%', '70%', '65%', '60%', '50%', '40%', '30%', '20%', '10%'],
       remarks: ['On track', 'Needs improvement', 'Critical gap', 'Exceeds target', 'Under review', 'Data pending verification', 'Action required'],
@@ -2636,12 +2592,6 @@
       return mult[reportingPeriod] || 1;
     }
 
-    // Apply period multiplier to a numeric value
-    function applyPeriodMultiplier(value) {
-      const mult = getPeriodMultiplier();
-      return Math.round(value * mult * 100) / 100;
-    }
-
     function renderPeriodFilterBar(context) {
       const periods = [
         { id: 'daily', label: 'Daily' },
@@ -2674,7 +2624,6 @@
         customFromDate = null;
         customToDate = null;
       }
-      // Recalculate everything and re-render current view
       updateAllIndicators();
       if (context === 'hc') renderHC();
       else if (context === 'hp') { if (currentHpId) renderHPDetail(currentHpId, currentHpTab); else renderHPs(); }
@@ -2833,7 +2782,7 @@
       { id: 62, agenda: 'qe', name: 'Total HIV Positive from KP Clinic', weight: 2, plan: 130, achievement: 92, unit: 'cases', direction: 'higher', verified: false, category: 'kp' }
     ];
 
-    // ---------- HEALTH POSTS (UPDATED with Kebele 05 Urban & Rural) ----------
+    // ---------- HEALTH POSTS ----------
     let healthPosts = [
       { id: 'hp1', name: 'Kebele 05 Urban', code: 'HP-05U', kebele: '05 Urban', responsible: 'Amanuel', irScore: 0, lgScore: 0, qeScore: 0, overall: 0, status: 'Draft' },
       { id: 'hp2', name: 'Kebele 06', code: 'HP-06', kebele: '06', responsible: 'Bruktawit', irScore: 0, lgScore: 0, qeScore: 0, overall: 0, status: 'Draft' },
@@ -3037,14 +2986,33 @@
     }
 
     // ---------- SUPERVISOR CALCULATIONS ----------
+    function calcSupervisorIndicatorScore(actual, target) {
+      if (!target || target === 0) return 0;
+      let val = (actual / target) * 100;
+      if (val > 100) val = 100;
+      if (val < 0) val = 0;
+      return Math.round(val);
+    }
+
     function getSupervisorScores() {
       updateAllIndicators();
       return supervisors.map(sup => {
         const hps = sup.kebeles.map(k => healthPosts.find(h => h.kebele === k)).filter(Boolean);
-        const avgScore = hps.length > 0
+        const kebeleAvg = hps.length > 0
           ? Math.round(hps.reduce((s, hp) => s + hp.overall, 0) / hps.length)
           : 0;
-        return { ...sup, score: avgScore, hpCount: hps.length, hps };
+        const meetingsPct = calcSupervisorIndicatorScore(sup.meetingsActual, sup.meetingsTarget);
+        const supervisionsPct = calcSupervisorIndicatorScore(sup.supervisionsActual, sup.supervisionsTarget);
+        const feedbackPct = calcSupervisorIndicatorScore(sup.feedbackActual, sup.feedbackTarget);
+        const supervisorIndicatorAvg = Math.round((meetingsPct + supervisionsPct + feedbackPct) / 3);
+        const finalScore = Math.round(supervisorIndicatorAvg * 0.4 + kebeleAvg * 0.6);
+        return {
+          ...sup, score: finalScore,
+          kebeleAvg: kebeleAvg,
+          meetingsPct, supervisionsPct, feedbackPct,
+          supervisorIndicatorAvg,
+          hpCount: hps.length, hps
+        };
       });
     }
 
@@ -3055,11 +3023,9 @@
       healthPosts.forEach(hp => {
         totalIndicators += (hpIndicators[hp.id] || []).length;
       });
-
       let plannedCount = 0, completedCount = 0, ongoingCount = 0, pendingCount = 0, overdueCount = 0;
       let totalTarget = 0, totalAchievement = 0;
       let indicatorsList = [];
-
       hcIndicators.forEach(k => {
         let perf = calcPerformance(k.plan, k.achievement * mult, k.direction || 'higher');
         let plan = k.plan;
@@ -3074,7 +3040,6 @@
         else if (perf >= 50) ongoingCount++;
         else pendingCount++;
       });
-
       healthPosts.forEach(hp => {
         (hpIndicators[hp.id] || []).forEach(k => {
           let perf = calcPerformance(k.plan, k.achievement * mult, k.direction || 'higher');
@@ -3091,21 +3056,13 @@
           else pendingCount++;
         });
       });
-
       plannedCount = totalIndicators;
       let achievementPct = totalTarget > 0 ? Math.round((totalAchievement / totalTarget) * 100) : 0;
-
       return {
-        total: totalIndicators,
-        planned: plannedCount,
-        completed: completedCount,
-        ongoing: ongoingCount,
-        pending: pendingCount,
-        overdue: overdueCount,
-        totalTarget: Math.round(totalTarget),
-        totalAchievement: Math.round(totalAchievement),
-        achievementPct: achievementPct,
-        indicatorsList: indicatorsList
+        total: totalIndicators, planned: plannedCount, completed: completedCount,
+        ongoing: ongoingCount, pending: pendingCount, overdue: overdueCount,
+        totalTarget: Math.round(totalTarget), totalAchievement: Math.round(totalAchievement),
+        achievementPct: achievementPct, indicatorsList: indicatorsList
       };
     }
 
@@ -3113,14 +3070,11 @@
     function renderSummary() {
       const container = document.getElementById('summaryContent');
       if (!container) return;
-
       updateAllIndicators();
       const stats = getSummaryStats();
       const periodLabel = getPeriodFilterLabel();
-
       let drillTitle = 'Total PHCU';
       let drillData = [];
-
       if (currentSummaryDrill === 'phcu') {
         drillData = [
           { name: 'Debremarkos HC', type: 'HC', score: getHCScore(), kebele: '—', indicatorCount: hcIndicators.length, responsible: 'HC Team' }
@@ -3151,10 +3105,8 @@
           });
         }
       }
-
       let html = renderPeriodFilterBar('summary');
       if (isQI() || isAdmin()) html += renderSectionFilterBar('summary');
-
       html += '<div class="drill-breadcrumb">';
       html += '<span class="dcrumb ' + (currentSummaryDrill === 'phcu' ? 'active' : '') + '" onclick="window._summaryDrill(\'phcu\')">Total PHCU</span>';
       if (currentSummaryDrill === 'hc') {
@@ -3165,7 +3117,6 @@
         if (hp) html += '<span class="dsep">›</span><span class="dcrumb active">' + hp.name + '</span>';
       }
       html += '</div>';
-
       html += '<div class="summary-grid">';
       html += '<div class="summary-card total" onclick="window._summaryDrill(\'phcu\')"><div class="sc-value">' + stats.total + '</div><div class="sc-label">Total</div></div>';
       html += '<div class="summary-card planned"><div class="sc-value">' + stats.planned + '</div><div class="sc-label">Planned</div></div>';
@@ -3175,15 +3126,12 @@
       html += '<div class="summary-card overdue"><div class="sc-value">' + stats.overdue + '</div><div class="sc-label">Overdue</div></div>';
       html += '<div class="summary-card indicator"><div class="sc-value">' + stats.achievementPct + '%</div><div class="sc-label">Achievement</div></div>';
       html += '</div>';
-
       html += '<div class="card"><div class="card-header">📊 ' + drillTitle + ' — ' + periodLabel + ' Summary</div>';
       html += '<div class="flex-between" style="padding:8px 0;"><span>Total Target: <strong>' + stats.totalTarget.toLocaleString() + '</strong></span><span>Total Achievement: <strong>' + stats.totalAchievement.toLocaleString() + '</strong></span><span>Achievement: <strong>' + stats.achievementPct + '%</strong></span></div>';
-
       html += '<div class="chart-box" style="height:140px;">';
       html += '<div class="chart-bar" style="height:' + Math.min(100, stats.achievementPct) + '%;background:' + (stats.achievementPct >= 85 ? '#2e7d32' : stats.achievementPct >= 75 ? '#f9a825' : stats.achievementPct >= 50 ? '#e65100' : '#b71c1c') + ';"><span class="bar-label">' + stats.achievementPct + '%</span></div>';
       html += '</div>';
       html += '<div class="chart-label-row"><span>Overall Achievement</span></div></div>';
-
       html += '<div class="card"><div class="card-header">📋 ' + drillTitle + ' Breakdown</div>';
       html += '<div class="table-wrap"><table><thead><tr><th>Name</th><th>Type</th><th>Score</th><th>Indicators</th><th>Responsible</th><th>Status</th></tr></thead><tbody>';
       drillData.forEach(function(item) {
@@ -3197,7 +3145,6 @@
         html += '</tr>';
       });
       html += '</tbody></table></div></div>';
-
       if (currentSummaryDrill === 'hc' || currentSummaryDrill === 'kebele') {
         html += '<div class="card"><div class="card-header">📋 Indicator Details</div>';
         html += '<div class="table-wrap"><table><thead><tr><th>Indicator</th><th>Target</th><th>Achievement</th><th>Performance</th><th>Status</th></tr></thead><tbody>';
@@ -3208,7 +3155,6 @@
         });
         html += '</tbody></table></div></div>';
       }
-
       container.innerHTML = html;
     }
 
@@ -3268,6 +3214,7 @@
 
     // ---------- PAGE NAVIGATION ----------
     function showPage(pageId) {
+      if (!isLoggedIn && pageId !== 'login') return;
       document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
       const target = document.getElementById('page-' + pageId);
       if (target) target.classList.add('active');
@@ -3276,6 +3223,7 @@
     }
 
     function goHome() {
+      if (!isLoggedIn) return;
       showPage('home');
       updateHomeCounts();
       updateSectionForPage('home');
@@ -3298,6 +3246,7 @@
     }
 
     function openHC() {
+      if (!isLoggedIn) return;
       if (!isNavVisible('homeHC') && !isAdmin()) {
         showToast('Health Center view is currently disabled by Admin.', 'warning');
         return;
@@ -3311,6 +3260,7 @@
     }
 
     function openHPs() {
+      if (!isLoggedIn) return;
       if (!isNavVisible('homeHPs') && !isAdmin()) {
         showToast('Health Posts view is currently disabled by Admin.', 'warning');
         return;
@@ -3325,7 +3275,7 @@
     }
 
     function openAdmin() {
-      if (!canAccessAdmin()) {
+      if (!isLoggedIn || !canAccessAdmin()) {
         showToast('Access restricted. Admin privileges required.', 'error');
         return;
       }
@@ -3338,6 +3288,7 @@
     }
 
     function openSummary() {
+      if (!isLoggedIn) return;
       showPage('summary');
       currentSummaryDrill = 'phcu';
       currentSummaryEntityId = null;
@@ -3348,6 +3299,7 @@
     }
 
     function openKP() {
+      if (!isLoggedIn) return;
       if (!isNavVisible('homeKP') && !isAdmin()) {
         showToast('KP Clinic view is currently disabled by Admin.', 'warning');
         return;
@@ -3380,16 +3332,15 @@
 
     // ---------- RENDER HC ----------
     function renderHC() {
+      if (!isLoggedIn) return;
       updateAllIndicators();
       const hcScore = getHCScore();
       const container = document.getElementById('hcContent');
       const userIndicators = getUserIndicators(currentUser, hcIndicators, hcAgendas);
-
       let sectionFilterHtml = '';
       if (isQI() || isAdmin()) {
         sectionFilterHtml = renderSectionFilterBar('hc');
       }
-
       container.innerHTML = `
         <div class="card" style="border-left:6px solid var(--primary);">
           <div class="flex-between">
@@ -3427,33 +3378,29 @@
     }
 
     function renderHCTab(tab) {
+      if (!isLoggedIn) return;
       currentHcTab = tab;
       const container = document.getElementById('hcTabContent');
       if (!container) return;
-
       let userIndicators = getUserIndicators(currentUser, hcIndicators, hcAgendas);
       if (isQI() || isAdmin()) {
         if (selectedSection !== 'all') {
           userIndicators = getIndicatorsForSection(selectedSection, hcIndicators);
         }
       }
-
       const tabLabels = { overview: 'Overview', data: 'Data', analysis: 'Analysis', feedback: 'Feedback' };
       updateSectionForPage('hc', { tab: tab, sub: tabLabels[tab] });
       updateDrawerNav();
       updateDesktopSidebarNav();
-
       const tabKeyMap = { overview: 'hcOverview', data: 'hcData', analysis: 'hcAnalysis', feedback: 'hcFeedback' };
       if (!isNavVisible(tabKeyMap[tab]) && !isAdmin()) {
         container.innerHTML = `<div class="card"><div class="no-data">🔒 This section is currently disabled by Admin.</div></div>`;
         return;
       }
-
       const canEditHc = canEditData('hc', 'hc');
       const canSubmitHc = canSubmitData('hc', 'hc');
       const periodLabel = getPeriodFilterLabel();
       const mult = getPeriodMultiplier();
-
       if (tab === 'overview') {
         container.innerHTML = `
           ${renderPeriodFilterBar('hc')}
@@ -3648,13 +3595,10 @@
         '📌 Enhance community engagement',
         '📌 Prioritize low-performing indicators'
       ];
-
       let periodLabel = getPeriodFilterLabel();
-
       let html = renderPeriodFilterBar(context) + `
         <div class="card">
           <div class="card-header">📝 Feedback &amp; Reporting — ${periodLabel}</div>
-
           <div class="feedback-preview" id="feedbackPreview">
             <div class="fb-section-title">📊 Performance Summary (${periodLabel})</div>
             <div>Overall Score: <strong>${context === 'hc' ? getHCScore() : context === 'kp' ? getKPScore() : '—'}%</strong></div>
@@ -3671,7 +3615,6 @@
             <div class="fb-section-title">📌 Way Forward</div>
             <div>${wayForward.join('<br>')}</div>
           </div>
-
           <div class="action-bar">
             <button class="btn btn-copy" onclick="window._copyFeedback()"><i class="fas fa-copy"></i></button>
             <button class="btn btn-share" onclick="window._shareFeedback()"><i class="fas fa-share-nodes"></i></button>
@@ -3699,14 +3642,13 @@
 
     // ---------- RENDER KP CLINIC ----------
     function renderKP() {
+      if (!isLoggedIn) return;
       updateAllIndicators();
       const container = document.getElementById('kpContent');
       if (!container) return;
-
       const kpIndicators = hcIndicators.filter(i => i.category === 'kp');
       const kpScore = getKPScore();
       const mult = getPeriodMultiplier();
-
       container.innerHTML = `
         <div class="kp-section-header">
           <i class="fas fa-heart-pulse"></i> KP Clinic — Key Population
@@ -3726,27 +3668,23 @@
     }
 
     function renderKPTab(tab) {
+      if (!isLoggedIn) return;
       currentKpTab = tab;
       const container = document.getElementById('kpTabContent');
       if (!container) return;
-
       const mult = getPeriodMultiplier();
       const kpIndicators = hcIndicators.filter(i => i.category === 'kp');
       const canEditKp = canEditData('kp', 'kp');
       const canSubmitKp = canSubmitData('kp', 'kp');
       const periodLabel = getPeriodFilterLabel();
-
-      const tabLabels = { overview: 'Overview', data: 'Data', analysis: 'Analysis', feedback: 'Feedback' };
       updateSectionForPage('kp', { tab: tab });
       updateDrawerNav();
       updateDesktopSidebarNav();
-
       const tabKeyMap = { overview: 'kpOverview', data: 'kpData', analysis: 'kpAnalysis', feedback: 'kpFeedback' };
       if (!isNavVisible(tabKeyMap[tab]) && !isAdmin()) {
         container.innerHTML = `<div class="card"><div class="no-data">🔒 This section is currently disabled by Admin.</div></div>`;
         return;
       }
-
       if (tab === 'overview') {
         let strengths = [], weaknesses = [], threats = [];
         kpIndicators.forEach(k => {
@@ -3755,7 +3693,6 @@
           else if (p >= 50 && p < 75) weaknesses.push({ name: k.name, perf: p });
           else if (p < 50) threats.push({ name: k.name, perf: p });
         });
-
         container.innerHTML = `
           ${renderPeriodFilterBar('kp')}
           <div class="card">
@@ -3827,7 +3764,6 @@
           else if (p >= 50 && p < 75) weaknesses.push({ name: k.name, perf: p });
           else if (p < 50) threats.push({ name: k.name, perf: p });
         });
-
         container.innerHTML = `
           ${renderPeriodFilterBar('kp')}
           <div class="card">
@@ -3924,19 +3860,17 @@
 
     // ---------- RENDER HPs ----------
     function renderHPs() {
+      if (!isLoggedIn) return;
       updateAllIndicators();
       const container = document.getElementById('hpContent');
       if (!container) return;
-
       if (currentHpId) {
         renderHPDetail(currentHpId, currentHpTab);
         return;
       }
-
       updateSectionForPage('hp', {});
       updateDrawerNav();
       updateDesktopSidebarNav();
-
       const frameworkHtml = `
         <div class="framework-section" onclick="window._hpFrameworkClick('ir')">
           <div class="section-title">1 የመረጃ አብዮት (20%)</div>
@@ -3973,7 +3907,6 @@
           <div class="framework-item"><span class="code">3.21</span> ሞዴል አባዎራ ብዛት</div>
         </div>
       `;
-
       container.innerHTML = `
         ${frameworkHtml}
         <div style="margin-top:16px;">
@@ -3989,7 +3922,6 @@
           </div>
         </div>
       `;
-
       container.querySelectorAll('.selector-btn').forEach(btn => {
         btn.addEventListener('click', function() {
           const hpId = this.dataset.hp;
@@ -4007,35 +3939,29 @@
     }
 
     function renderHPDetail(hpId, tab) {
+      if (!isLoggedIn) return;
       const container = document.getElementById('hpContent');
       const hp = healthPosts.find(h => h.id === hpId);
       if (!hp) { currentHpId = null; renderHPs(); return; }
-
       const bcCurrent = document.getElementById('hpBreadcrumbCurrent');
       if (bcCurrent) bcCurrent.textContent = hp.name + ' (Kebele ' + hp.kebele + ')';
-
       const indicators = hpIndicators[hpId] || [];
       const mult = getPeriodMultiplier();
-
       const tabLabels = { overview: 'Overview', data: 'Data Entry', analysis: 'Analysis', feedback: 'Feedback' };
       updateSectionForPage('hp', { hpName: hp.name, kebele: hp.kebele, tab: tab });
       updateDrawerNav();
       updateDesktopSidebarNav();
-
       const tabKeyMap = { overview: 'hpOverview', data: 'hpData', analysis: 'hpAnalysis', feedback: 'hpFeedback' };
       if (!isNavVisible(tabKeyMap[tab]) && !isAdmin()) {
         container.innerHTML = `<div class="card"><div class="no-data">🔒 This section is currently disabled by Admin.</div></div>`;
         return;
       }
-
       const canEditHp = canEditData(hpId, 'hp');
       const canSubmitHp = canSubmitData(hpId, 'hp');
       const periodLabel = getPeriodFilterLabel();
-
       let backHtml = `<div class="mb-2">
         <button class="btn btn-sm btn-outline" onclick="window._hpGoToList()"><i class="fas fa-arrow-left"></i> ወደ ጤና ኬላዎች ዝርዝር</button>
       </div>`;
-
       if (tab === 'overview') {
         container.innerHTML = backHtml + renderPeriodFilterBar('hp') + `
           <div class="card" style="border-left:6px solid var(--secondary);">
@@ -4103,12 +4029,10 @@
         const irItems = indicators.filter(i => i.agenda === 'ir');
         const lgItems = indicators.filter(i => i.agenda === 'lg');
         const qeItems = indicators.filter(i => i.agenda === 'qe');
-
         let html = backHtml + renderPeriodFilterBar('hp') + `<div class="card" style="border-left:6px solid var(--secondary);">
           <div class="amharic" style="font-weight:800;font-size:1rem;color:var(--secondary);text-align:center;">${hp.name} — ማስገቢያ (${periodLabel})</div>
           <div class="amharic text-muted" style="font-size:0.75rem;text-align:center;">ቀበሌ ${hp.kebele} · ኃላፊ: ${hp.responsible}</div>
         </div>`;
-
         const makeRow = (k) => {
           let perf = calcPerformance(k.plan, k.achievement * mult, k.direction || 'higher');
           const editable = canEditHp;
@@ -4123,29 +4047,24 @@
             <td><span class="status-badge ${getStatusClass(perf)} amharic">${getStatusTextAm(perf)}</span></td>
           </tr>`;
         };
-
         html += `<div class="card"><div class="amharic" style="font-weight:800;font-size:0.9rem;color:#f9a825;margin-bottom:8px;text-align:center;">1. የመረጃ አብዮት (20%)</div>
           <div class="table-wrap"><table class="indicator-table"><thead><tr><th class="amharic">አመልካች</th><th class="amharic">ክብደት</th><th class="amharic">ዒላማ</th><th class="amharic">ውጤት</th><th class="amharic">አፈጻጸም</th><th class="amharic">ሁኔታ</th></tr></thead><tbody>`;
         irItems.forEach(k => { html += makeRow(k); });
         html += `</tbody></table></div></div>`;
-
         html += `<div class="card"><div class="amharic" style="font-weight:800;font-size:0.9rem;color:#0b3b5c;margin-bottom:8px;text-align:center;">2. አመራርና አስተዳደር (30%)</div>
           <div class="table-wrap"><table class="indicator-table"><thead><tr><th class="amharic">አመልካች</th><th class="amharic">ክብደት</th><th class="amharic">ዒላማ</th><th class="amharic">ውጤት</th><th class="amharic">አፈጻጸም</th><th class="amharic">ሁኔታ</th></tr></thead><tbody>`;
         lgItems.forEach(k => { html += makeRow(k); });
         html += `</tbody></table></div></div>`;
-
         html += `<div class="card"><div class="amharic" style="font-weight:800;font-size:0.9rem;color:#b71c1c;margin-bottom:8px;text-align:center;">3. ጠቅላላ የጥራትና ፍትሃዊነት (50%)</div>
           <div class="table-wrap"><table class="indicator-table"><thead><tr><th class="amharic">አመልካች</th><th class="amharic">ክብደት</th><th class="amharic">ዒላማ</th><th class="amharic">ውጤት</th><th class="amharic">አፈጻጸም</th><th class="amharic">ሁኔታ</th></tr></thead><tbody>`;
         qeItems.forEach(k => { html += makeRow(k); });
         html += `</tbody></table></div></div>`;
-
         html += `<div class="action-bar">
           ${canSubmitHp ? `<button class="btn btn-green amharic" onclick="window._hpSubmitData('${hpId}')"><i class="fas fa-paper-plane"></i></button>` : ''}
           <button class="btn btn-copy" onclick="window._hpCopyData('${hpId}')"><i class="fas fa-copy"></i></button>
           <button class="btn btn-share" onclick="window._hpShareData('${hpId}')"><i class="fas fa-share-nodes"></i></button>
           ${canEditHp ? `<button class="btn btn-outline amharic" onclick="window._hpSelect('${hpId}','data')"><i class="fas fa-rotate"></i></button>` : ''}
         </div>`;
-
         container.innerHTML = html;
         container.querySelectorAll('.hp-ach-input').forEach(inp => {
           if (!canEditHp) return;
@@ -4170,7 +4089,6 @@
           else if (p >= 50 && p < 75) weaknesses.push({ name: k.name, perf: p });
           else if (p < 50) threats.push({ name: k.name, perf: p });
         });
-
         container.innerHTML = backHtml + renderPeriodFilterBar('hp') + `
           <div class="card" style="border-left:6px solid var(--secondary);">
             <div class="amharic" style="font-weight:800;font-size:1rem;color:var(--secondary);text-align:center;">${hp.name} — ትንተና (${periodLabel})</div>
@@ -4235,28 +4153,27 @@
 
     // ---------- RENDER ADMIN ----------
     function renderAdmin() {
+      if (!isLoggedIn || !canAccessAdmin()) return;
       const container = document.getElementById('adminContent');
       if (!container) return;
       renderAdminTab(currentAdminTab);
     }
 
     function renderAdminTab(tab) {
+      if (!isLoggedIn || !canAccessAdmin()) return;
       currentAdminTab = tab;
       const container = document.getElementById('adminContent');
       if (!container) return;
-
       const tabLabels = { submissions: 'Submissions', aggregate: 'Aggregate', comparison: 'Comparison', ranking: 'Ranking & Championship', supervisor: 'Supervisor', summary: 'Summary', feedback: 'Feedback', kobotool: 'KoboTool' };
       updateSectionForPage('admin', { tab: tab });
       updateDrawerNav();
       updateDesktopSidebarNav();
-
       const adminAccess = canAccessAdmin();
       const tabKeyMap = { submissions: 'adminSubmissions', aggregate: 'adminAggregate', comparison: 'adminComparison', ranking: 'adminRanking', supervisor: 'adminSupervisor', summary: 'adminSummary', feedback: 'adminFeedback', kobotool: 'adminKobotool' };
       if (!isNavVisible(tabKeyMap[tab]) && !isAdmin()) {
         container.innerHTML = `<div class="card"><div class="no-data">🔒 This section is currently disabled by Admin.</div></div>`;
         return;
       }
-
       if (tab === 'submissions') {
         if (!adminAccess) {
           container.innerHTML = `<div class="card"><div class="no-data">🔒 Access restricted. Admin privileges required.</div></div>`;
@@ -4309,7 +4226,6 @@
         const hpAvg = healthPosts.length > 0
           ? Math.round(healthPosts.reduce((s, hp) => s + hp.overall, 0) / healthPosts.length)
           : 0;
-
         let totalIr = 0, totalLg = 0, totalQe = 0;
         healthPosts.forEach(hp => {
           totalIr += hp.irScore;
@@ -4320,7 +4236,6 @@
         const avgIr = Math.round(totalIr / n);
         const avgLg = Math.round(totalLg / n);
         const avgQe = Math.round(totalQe / n);
-
         container.innerHTML = renderPeriodFilterBar('admin') + `
           <div class="card" style="border-left:6px solid var(--teal);">
             <div style="font-weight:800;font-size:1.05rem;color:var(--teal-dark);text-align:center;">📊 PHCU Aggregate Performance — ${getPeriodFilterLabel()}</div>
@@ -4388,7 +4303,6 @@
         const avgIr = Math.round(totalIr / n);
         const avgLg = Math.round(totalLg / n);
         const avgQe = Math.round(totalQe / n);
-
         container.innerHTML = renderPeriodFilterBar('admin') + `
           <div class="card" style="border-left:6px solid #6d28d9;">
             <div style="font-weight:800;font-size:1.05rem;color:#6d28d9;text-align:center;">📊 Kebele / HP Comparison — ${getPeriodFilterLabel()}</div>
@@ -4451,21 +4365,17 @@
         `;
       } else if (tab === 'ranking') {
         updateAllIndicators();
-
         const rankModes = [
           { id: 'hp', label: '🏥 Health Post Ranking', icon: 'fa-house-medical', desc: 'Rank all Health Posts by overall performance' },
-          { id: 'hc', label: '🏥 Health Center Ranking', icon: 'fa-hospital', desc: 'Health Center performance ranking' },
           { id: 'department', label: '🏢 Department Ranking', icon: 'fa-building', desc: 'Rank departments by KPI performance' },
           { id: 'individual', label: '👤 Individual Ranking', icon: 'fa-user', desc: 'Rank individual staff by performance' },
           { id: 'overall', label: '🏆 Overall Performance', icon: 'fa-trophy', desc: 'Combined PHCU performance summary' }
         ];
-
         container.innerHTML = renderPeriodFilterBar('admin') + `
           <div class="card" style="border-left:6px solid var(--gold);">
             <div style="font-weight:800;font-size:1.05rem;color:var(--gold-dark);text-align:center;">🏆 Ranking &amp; Championship — ${getPeriodFilterLabel()}</div>
             <div style="font-size:0.72rem;color:var(--text-muted);text-align:center;margin-top:4px;">Facility / Organizational Performance — Not Individual</div>
           </div>
-
           <div class="card">
             <div class="card-header">📊 Select Ranking Level</div>
             <div class="rank-mode-grid">
@@ -4478,10 +4388,8 @@
               `).join('')}
             </div>
           </div>
-
           <div id="rankingResults"></div>
         `;
-
         container.querySelectorAll('.rank-mode-card').forEach(card => {
           card.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -4490,13 +4398,11 @@
             }
           });
         });
-
         window._setRankMode = function(mode) {
           currentRankMode = mode;
           document.querySelectorAll('.rank-mode-card').forEach(b => b.classList.toggle('selected', b.dataset.mode === mode));
           const resultsDiv = document.getElementById('rankingResults');
           if (!resultsDiv) return;
-
           if (mode === 'hp') {
             const sorted = [...healthPosts].sort((a, b) => b.overall - a.overall);
             resultsDiv.innerHTML = `
@@ -4534,42 +4440,9 @@
                   </tbody></table></div>
               </div>
             `;
-          } else if (mode === 'hc') {
-            const hcScoreVal = getHCScore();
-            const kpScoreVal = getKPScore();
-            resultsDiv.innerHTML = `
-              <div class="rank-info-banner">
-                <div class="ri-title"><i class="fas fa-info-circle"></i> Ranking Criteria — Health Center Level</div>
-                <div class="ri-detail">
-                  <span><i class="fas fa-calendar"></i> Period: ${getPeriodFilterLabel()}</span>
-                  <span><i class="fas fa-list-ol"></i> Indicators: ${hcIndicators.length}</span>
-                  <span><i class="fas fa-weight-hanging"></i> 5 Agendas (Finance 5%, IR 15%, LG 20%, MCC 10%, Q&E 50%)</span>
-                  <span><i class="fas fa-arrow-up"></i> Ranked by Overall %</span>
-                </div>
-              </div>
-              <div class="card">
-                <div class="card-header">🏥 Health Center Ranking</div>
-                <div class="table-wrap"><table>
-                  <thead><tr><th>Rank</th><th>Championship</th><th>Health Center</th><th>Overall</th><th>Status</th></tr></thead>
-                  <tbody>
-                  <tr style="background:#fffbeb;">
-                    <td><strong>${getChampionshipText(1)}</strong></td>
-                    <td>${getChampionshipBadge(1)}</td>
-                    <td><strong>Debremarkos HC</strong></td>
-                    <td><strong>${hcScoreVal}%</strong></td>
-                    <td><span class="status-badge ${getStatusClass(hcScoreVal)}">${getStatusText(hcScoreVal)}</span></td>
-                  </tr>
-                  </tbody></table></div>
-              </div>
-            `;
           } else if (mode === 'department') {
-            // Department ranking based on HC indicators grouped by category/agenda
             const deptScores = hcAgendas.map(a => ({
-              name: a.name,
-              score: a.score,
-              weight: a.weight,
-              icon: a.icon,
-              color: a.color
+              name: a.name, score: a.score, weight: a.weight, icon: a.icon, color: a.color
             })).sort((a, b) => b.score - a.score);
             resultsDiv.innerHTML = `
               <div class="rank-info-banner">
@@ -4600,15 +4473,9 @@
               </div>
             `;
           } else if (mode === 'individual') {
-            // Individual ranking - based on responsible persons across health posts
             const individuals = healthPosts.map(hp => ({
-              name: hp.responsible,
-              facility: hp.name,
-              kebele: hp.kebele,
-              score: hp.overall,
-              ir: hp.irScore,
-              lg: hp.lgScore,
-              qe: hp.qeScore
+              name: hp.responsible, facility: hp.name, kebele: hp.kebele,
+              score: hp.overall, ir: hp.irScore, lg: hp.lgScore, qe: hp.qeScore
             })).sort((a, b) => b.score - a.score);
             resultsDiv.innerHTML = `
               <div class="rank-info-banner">
@@ -4642,7 +4509,6 @@
           } else if (mode === 'overall') {
             const phcuScore = getPHCUScore();
             const hcScore = getHCScore();
-            const kpScore = getKPScore();
             const hpAvg = healthPosts.length > 0
               ? Math.round(healthPosts.reduce((s, hp) => s + hp.overall, 0) / healthPosts.length)
               : 0;
@@ -4694,24 +4560,20 @@
             `;
           }
         };
-
         window._setRankMode(currentRankMode || 'hp');
-
       } else if (tab === 'supervisor') {
         updateAllIndicators();
         const supScores = getSupervisorScores();
         const sortedSups = [...supScores].sort((a, b) => b.score - a.score);
-
         container.innerHTML = renderPeriodFilterBar('admin') + `
           <div class="card" style="border-left:6px solid #0284c7;">
             <div style="font-weight:800;font-size:1.05rem;color:#0284c7;text-align:center;">👔 Supervisor Management — ${getPeriodFilterLabel()}</div>
-            <div style="font-size:0.72rem;color:var(--text-muted);text-align:center;margin-top:4px;">Cumulative performance of assigned kebeles</div>
+            <div style="font-size:0.72rem;color:var(--text-muted);text-align:center;margin-top:4px;">Cumulative performance of assigned kebeles + supervisor indicators</div>
           </div>
-
           <div class="card">
             <div class="card-header">📊 Supervisor Ranking — ${getPeriodFilterLabel()}</div>
             <div class="table-wrap"><table>
-              <thead><tr><th>Rank</th><th>Championship</th><th>Supervisor</th><th>Group</th><th>Assigned Kebeles</th><th>Cumulative Score</th><th>Status</th></tr></thead>
+              <thead><tr><th>Rank</th><th>Championship</th><th>Supervisor</th><th>Group</th><th>Assigned Kebeles</th><th>Kebele Score</th><th>Supervisor Indicators</th><th>Final Score</th><th>Status</th></tr></thead>
               <tbody>
               ${sortedSups.map((sup, i) => {
                 const rank = i + 1;
@@ -4721,13 +4583,36 @@
                   <td><strong>${escapeHtml(sup.name)}</strong></td>
                   <td>Group ${sup.group}</td>
                   <td>${sup.kebeles.join(', ')}</td>
+                  <td>${sup.kebeleAvg}%</td>
+                  <td>${sup.supervisorIndicatorAvg}%</td>
                   <td><strong>${sup.score}%</strong> (${sup.hpCount} HPs)</td>
                   <td><span class="status-badge ${getStatusClass(sup.score)}">${getStatusText(sup.score)}</span></td>
                 </tr>`;
               }).join('')}
               </tbody></table></div>
           </div>
-
+          <div class="card">
+            <div class="card-header">📋 Supervisor Indicator Details — ${getPeriodFilterLabel()}</div>
+            <div class="table-wrap"><table>
+              <thead><tr><th>Supervisor</th><th>Meetings Target</th><th>Meetings Actual</th><th>Meetings %</th><th>Supervisions Target</th><th>Supervisions Actual</th><th>Supervisions %</th><th>Feedback Target</th><th>Feedback Actual</th><th>Feedback %</th><th>Avg %</th></tr></thead>
+              <tbody>
+              ${supScores.map(sup => `
+                <tr>
+                  <td><strong>${escapeHtml(sup.name)}</strong></td>
+                  <td>${sup.meetingsTarget}</td>
+                  <td>${sup.meetingsActual}</td>
+                  <td>${sup.meetingsPct}%</td>
+                  <td>${sup.supervisionsTarget}</td>
+                  <td>${sup.supervisionsActual}</td>
+                  <td>${sup.supervisionsPct}%</td>
+                  <td>${sup.feedbackTarget}</td>
+                  <td>${sup.feedbackActual}</td>
+                  <td>${sup.feedbackPct}%</td>
+                  <td><strong>${sup.supervisorIndicatorAvg}%</strong></td>
+                </tr>
+              `).join('')}
+              </tbody></table></div>
+          </div>
           <div class="card">
             <div class="card-header">📋 Assigned Kebeles Breakdown — ${getPeriodFilterLabel()}</div>
             <div class="table-wrap"><table>
@@ -4747,7 +4632,6 @@
               `).join('')).join('')}
               </tbody></table></div>
           </div>
-
           ${isAdmin() ? `
           <div class="card">
             <div class="card-header">⚙️ Manage Supervisors</div>
@@ -4780,7 +4664,6 @@
           </div>
           ` : ''}
         `;
-
         window._addSupervisor = function() {
           if (!canManageSupervisors()) { showToast('Access restricted. Admin only.', 'error'); return; }
           const name = document.getElementById('newSupervisorName').value.trim();
@@ -4788,11 +4671,15 @@
           const group = parseInt(document.getElementById('newSupervisorGroup').value);
           const kebeles = group === 1 ? ['04', '06', '15'] : ['05 Urban', '05 Rural', '11', '17'];
           const newId = 'sup' + (supervisors.length + 1);
-          supervisors.push({ id: newId, name: name, group: group, kebeles: kebeles });
+          supervisors.push({
+            id: newId, name: name, group: group, kebeles: kebeles,
+            meetingsTarget: 12, meetingsActual: 0,
+            supervisionsTarget: 8, supervisionsActual: 0,
+            feedbackTarget: 10, feedbackActual: 0
+          });
           showToast('Supervisor added successfully!', 'success');
           renderAdminTab('supervisor');
         };
-
         window._removeSupervisor = function(id) {
           if (!canManageSupervisors()) { showToast('Access restricted. Admin only.', 'error'); return; }
           if (!confirm('Remove this supervisor?')) return;
@@ -4800,14 +4687,12 @@
           showToast('Supervisor removed', 'success');
           renderAdminTab('supervisor');
         };
-
       } else if (tab === 'summary') {
         openSummary();
       } else if (tab === 'feedback') {
         const userIndicators = getUserIndicators(currentUser, hcIndicators, hcAgendas);
         renderFeedbackSection('admin', container, userIndicators);
       } else if (tab === 'kobotool') {
-        // KoboTool navigation tab - list all available Kobo sources
         let html = `
           <div class="card" style="border-left:6px solid #0284c7;">
             <div style="font-weight:800;font-size:1.05rem;color:#0284c7;text-align:center;">📊 KoboTool Integration — Data Sources</div>
@@ -4899,12 +4784,10 @@
       const hp = healthPosts.find(h => h.id === hpId);
       if (hp) currentKebele = hp.kebele;
       currentHpTab = tab;
-
       document.querySelectorAll('#hpTabBar .tab-btn').forEach(b => {
         b.classList.remove('active');
         if (b.dataset.hptab === tab) b.classList.add('active');
       });
-
       renderHPDetail(hpId, tab);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -4984,20 +4867,11 @@
       if (!confirm('ለ ' + hp.name + ' የመረጃ ማስገቢያ ማረጋገጫ? መረጃው ለአስተዳዳሪ ይላካል።')) return;
       hp.status = 'Submitted';
       submissions.push({
-        facility: hp.name,
-        facilityType: 'HP',
-        hpId: hpId,
-        kebele: hp.kebele,
-        user: currentUser.name,
-        role: currentUser.role,
+        facility: hp.name, facilityType: 'HP', hpId: hpId, kebele: hp.kebele,
+        user: currentUser.name, role: currentUser.role,
         period: new Date().toISOString().slice(0, 7),
-        enteredAt: new Date().toLocaleString(),
-        submittedAt: new Date().toLocaleString(),
-        status: 'Submitted',
-        adminReviewer: '',
-        reviewDate: '',
-        adminComments: '',
-        approval: 'Pending'
+        enteredAt: new Date().toLocaleString(), submittedAt: new Date().toLocaleString(),
+        status: 'Submitted', adminReviewer: '', reviewDate: '', adminComments: '', approval: 'Pending'
       });
       updateHomeCounts();
       renderHPDetail(hpId, 'data');
@@ -5011,19 +4885,11 @@
       }
       if (!confirm('Submit HC data to Admin for review?')) return;
       submissions.push({
-        facility: 'Debremarkos HC',
-        facilityType: 'HC',
-        kebele: '—',
-        user: currentUser.name,
-        role: currentUser.role,
+        facility: 'Debremarkos HC', facilityType: 'HC', kebele: '—',
+        user: currentUser.name, role: currentUser.role,
         period: new Date().toISOString().slice(0, 7),
-        enteredAt: new Date().toLocaleString(),
-        submittedAt: new Date().toLocaleString(),
-        status: 'Submitted',
-        adminReviewer: '',
-        reviewDate: '',
-        adminComments: '',
-        approval: 'Pending'
+        enteredAt: new Date().toLocaleString(), submittedAt: new Date().toLocaleString(),
+        status: 'Submitted', adminReviewer: '', reviewDate: '', adminComments: '', approval: 'Pending'
       });
       updateHomeCounts();
       showToast('HC data submitted to Admin', 'success');
@@ -5233,10 +5099,11 @@
       };
     }
 
-    // ---------- MOBILE DRAWER ----------
+    // ---------- DRAWER NAVIGATION (ROLE-BASED, RESTRICTED) ----------
     function updateDrawerNav() {
       const nav = document.getElementById('drawerNav');
       if (!nav) return;
+      if (!isLoggedIn) { nav.innerHTML = ''; return; }
 
       const isAdminUser = isAdmin();
       const isKebele = currentUser.role === 'kebele';
@@ -5245,189 +5112,58 @@
 
       let items = [];
 
-      if (isNavVisible('drawerDashboard')) {
-        items.push({ type: 'label', text: 'Dashboard' });
-
-        items.push({
-          type: 'item',
-          label: 'Summary',
-          icon: 'fa-clipboard-list',
-          active: currentPage === 'summary',
-          action: () => { openSummary(); }
-        });
-
-        if (isAdminUser || !isKebele) {
-          if (isNavVisible('adminAggregate')) {
-            items.push({
-              type: 'item',
-              label: 'Aggregate',
-              icon: 'fa-chart-simple',
-              active: currentPage === 'admin' && currentAdminTab === 'aggregate',
-              action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="aggregate"]')?.click(); }, 50); }
-            });
-          }
-          if (isNavVisible('adminRanking')) {
-            items.push({
-              type: 'item',
-              label: 'Ranking & Championship',
-              icon: 'fa-ranking-star',
-              active: currentPage === 'admin' && currentAdminTab === 'ranking',
-              action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="ranking"]')?.click(); }, 50); }
-            });
-          }
-        }
-
-        if ((isAdminUser || !isKebele) && isNavVisible('homeHC')) {
-          items.push({
-            type: 'item',
-            label: 'HC',
-            icon: 'fa-hospital',
-            active: currentPage === 'hc',
-            action: () => { openHC(); }
-          });
-        }
-
-        if ((isAdminUser || !isKebele) && isNavVisible('hcData')) {
-          items.push({
-            type: 'item',
-            label: `${hcIndicators.length} Indicators`,
-            icon: 'fa-list-check',
-            active: currentPage === 'hc' && currentHcTab === 'data',
-            action: () => { openHC(); setTimeout(() => { renderHCTab('data'); }, 100); }
-          });
-        }
-
-        if ((isAdminUser || isKPUser || isQIUser) && isNavVisible('homeKP')) {
-          items.push({
-            type: 'item',
-            label: 'KP Clinic',
-            icon: 'fa-heart-pulse',
-            active: currentPage === 'kp',
-            action: () => { openKP(); }
-          });
-        }
+      // ADMIN SIDEBAR (exact order per spec)
+      if (isAdminUser) {
+        items.push({ type: 'item', label: 'Summary', icon: 'fa-clipboard-list', active: currentPage === 'summary', action: () => { openSummary(); } });
+        items.push({ type: 'item', label: 'Aggregate', icon: 'fa-chart-simple', active: currentPage === 'admin' && currentAdminTab === 'aggregate', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="aggregate"]')?.click(); }, 50); } });
+        items.push({ type: 'item', label: 'Ranking & Championship', icon: 'fa-ranking-star', active: currentPage === 'admin' && currentAdminTab === 'ranking', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="ranking"]')?.click(); }, 50); } });
+        items.push({ type: 'item', label: 'Submission', icon: 'fa-inbox', active: currentPage === 'admin' && currentAdminTab === 'submissions', action: () => { openAdmin(); } });
+        items.push({ type: 'item', label: 'Comparison', icon: 'fa-code-compare', active: currentPage === 'admin' && currentAdminTab === 'comparison', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="comparison"]')?.click(); }, 50); } });
+        items.push({ type: 'item', label: 'Supervisors', icon: 'fa-user-tie', active: currentPage === 'admin' && currentAdminTab === 'supervisor', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="supervisor"]')?.click(); }, 50); } });
+        items.push({ type: 'item', label: 'Feedback', icon: 'fa-comment-dots', active: currentPage === 'admin' && currentAdminTab === 'feedback', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="feedback"]')?.click(); }, 50); } });
+        items.push({ type: 'item', label: 'KoboTool', icon: 'fa-table', active: currentPage === 'admin' && currentAdminTab === 'kobotool', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="kobotool"]')?.click(); }, 50); } });
+        items.push({ type: 'item', label: 'Overview', icon: 'fa-chart-pie', active: currentPage === 'hc' && currentHcTab === 'overview', action: () => { openHC(); } });
+        items.push({ type: 'item', label: 'Data', icon: 'fa-database', active: currentPage === 'hc' && currentHcTab === 'data', action: () => { openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
+        items.push({ type: 'item', label: 'Analysis', icon: 'fa-chart-line', active: currentPage === 'hc' && currentHcTab === 'analysis', action: () => { openHC(); setTimeout(() => { renderHCTab('analysis'); }, 100); } });
       }
 
-      if (isNavVisible('drawerAllUsers')) {
-        items.push({ type: 'divider' });
-        items.push({ type: 'label', text: 'All Users' });
+      // HC USER SIDEBAR (exact order per spec)
+      else if (currentUser.facility === 'HC' && !isAdminUser) {
+        items.push({ type: 'item', label: 'All Indicators', icon: 'fa-list-check', active: currentPage === 'hc', action: () => { openHC(); } });
+        items.push({ type: 'item', label: 'KP Clinic', icon: 'fa-heart-pulse', active: currentPage === 'kp', action: () => { openKP(); } });
+        items.push({ type: 'item', label: 'Finance', icon: 'fa-coins', active: false, action: () => { selectedSection = 'finance'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
+        items.push({ type: 'item', label: 'HIT', icon: 'fa-chart-simple', active: false, action: () => { selectedSection = 'hit'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
+        items.push({ type: 'item', label: 'MCH Clinic', icon: 'fa-baby', active: false, action: () => { selectedSection = 'mch'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
+        items.push({ type: 'item', label: 'ART Clinic', icon: 'fa-heart-pulse', active: false, action: () => { selectedSection = 'art'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
+        items.push({ type: 'item', label: 'TB Clinic', icon: 'fa-lungs', active: false, action: () => { selectedSection = 'tb'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
+        items.push({ type: 'item', label: 'EPI Clinic', icon: 'fa-syringe', active: false, action: () => { selectedSection = 'epi'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
+        items.push({ type: 'item', label: 'Under-5 Clinic', icon: 'fa-child', active: false, action: () => { selectedSection = 'under5'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
+        items.push({ type: 'item', label: 'OPD Clinic', icon: 'fa-stethoscope', active: false, action: () => { selectedSection = 'opd'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
+        items.push({ type: 'item', label: 'Pharmacy Clinic', icon: 'fa-prescription-bottle', active: false, action: () => { selectedSection = 'pharmacy'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
+        // Assessment & Service forms (exact order per spec, starting from CSC)
+        ADDITIONAL_NAV_ITEMS.forEach(item => {
+          if (!isNavVisible(item.key)) return;
+          items.push({ type: 'item', label: item.label, icon: item.icon || 'fa-clipboard-list', active: false, action: () => { let targetLevel = 'hc', facilityId = 'hc'; openKoboSource(item.key, targetLevel, facilityId); } });
+        });
+      }
 
-        ALL_USERS.forEach(function(user) {
-          let isActive = false;
-          if (user.id === 'admin' && isAdminUser) isActive = true;
-          if (user.id === 'kebele' + currentUser.kebele && isKebele) isActive = true;
-          if (user.role === currentUser.role && user.facility === 'HC' && currentUser.facility === 'HC') isActive = true;
-          if (user.role === 'kp' && isKPUser) isActive = true;
-
+      // HP USER SIDEBAR (exact order per spec)
+      else if (isKebele) {
+        healthPosts.forEach(hp => {
           items.push({
-            type: 'item',
-            label: user.label,
-            icon: user.icon,
-            active: isActive,
-            action: () => {
-              if (user.role === 'admin') {
-                openAdmin();
-              } else if (user.role === 'kebele') {
-                openHPs();
-                if (user.hpId) setTimeout(() => { window._hpSelect(user.hpId, 'overview'); }, 100);
-              } else if (user.role === 'kp') {
-                openKP();
-              } else {
-                openHC();
-              }
-              showToast('Viewing as: ' + user.label, 'info');
-            }
+            type: 'item', label: hp.name, icon: 'fa-house-medical',
+            active: currentPage === 'hp' && currentHpId === hp.id,
+            action: () => { openHPs(); window._hpSelect(hp.id, 'overview'); }
           });
         });
       }
 
-      if (isNavVisible('drawerAssessments')) {
-        items.push({ type: 'divider' });
-        items.push({ type: 'label', text: 'Assessments & Services' });
-
-        ADDITIONAL_NAV_ITEMS.forEach(function(navItem) {
-          if (!isNavVisible(navItem.key)) return;
-          let icon = navItem.icon || 'fa-clipboard-list';
-          items.push({
-            type: 'item',
-            label: navItem.label,
-            icon: icon,
-            active: false,
-            action: () => {
-              let targetLevel = 'hc', facilityId = 'hc';
-              if (currentPage === 'hp' && currentHpId) { targetLevel = 'hp'; facilityId = currentHpId; }
-              openKoboSource(navItem.key, targetLevel, facilityId);
-            }
-          });
-        });
-      }
-
-      if (isAdminUser && isNavVisible('drawerAdmin')) {
-        items.push({ type: 'divider' });
-        items.push({ type: 'label', text: 'Admin' });
-        if (isNavVisible('adminSubmissions')) {
-          items.push({ type: 'item', label: 'Submissions', icon: 'fa-inbox', active: currentPage === 'admin' && currentAdminTab === 'submissions', action: () => { openAdmin(); } });
-        }
-        if (isNavVisible('adminComparison')) {
-          items.push({ type: 'item', label: 'Comparison', icon: 'fa-code-compare', active: currentPage === 'admin' && currentAdminTab === 'comparison', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="comparison"]')?.click(); }, 50); } });
-        }
-        if (isNavVisible('adminSupervisor')) {
-          items.push({ type: 'item', label: 'Supervisor', icon: 'fa-user-tie', active: currentPage === 'admin' && currentAdminTab === 'supervisor', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="supervisor"]')?.click(); }, 50); } });
-        }
-        if (isNavVisible('adminFeedback')) {
-          items.push({ type: 'item', label: 'Feedback', icon: 'fa-comment-dots', active: currentPage === 'admin' && currentAdminTab === 'feedback', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="feedback"]')?.click(); }, 50); } });
-        }
-        if (isNavVisible('adminKobotool')) {
-          items.push({ type: 'item', label: 'KoboTool', icon: 'fa-table', active: currentPage === 'admin' && currentAdminTab === 'kobotool', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="kobotool"]')?.click(); }, 50); } });
-        }
-      }
-
-      if (currentPage === 'hp' && currentHpId && isNavVisible('drawerHPs')) {
-        const hp = healthPosts.find(h => h.id === currentHpId);
-        if (hp) {
-          items.push({ type: 'divider' });
-          items.push({ type: 'label', text: hp.name });
-          const tabs = [
-            { id: 'overview', label: 'Overview', icon: 'fa-chart-pie', key: 'hpOverview' },
-            { id: 'data', label: 'Data Entry', icon: 'fa-database', key: 'hpData' },
-            { id: 'analysis', label: 'Analysis', icon: 'fa-chart-line', key: 'hpAnalysis' },
-            { id: 'feedback', label: 'Feedback', icon: 'fa-comment-dots', key: 'hpFeedback' }
-          ];
-          tabs.forEach(t => {
-            if (!isNavVisible(t.key)) return;
-            items.push({ type: 'item', label: t.label, icon: t.icon, active: currentHpTab === t.id, action: () => { window._hpSelect(currentHpId, t.id); } });
-          });
-        }
-      }
-
-      if (currentPage === 'hc' && isNavVisible('drawerHC')) {
-        items.push({ type: 'divider' });
-        items.push({ type: 'label', text: 'Health Center' });
-        const tabs = [
-          { id: 'overview', label: 'Overview', icon: 'fa-chart-pie', key: 'hcOverview' },
-          { id: 'data', label: 'Data', icon: 'fa-database', key: 'hcData' },
-          { id: 'analysis', label: 'Analysis', icon: 'fa-chart-line', key: 'hcAnalysis' },
-          { id: 'feedback', label: 'Feedback', icon: 'fa-comment-dots', key: 'hcFeedback' }
-        ];
-        tabs.forEach(t => {
-          if (!isNavVisible(t.key)) return;
-          items.push({ type: 'item', label: t.label, icon: t.icon, active: currentHcTab === t.id, action: () => { renderHCTab(t.id); } });
-        });
-      }
-
-      if (currentPage === 'kp' && isNavVisible('drawerKP')) {
-        items.push({ type: 'divider' });
-        items.push({ type: 'label', text: 'KP Clinic' });
-        const tabs = [
-          { id: 'overview', label: 'Overview', icon: 'fa-chart-pie', key: 'kpOverview' },
-          { id: 'data', label: 'Data', icon: 'fa-database', key: 'kpData' },
-          { id: 'analysis', label: 'Analysis', icon: 'fa-chart-line', key: 'kpAnalysis' },
-          { id: 'feedback', label: 'Feedback', icon: 'fa-comment-dots', key: 'kpFeedback' }
-        ];
-        tabs.forEach(t => {
-          if (!isNavVisible(t.key)) return;
-          items.push({ type: 'item', label: t.label, icon: t.icon, active: currentKpTab === t.id, action: () => { renderKPTab(t.id); } });
-        });
+      // KP USER SIDEBAR
+      else if (isKPUser) {
+        items.push({ type: 'item', label: 'Overview', icon: 'fa-chart-pie', active: currentPage === 'kp' && currentKpTab === 'overview', action: () => { openKP(); } });
+        items.push({ type: 'item', label: 'Data', icon: 'fa-database', active: currentPage === 'kp' && currentKpTab === 'data', action: () => { openKP(); setTimeout(() => { renderKPTab('data'); }, 100); } });
+        items.push({ type: 'item', label: 'Analysis', icon: 'fa-chart-line', active: currentPage === 'kp' && currentKpTab === 'analysis', action: () => { openKP(); setTimeout(() => { renderKPTab('analysis'); }, 100); } });
+        items.push({ type: 'item', label: 'Feedback', icon: 'fa-comment-dots', active: currentPage === 'kp' && currentKpTab === 'feedback', action: () => { openKP(); setTimeout(() => { renderKPTab('feedback'); }, 100); } });
       }
 
       nav.innerHTML = items.map(item => {
@@ -5452,10 +5188,11 @@
       });
     }
 
-    // ---------- DESKTOP SIDEBAR ----------
+    // ---------- DESKTOP SIDEBAR (SAME AS DRAWER) ----------
     function updateDesktopSidebarNav() {
       const nav = document.getElementById('desktopSidebarNav');
       if (!nav) return;
+      if (!isLoggedIn) { nav.innerHTML = ''; return; }
 
       const isAdminUser = isAdmin();
       const isKebele = currentUser.role === 'kebele';
@@ -5464,143 +5201,58 @@
 
       let items = [];
 
-      if (isNavVisible('drawerDashboard')) {
-        items.push({ type: 'label', text: 'Dashboard' });
-
-        items.push({
-          type: 'item',
-          label: 'Summary',
-          icon: 'fa-clipboard-list',
-          active: currentPage === 'summary',
-          action: () => { openSummary(); }
-        });
-
-        if (isAdminUser || !isKebele) {
-          if (isNavVisible('adminAggregate')) {
-            items.push({ type: 'item', label: 'Aggregate', icon: 'fa-chart-simple', active: currentPage === 'admin' && currentAdminTab === 'aggregate', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="aggregate"]')?.click(); }, 50); } });
-          }
-          if (isNavVisible('adminRanking')) {
-            items.push({ type: 'item', label: 'Ranking & Championship', icon: 'fa-ranking-star', active: currentPage === 'admin' && currentAdminTab === 'ranking', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="ranking"]')?.click(); }, 50); } });
-          }
-        }
-
-        if ((isAdminUser || !isKebele) && isNavVisible('homeHC')) {
-          items.push({ type: 'item', label: 'HC', icon: 'fa-hospital', active: currentPage === 'hc', action: () => { openHC(); } });
-        }
-
-        if ((isAdminUser || !isKebele) && isNavVisible('hcData')) {
-          items.push({ type: 'item', label: `${hcIndicators.length} Indicators`, icon: 'fa-list-check', active: currentPage === 'hc' && currentHcTab === 'data', action: () => { openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
-        }
-
-        if ((isAdminUser || isKPUser || isQIUser) && isNavVisible('homeKP')) {
-          items.push({ type: 'item', label: 'KP Clinic', icon: 'fa-heart-pulse', active: currentPage === 'kp', action: () => { openKP(); } });
-        }
+      // ADMIN SIDEBAR (exact order per spec)
+      if (isAdminUser) {
+        items.push({ type: 'item', label: 'Summary', icon: 'fa-clipboard-list', active: currentPage === 'summary', action: () => { openSummary(); } });
+        items.push({ type: 'item', label: 'Aggregate', icon: 'fa-chart-simple', active: currentPage === 'admin' && currentAdminTab === 'aggregate', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="aggregate"]')?.click(); }, 50); } });
+        items.push({ type: 'item', label: 'Ranking & Championship', icon: 'fa-ranking-star', active: currentPage === 'admin' && currentAdminTab === 'ranking', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="ranking"]')?.click(); }, 50); } });
+        items.push({ type: 'item', label: 'Submission', icon: 'fa-inbox', active: currentPage === 'admin' && currentAdminTab === 'submissions', action: () => { openAdmin(); } });
+        items.push({ type: 'item', label: 'Comparison', icon: 'fa-code-compare', active: currentPage === 'admin' && currentAdminTab === 'comparison', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="comparison"]')?.click(); }, 50); } });
+        items.push({ type: 'item', label: 'Supervisors', icon: 'fa-user-tie', active: currentPage === 'admin' && currentAdminTab === 'supervisor', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="supervisor"]')?.click(); }, 50); } });
+        items.push({ type: 'item', label: 'Feedback', icon: 'fa-comment-dots', active: currentPage === 'admin' && currentAdminTab === 'feedback', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="feedback"]')?.click(); }, 50); } });
+        items.push({ type: 'item', label: 'KoboTool', icon: 'fa-table', active: currentPage === 'admin' && currentAdminTab === 'kobotool', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="kobotool"]')?.click(); }, 50); } });
+        items.push({ type: 'item', label: 'Overview', icon: 'fa-chart-pie', active: currentPage === 'hc' && currentHcTab === 'overview', action: () => { openHC(); } });
+        items.push({ type: 'item', label: 'Data', icon: 'fa-database', active: currentPage === 'hc' && currentHcTab === 'data', action: () => { openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
+        items.push({ type: 'item', label: 'Analysis', icon: 'fa-chart-line', active: currentPage === 'hc' && currentHcTab === 'analysis', action: () => { openHC(); setTimeout(() => { renderHCTab('analysis'); }, 100); } });
       }
 
-      if (isNavVisible('drawerAllUsers')) {
-        items.push({ type: 'divider' });
-        items.push({ type: 'label', text: 'All Users' });
+      // HC USER SIDEBAR (exact order per spec)
+      else if (currentUser.facility === 'HC' && !isAdminUser) {
+        items.push({ type: 'item', label: 'All Indicators', icon: 'fa-list-check', active: currentPage === 'hc', action: () => { openHC(); } });
+        items.push({ type: 'item', label: 'KP Clinic', icon: 'fa-heart-pulse', active: currentPage === 'kp', action: () => { openKP(); } });
+        items.push({ type: 'item', label: 'Finance', icon: 'fa-coins', active: false, action: () => { selectedSection = 'finance'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
+        items.push({ type: 'item', label: 'HIT', icon: 'fa-chart-simple', active: false, action: () => { selectedSection = 'hit'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
+        items.push({ type: 'item', label: 'MCH Clinic', icon: 'fa-baby', active: false, action: () => { selectedSection = 'mch'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
+        items.push({ type: 'item', label: 'ART Clinic', icon: 'fa-heart-pulse', active: false, action: () => { selectedSection = 'art'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
+        items.push({ type: 'item', label: 'TB Clinic', icon: 'fa-lungs', active: false, action: () => { selectedSection = 'tb'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
+        items.push({ type: 'item', label: 'EPI Clinic', icon: 'fa-syringe', active: false, action: () => { selectedSection = 'epi'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
+        items.push({ type: 'item', label: 'Under-5 Clinic', icon: 'fa-child', active: false, action: () => { selectedSection = 'under5'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
+        items.push({ type: 'item', label: 'OPD Clinic', icon: 'fa-stethoscope', active: false, action: () => { selectedSection = 'opd'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
+        items.push({ type: 'item', label: 'Pharmacy Clinic', icon: 'fa-prescription-bottle', active: false, action: () => { selectedSection = 'pharmacy'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
+        // Assessment & Service forms (exact order per spec, starting from CSC)
+        ADDITIONAL_NAV_ITEMS.forEach(item => {
+          if (!isNavVisible(item.key)) return;
+          items.push({ type: 'item', label: item.label, icon: item.icon || 'fa-clipboard-list', active: false, action: () => { let targetLevel = 'hc', facilityId = 'hc'; openKoboSource(item.key, targetLevel, facilityId); } });
+        });
+      }
 
-        ALL_USERS.forEach(function(user) {
-          let isActive = false;
-          if (user.id === 'admin' && isAdminUser) isActive = true;
-          if (user.id === 'kebele' + currentUser.kebele && isKebele) isActive = true;
-          if (user.role === currentUser.role && user.facility === 'HC' && currentUser.facility === 'HC') isActive = true;
-          if (user.role === 'kp' && isKPUser) isActive = true;
-
+      // HP USER SIDEBAR (exact order per spec)
+      else if (isKebele) {
+        healthPosts.forEach(hp => {
           items.push({
-            type: 'item',
-            label: user.label,
-            icon: user.icon,
-            active: isActive,
-            action: () => {
-              if (user.role === 'admin') openAdmin();
-              else if (user.role === 'kebele') { openHPs(); if (user.hpId) setTimeout(() => { window._hpSelect(user.hpId, 'overview'); }, 100); }
-              else if (user.role === 'kp') openKP();
-              else openHC();
-              showToast('Viewing as: ' + user.label, 'info');
-            }
+            type: 'item', label: hp.name, icon: 'fa-house-medical',
+            active: currentPage === 'hp' && currentHpId === hp.id,
+            action: () => { openHPs(); window._hpSelect(hp.id, 'overview'); }
           });
         });
       }
 
-      if (isNavVisible('drawerAssessments')) {
-        items.push({ type: 'divider' });
-        items.push({ type: 'label', text: 'Assessments & Services' });
-
-        ADDITIONAL_NAV_ITEMS.forEach(function(navItem) {
-          if (!isNavVisible(navItem.key)) return;
-          let icon = navItem.icon || 'fa-clipboard-list';
-          items.push({
-            type: 'item',
-            label: navItem.label,
-            icon: icon,
-            active: false,
-            action: () => {
-              let targetLevel = 'hc', facilityId = 'hc';
-              if (currentPage === 'hp' && currentHpId) { targetLevel = 'hp'; facilityId = currentHpId; }
-              openKoboSource(navItem.key, targetLevel, facilityId);
-            }
-          });
-        });
-      }
-
-      if (isAdminUser && isNavVisible('drawerAdmin')) {
-        items.push({ type: 'divider' });
-        items.push({ type: 'label', text: 'Admin' });
-        if (isNavVisible('adminSubmissions')) items.push({ type: 'item', label: 'Submissions', icon: 'fa-inbox', active: currentPage === 'admin' && currentAdminTab === 'submissions', action: () => { openAdmin(); } });
-        if (isNavVisible('adminComparison')) items.push({ type: 'item', label: 'Comparison', icon: 'fa-code-compare', active: currentPage === 'admin' && currentAdminTab === 'comparison', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="comparison"]')?.click(); }, 50); } });
-        if (isNavVisible('adminSupervisor')) items.push({ type: 'item', label: 'Supervisor', icon: 'fa-user-tie', active: currentPage === 'admin' && currentAdminTab === 'supervisor', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="supervisor"]')?.click(); }, 50); } });
-        if (isNavVisible('adminFeedback')) items.push({ type: 'item', label: 'Feedback', icon: 'fa-comment-dots', active: currentPage === 'admin' && currentAdminTab === 'feedback', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="feedback"]')?.click(); }, 50); } });
-        if (isNavVisible('adminKobotool')) items.push({ type: 'item', label: 'KoboTool', icon: 'fa-table', active: currentPage === 'admin' && currentAdminTab === 'kobotool', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="kobotool"]')?.click(); }, 50); } });
-      }
-
-      if (currentPage === 'hp' && currentHpId && isNavVisible('drawerHPs')) {
-        const hp = healthPosts.find(h => h.id === currentHpId);
-        if (hp) {
-          items.push({ type: 'divider' });
-          items.push({ type: 'label', text: hp.name });
-          const tabs = [
-            { id: 'overview', label: 'Overview', icon: 'fa-chart-pie', key: 'hpOverview' },
-            { id: 'data', label: 'Data Entry', icon: 'fa-database', key: 'hpData' },
-            { id: 'analysis', label: 'Analysis', icon: 'fa-chart-line', key: 'hpAnalysis' },
-            { id: 'feedback', label: 'Feedback', icon: 'fa-comment-dots', key: 'hpFeedback' }
-          ];
-          tabs.forEach(t => {
-            if (!isNavVisible(t.key)) return;
-            items.push({ type: 'item', label: t.label, icon: t.icon, active: currentHpTab === t.id, action: () => { window._hpSelect(currentHpId, t.id); } });
-          });
-        }
-      }
-
-      if (currentPage === 'hc' && isNavVisible('drawerHC')) {
-        items.push({ type: 'divider' });
-        items.push({ type: 'label', text: 'Health Center' });
-        const tabs = [
-          { id: 'overview', label: 'Overview', icon: 'fa-chart-pie', key: 'hcOverview' },
-          { id: 'data', label: 'Data', icon: 'fa-database', key: 'hcData' },
-          { id: 'analysis', label: 'Analysis', icon: 'fa-chart-line', key: 'hcAnalysis' },
-          { id: 'feedback', label: 'Feedback', icon: 'fa-comment-dots', key: 'hcFeedback' }
-        ];
-        tabs.forEach(t => {
-          if (!isNavVisible(t.key)) return;
-          items.push({ type: 'item', label: t.label, icon: t.icon, active: currentHcTab === t.id, action: () => { renderHCTab(t.id); } });
-        });
-      }
-
-      if (currentPage === 'kp' && isNavVisible('drawerKP')) {
-        items.push({ type: 'divider' });
-        items.push({ type: 'label', text: 'KP Clinic' });
-        const tabs = [
-          { id: 'overview', label: 'Overview', icon: 'fa-chart-pie', key: 'kpOverview' },
-          { id: 'data', label: 'Data', icon: 'fa-database', key: 'kpData' },
-          { id: 'analysis', label: 'Analysis', icon: 'fa-chart-line', key: 'kpAnalysis' },
-          { id: 'feedback', label: 'Feedback', icon: 'fa-comment-dots', key: 'kpFeedback' }
-        ];
-        tabs.forEach(t => {
-          if (!isNavVisible(t.key)) return;
-          items.push({ type: 'item', label: t.label, icon: t.icon, active: currentKpTab === t.id, action: () => { renderKPTab(t.id); } });
-        });
+      // KP USER SIDEBAR
+      else if (isKPUser) {
+        items.push({ type: 'item', label: 'Overview', icon: 'fa-chart-pie', active: currentPage === 'kp' && currentKpTab === 'overview', action: () => { openKP(); } });
+        items.push({ type: 'item', label: 'Data', icon: 'fa-database', active: currentPage === 'kp' && currentKpTab === 'data', action: () => { openKP(); setTimeout(() => { renderKPTab('data'); }, 100); } });
+        items.push({ type: 'item', label: 'Analysis', icon: 'fa-chart-line', active: currentPage === 'kp' && currentKpTab === 'analysis', action: () => { openKP(); setTimeout(() => { renderKPTab('analysis'); }, 100); } });
+        items.push({ type: 'item', label: 'Feedback', icon: 'fa-comment-dots', active: currentPage === 'kp' && currentKpTab === 'feedback', action: () => { openKP(); setTimeout(() => { renderKPTab('feedback'); }, 100); } });
       }
 
       nav.innerHTML = items.map(item => {
@@ -5638,6 +5290,7 @@
     }
 
     window._openDrawer = function() {
+      if (!isLoggedIn) return;
       document.getElementById('mobileDrawer').classList.add('open');
       document.getElementById('drawerOverlay').classList.add('open');
       document.body.style.overflow = 'hidden';
@@ -5718,7 +5371,7 @@
       showToast('Kobo source opened: ' + sourceKey, 'info');
     }
 
-    // ---------- LOGIN (UPDATED with password/device logic) ----------
+    // ---------- LOGIN (UPDATED) ----------
     function handleLogin() {
       const username = document.getElementById('usernameSelect').value;
       const name = document.getElementById('nameInput').value.trim();
@@ -5745,7 +5398,6 @@
       if (!password) { passwordError.classList.add('show'); document.getElementById('passwordInput').classList.add('error'); valid = false; }
       if (!valid) return;
 
-      // Admin login with fixed password
       if (username === 'Admin') {
         if (password !== ADMIN_PASSWORD) {
           passwordError.textContent = 'Invalid admin password';
@@ -5756,14 +5408,11 @@
         currentUser = { name: name || 'Admin', role: 'admin', facility: 'All' };
         document.getElementById('settingsBtn').style.display = 'flex';
       } else {
-        // Non-admin: check if password is set for this user
         const storedPassword = getUserPassword(username);
         if (storedPassword === null) {
-          // First time login — set the password
           setUserPassword(username, password);
           showToast('Password set successfully for ' + username, 'success');
         } else {
-          // Check stored password
           if (password !== storedPassword) {
             passwordError.textContent = 'Invalid password for this user';
             passwordError.classList.add('show');
@@ -5772,9 +5421,7 @@
           }
         }
 
-        // Device verification for non-admin
         if (!isDeviceVerified(username)) {
-          // Show device input if not already visible
           if (deviceGroup.style.display === 'none' || !deviceGroup.style.display) {
             deviceGroup.style.display = 'block';
             deviceError.classList.add('show');
@@ -5794,12 +5441,10 @@
             document.getElementById('deviceInput').classList.add('error');
             return;
           }
-          // Mark device as verified
           markDeviceVerified(username);
           showToast('New device verified successfully!', 'success');
         }
 
-        // Set current user based on username
         if (username.startsWith('Kebele')) {
           const kebeleNum = username.replace('Kebele ', '').trim();
           const hp = healthPosts.find(h => h.kebele === kebeleNum);
@@ -5816,7 +5461,12 @@
         }
       }
 
+      isLoggedIn = true;
       document.getElementById('page-login').classList.remove('active');
+
+      // Hide KP card from Admin home if admin
+      const kpCard = document.getElementById('kpCard');
+      if (kpCard) kpCard.style.display = isAdmin() ? 'none' : '';
 
       if (currentUser.role === 'admin') openAdmin();
       else if (currentUser.role === 'kebele') { if (currentUser.hpId) { openHPs(); window._hpSelect(currentUser.hpId, 'overview'); } else openHPs(); }
@@ -6317,6 +5967,7 @@
         if (e.key === 'Enter') { e.preventDefault(); document.getElementById('nameInput').focus(); }
       });
 
+      // Home cards now direct to respective pages (HC and HPs are direct)
       document.getElementById('hcCard').addEventListener('click', openHC);
       document.getElementById('hcCard').addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openHC(); } });
       document.getElementById('hpCard').addEventListener('click', openHPs);
@@ -6331,10 +5982,12 @@
 
       updateAllIndicators();
       updateHomeCounts();
-      updateSectionForPage('home');
-      updateDrawerNav();
-      updateDesktopSidebarNav();
-      console.log('Debremarkos PHCU KPI initialized with Supervisor section, updated Kebele structure, password/device verification, and period-aware dynamic value updates.');
+      updateSectionForPage('login');
+      // Ensure only login page is visible
+      document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-login').classList.add('active');
+
+      console.log('Debremarkos PHCU KPI initialized with role-based sidebar, supervisor indicators, and access restrictions.');
     });
 
   })();
