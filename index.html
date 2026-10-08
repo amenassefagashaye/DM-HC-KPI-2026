@@ -52,10 +52,21 @@
       --teal: #0d9488;
       --teal-light: #14b8a6;
       --teal-dark: #0f766e;
-      --sidebar-width: 300px;
+      --sidebar-width: 320px;
       --header-height: 72px;
       --kp-color: #7c3aed;
       --kp-light: #a78bfa;
+      /* NEW: main group colors */
+      --grp-admin: #6d28d9;
+      --grp-admin-light: #8b5cf6;
+      --grp-hc: #0b3b5c;
+      --grp-hc-light: #1f5a7a;
+      --grp-hp: #2c7a7b;
+      --grp-hp-light: #3a9a9b;
+      --agg-bg: #0284c7;
+      --agg-bg-hover: #0369a1;
+      --rank-bg: #b45309;
+      --rank-bg-hover: #92400e;
     }
 
     body.compressed { font-size: 0.82rem; }
@@ -318,8 +329,8 @@
     .mobile-drawer {
       position: fixed;
       top: 0; left: 0; bottom: 0;
-      width: 320px;
-      max-width: 90vw;
+      width: 340px;
+      max-width: 92vw;
       background: white;
       z-index: 2001;
       transform: translateX(-100%);
@@ -461,7 +472,6 @@
       padding: 32px 24px;
       width: 100%;
       max-width: 520px;
-      /* REMOVED: border-top: 6px solid var(--primary); */
     }
     .login-card h2 {
       font-size: 1.4rem;
@@ -1478,12 +1488,14 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      justify-content: center;
     }
     .rank-info-banner .ri-detail {
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
       font-size: 0.74rem;
+      justify-content: center;
     }
     .rank-info-banner .ri-detail span {
       display: flex;
@@ -1810,6 +1822,140 @@
       font-size: 1rem;
     }
 
+    /* ============================================================
+       NEW: THREE MAIN SIDEBAR GROUPS + SUB-SIDEBARS
+       ============================================================ */
+    .nav-group {
+      border-radius: 10px;
+      margin-bottom: 8px;
+      overflow: hidden;
+      border: 1px solid #eef2f6;
+      background: #ffffff;
+    }
+    .nav-group-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 12px 12px;
+      background: linear-gradient(135deg, #0b3b5c, #1f5a7a);
+      color: #ffffff;
+      border: none;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 0.86rem;
+      font-family: 'Times New Roman', 'Noto Sans Ethiopic', serif;
+      text-align: left;
+      min-height: 48px;
+      transition: var(--transition);
+      letter-spacing: 0.3px;
+    }
+    .nav-group-header:hover { filter: brightness(1.08); }
+    .nav-group-header .ng-icon {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.18);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.82rem;
+      flex-shrink: 0;
+    }
+    .nav-group-header .ng-title {
+      flex: 1;
+      text-align: left;
+      font-weight: 800;
+    }
+    .nav-group-header .ng-caret {
+      font-size: 0.75rem;
+      transition: transform 0.25s ease;
+      opacity: 0.9;
+    }
+    .nav-group.open .nav-group-header .ng-caret { transform: rotate(90deg); }
+    .nav-group .ng-sub {
+      display: none;
+      flex-direction: column;
+      gap: 2px;
+      padding: 6px 8px 10px;
+      background: #f8fafc;
+      border-top: 1px solid #eef2f6;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+    .nav-group.open .ng-sub { display: flex; }
+    .ng-sub .ng-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 9px 10px;
+      border-radius: 8px;
+      background: transparent;
+      border: 2px solid transparent;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #334155;
+      font-family: 'Times New Roman', 'Noto Sans Ethiopic', serif;
+      text-align: left;
+      transition: var(--transition);
+      min-height: 40px;
+    }
+    .ng-sub .ng-item i {
+      width: 18px; text-align: center;
+      font-size: 0.82rem;
+      flex-shrink: 0;
+      color: var(--primary-light);
+    }
+    .ng-sub .ng-item:hover {
+      background: #e8f0f8;
+      color: var(--primary);
+    }
+    .ng-sub .ng-item:hover i { color: var(--primary); }
+    .ng-sub .ng-item.active {
+      background: #0b3b5c;
+      color: #ffffff;
+      border-color: #0b3b5c;
+      box-shadow: 0 3px 10px rgba(11,59,92,0.28);
+    }
+    .ng-sub .ng-item.active i { color: #ffe082; }
+    .ng-sub .ng-item.disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    /* Distinct contrast backgrounds for Aggregate & Ranking */
+    .ng-sub .ng-item.ng-highlight-agg {
+      background: linear-gradient(135deg, var(--agg-bg), #0369a1);
+      color: #ffffff;
+      border-color: var(--agg-bg);
+      box-shadow: 0 3px 10px rgba(2,132,199,0.3);
+    }
+    .ng-sub .ng-item.ng-highlight-agg i { color: #e0f2fe; }
+    .ng-sub .ng-item.ng-highlight-agg:hover {
+      background: linear-gradient(135deg, var(--agg-bg-hover), #075985);
+      color: #ffffff;
+    }
+    .ng-sub .ng-item.ng-highlight-agg:hover i { color: #ffffff; }
+    .ng-sub .ng-item.ng-highlight-agg.active {
+      box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px var(--agg-bg);
+    }
+
+    .ng-sub .ng-item.ng-highlight-rank {
+      background: linear-gradient(135deg, var(--rank-bg), #92400e);
+      color: #ffffff;
+      border-color: var(--rank-bg);
+      box-shadow: 0 3px 10px rgba(180,83,9,0.3);
+    }
+    .ng-sub .ng-item.ng-highlight-rank i { color: #fef3c7; }
+    .ng-sub .ng-item.ng-highlight-rank:hover {
+      background: linear-gradient(135deg, var(--rank-bg-hover), #78350f);
+      color: #ffffff;
+    }
+    .ng-sub .ng-item.ng-highlight-rank:hover i { color: #ffffff; }
+    .ng-sub .ng-item.ng-highlight-rank.active {
+      box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px var(--rank-bg);
+    }
+
     @media (max-width: 991px) {
       .sidebar { display: none; }
       .sidebar-toggle-btn { display: none !important; }
@@ -1901,7 +2047,7 @@
       .app-footer .footer-inner { flex-direction: column; gap: 2px; white-space: normal; }
       .chart-bar .bar-label { font-size: 0.5rem; padding: 0 2px; top: -16px; }
       .rank-mode-grid { grid-template-columns: 1fr; }
-      .mobile-drawer { width: 260px; }
+      .mobile-drawer { width: 270px; }
       .summary-grid { grid-template-columns: 1fr 1fr; }
       .period-filter-bar .pf-btn { font-size: 0.6rem; padding: 4px 7px; min-height: 28px; }
       .section-filter-bar .sf-select { min-width: 90px; font-size: 0.62rem; }
@@ -2193,22 +2339,88 @@
     let customToDate = null;
     let isLoggedIn = false;
 
+    // NEW: which main group is expanded in the sidebar
+    let activeNavGroup = 'ADMIN'; // 'ADMIN' | 'HC' | 'HP'
+    // NEW: which HC sub-item is currently selected (label key)
+    let activeHcItemKey = 'all-indicators';
+
     // ---------- PASSWORD & DEVICE VERIFICATION ----------
     const ADMIN_PASSWORD = 'kpi2123';
     const DEVICE_VERIFICATION_CODE = 'kpi21232026';
     const STORAGE_KEY_USERS = 'dm_phcu_users';
     const STORAGE_KEY_DEVICES = 'dm_phcu_devices';
+    const STORAGE_KEY_PASSWORD_RESET = 'dm_phcu_password_reset';
+    const STORAGE_KEY_SESSION = 'dm_phcu_session';
 
+    // ---------- PASSWORD STORAGE (FULLY FUNCTIONAL) ----------
     function loadUserPasswords() {
       try { return JSON.parse(localStorage.getItem(STORAGE_KEY_USERS)) || {}; }
       catch (e) { return {}; }
     }
     function saveUserPasswords(data) { localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(data)); }
-    function getUserPassword(username) { const users = loadUserPasswords(); return users[username] || null; }
-    function setUserPassword(username, password) {
-      const users = loadUserPasswords(); users[username] = password; saveUserPasswords(users);
+
+    function getUserPassword(username) {
+      const users = loadUserPasswords();
+      return users[username] || null;
     }
 
+    function setUserPassword(username, password) {
+      const users = loadUserPasswords();
+      users[username] = password;
+      saveUserPasswords(users);
+    }
+
+    function hasUserPassword(username) {
+      return getUserPassword(username) !== null;
+    }
+
+    // ---------- PASSWORD RESET FLAG ----------
+    function loadPasswordResetFlags() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY_PASSWORD_RESET)) || {}; }
+      catch (e) { return {}; }
+    }
+    function savePasswordResetFlags(data) { localStorage.setItem(STORAGE_KEY_PASSWORD_RESET, JSON.stringify(data)); }
+
+    function mustChangePassword(username) {
+      const flags = loadPasswordResetFlags();
+      return flags[username] === true;
+    }
+
+    function setMustChangePassword(username, value) {
+      const flags = loadPasswordResetFlags();
+      if (value) flags[username] = true;
+      else delete flags[username];
+      savePasswordResetFlags(flags);
+    }
+
+    // ---------- ADMIN: RESET ALL USER PASSWORDS ----------
+    function resetAllUserPasswords() {
+      const users = loadUserPasswords();
+      const flags = loadPasswordResetFlags();
+      Object.keys(users).forEach(username => {
+        if (username === 'Admin') return;
+        delete users[username];
+        flags[username] = true;
+      });
+      saveUserPasswords(users);
+      savePasswordResetFlags(flags);
+      return Object.keys(flags).length;
+    }
+
+    // ---------- SESSION PERSISTENCE (non-plaintext) ----------
+    function saveSession(user) {
+      try {
+        const session = { role: user.role, facility: user.facility, hpId: user.hpId || null, kebele: user.kebele || null, name: user.name, savedAt: Date.now() };
+        localStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify(session));
+      } catch (e) { /* ignore */ }
+    }
+    function loadSession() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY_SESSION)); }
+      catch (e) { return null; }
+    }
+    function clearSession() { localStorage.removeItem(STORAGE_KEY_SESSION); }
+
+    // ---------- DEVICE VERIFICATION ----------
     function loadVerifiedDevices() {
       try { return JSON.parse(localStorage.getItem(STORAGE_KEY_DEVICES)) || {}; }
       catch (e) { return {}; }
@@ -2219,7 +2431,7 @@
       const devices = loadVerifiedDevices(); devices[username] = true; saveVerifiedDevices(devices);
     }
 
-    // ---------- SELECTED SECTION (for section filter) ----------
+    // ---------- SELECTED SECTION ----------
     let selectedSection = 'all';
 
     // ---------- NAVIGATION VISIBILITY CONFIG ----------
@@ -2294,6 +2506,25 @@
         feedbackTarget: 10, feedbackActual: 8
       }
     ];
+
+    // NEW: Store supervisor meeting data per period (keyed by supervisor id + period)
+    const supervisorPeriodData = {};
+
+    function getSupervisorPeriodKey(supervisorId) {
+      const p = reportingPeriod === 'custom' ? `custom_${customFromDate || ''}_${customToDate || ''}` : reportingPeriod;
+      return `${supervisorId}__${p}`;
+    }
+
+    function loadSupervisorPeriodData() {
+      const supScores = getSupervisorScores();
+      supScores.forEach(sup => {
+        const key = getSupervisorPeriodKey(sup.id);
+        if (supervisorPeriodData[key]) {
+          sup.meetingsTarget = supervisorPeriodData[key].meetingsTarget;
+          sup.meetingsActual = supervisorPeriodData[key].meetingsActual;
+        }
+      });
+    }
 
     // ---------- ROLE PERMISSION SYSTEM ----------
     function isAdmin() { return currentUser.role === 'admin'; }
@@ -2419,6 +2650,57 @@
       { label: 'ME – Chapter 9', key: 'ME-Chapter-9', icon: 'fa-chart-line' },
       { label: 'Laboratory – Chapter 6', key: 'Laboratory-Chapter-6', icon: 'fa-flask' },
       { label: 'HR – Chapter 10', key: 'HR-Chapter-10', icon: 'fa-user-doctor' }
+    ];
+
+    // ---------- HC SUB-SIDEBAR ITEMS (exact 31-item list per spec) ----------
+    const HC_SUB_ITEMS = [
+      { key: 'all-indicators',    label: 'All Indicators',        icon: 'fa-list-check',        action: 'hcAll' },
+      { key: 'kp-clinic',         label: 'KP Clinic',             icon: 'fa-heart-pulse',       action: 'kp' },
+      { key: 'finance',           label: 'Finance',               icon: 'fa-coins',             action: 'hcSection', section: 'finance' },
+      { key: 'hit',               label: 'HIT',                   icon: 'fa-chart-simple',      action: 'hcSection', section: 'hit' },
+      { key: 'mch',               label: 'MCH Clinic',            icon: 'fa-baby',              action: 'hcSection', section: 'mch' },
+      { key: 'art',               label: 'ART Clinic',            icon: 'fa-heart-pulse',       action: 'hcSection', section: 'art' },
+      { key: 'tb',                label: 'TB Clinic',             icon: 'fa-lungs',             action: 'hcSection', section: 'tb' },
+      { key: 'epi',               label: 'EPI Clinic',            icon: 'fa-syringe',           action: 'hcSection', section: 'epi' },
+      { key: 'under5',            label: 'Under-5 Clinic',        icon: 'fa-child',             action: 'hcSection', section: 'under5' },
+      { key: 'opd',               label: 'OPD Clinic',            icon: 'fa-stethoscope',       action: 'hcSection', section: 'opd' },
+      { key: 'pharmacy-clinic',   label: 'Pharmacy Clinic',       icon: 'fa-prescription-bottle', action: 'hcSection', section: 'pharmacy' },
+      { key: 'csc',               label: 'CSC',                   icon: 'fa-users',             action: 'kobo', source: 'CSC' },
+      { key: 'hep',               label: 'HEP',                   icon: 'fa-heart-pulse',       action: 'kobo', source: 'HEP' },
+      { key: 'hr-heps',           label: 'HR-HEPs',               icon: 'fa-user-doctor',       action: 'kobo', source: 'HR-HPs' },
+      { key: 'model',             label: 'Model',                 icon: 'fa-star',              action: 'kobo', source: 'Model' },
+      { key: 'wda',               label: 'WDA',                   icon: 'fa-people-group',      action: 'kobo', source: 'WDA' },
+      { key: 'laboratory',        label: 'Laboratory',            icon: 'fa-flask',             action: 'kobo', source: 'Laboratory' },
+      { key: 'client-satisfaction', label: 'Client Satisfaction', icon: 'fa-face-smile',        action: 'kobo', source: 'Client Satisfaction' },
+      { key: 'lg-ch1',            label: 'LG – Chapter 1',        icon: 'fa-landmark',          action: 'kobo', source: 'LG-Chapter-1' },
+      { key: 'mch-ch4',           label: 'MCH – Chapter 4',       icon: 'fa-baby',              action: 'kobo', source: 'Chapter-4' },
+      { key: 'staff-satisfaction', label: 'Staff Satisfaction',   icon: 'fa-face-smile',        action: 'kobo', source: 'Staff Satisfaction' },
+      { key: 'pharmacy-ch5',      label: 'Pharmacy – Chapter 5',  icon: 'fa-prescription-bottle', action: 'kobo', source: 'Pharmacy-Chapter-5' },
+      { key: 'hir-ch12',          label: 'HIR – Chapter 12',      icon: 'fa-file-medical',      action: 'kobo', source: 'HIR-Chapter-12' },
+      { key: 'ip-ch12',           label: 'IP – Chapter 12',       icon: 'fa-shield-halved',     action: 'kobo', source: 'IP-Chapter-7' },
+      { key: 'hep-ch2',           label: 'HEP – Chapter 2',       icon: 'fa-heart-pulse',       action: 'kobo', source: 'HEP-Chapter-2' },
+      { key: 'patient-flow-ch3',  label: 'Patient Flow – Chapter 3', icon: 'fa-route',          action: 'kobo', source: 'Patient Flow-Chapter-3' },
+      { key: 'ggi',               label: 'GGI',                   icon: 'fa-scale-balanced',    action: 'kobo', source: 'GGI' },
+      { key: 'ifm-ch8',           label: 'IFM – Chapter 8',       icon: 'fa-coins',             action: 'kobo', source: 'IFM-Chapter-8' },
+      { key: 'me-ch9',            label: 'ME – Chapter 9',        icon: 'fa-chart-line',        action: 'kobo', source: 'ME-Chapter-9' },
+      { key: 'laboratory-ch6',    label: 'Laboratory – Chapter 6', icon: 'fa-flask',            action: 'kobo', source: 'Laboratory-Chapter-6' },
+      { key: 'hr-ch10',           label: 'HR – Chapter 10',       icon: 'fa-user-doctor',       action: 'kobo', source: 'HR-Chapter-10' }
+    ];
+
+    // ---------- ADMIN SUB-SIDEBAR ITEMS (exact 12-item list per spec) ----------
+    const ADMIN_SUB_ITEMS = [
+      { key: 'summary',      label: 'Summary',                icon: 'fa-clipboard-list',  action: 'summary' },
+      { key: 'aggregate',    label: 'Aggregate',              icon: 'fa-chart-simple',    action: 'adminTab', tab: 'aggregate', highlight: 'agg' },
+      { key: 'ranking',      label: 'Ranking & Championship', icon: 'fa-ranking-star',    action: 'adminTab', tab: 'ranking',   highlight: 'rank' },
+      { key: 'submission',   label: 'Submission',             icon: 'fa-inbox',           action: 'adminTab', tab: 'submissions' },
+      { key: 'comparison',   label: 'Comparison',             icon: 'fa-code-compare',    action: 'adminTab', tab: 'comparison' },
+      { key: 'supervisors',  label: 'Supervisors',            icon: 'fa-user-tie',        action: 'adminTab', tab: 'supervisor' },
+      { key: 'feedback',     label: 'Feedback',               icon: 'fa-comment-dots',    action: 'adminTab', tab: 'feedback' },
+      { key: 'kobotool',     label: 'KoboTool',               icon: 'fa-table',           action: 'adminTab', tab: 'kobotool' },
+      { key: 'overview',     label: 'Overview',               icon: 'fa-chart-pie',       action: 'hcOverview' },
+      { key: 'data',         label: 'Data',                   icon: 'fa-database',        action: 'hcData' },
+      { key: 'analysis',     label: 'Analysis',               icon: 'fa-chart-line',      action: 'hcAnalysis' },
+      { key: 'settings',     label: 'Settings',               icon: 'fa-gear',            action: 'settings' }
     ];
 
     // ---------- AUTO-SUGGESTION ----------
@@ -2625,6 +2907,7 @@
         customToDate = null;
       }
       updateAllIndicators();
+      loadSupervisorPeriodData();
       if (context === 'hc') renderHC();
       else if (context === 'hp') { if (currentHpId) renderHPDetail(currentHpId, currentHpTab); else renderHPs(); }
       else if (context === 'admin') renderAdmin();
@@ -2638,6 +2921,7 @@
       else customToDate = value;
       if (customFromDate && customToDate) {
         updateAllIndicators();
+        loadSupervisorPeriodData();
         if (currentPage === 'summary') renderSummary();
         else if (currentPage === 'admin') renderAdmin();
         else if (currentPage === 'hc') renderHC();
@@ -4592,15 +4876,15 @@
               </tbody></table></div>
           </div>
           <div class="card">
-            <div class="card-header">📋 Supervisor Indicator Details — ${getPeriodFilterLabel()}</div>
+            <div class="card-header">📋 Supervisor Indicator Details with Editable Meeting Target and Meeting Actual</div>
             <div class="table-wrap"><table>
               <thead><tr><th>Supervisor</th><th>Meetings Target</th><th>Meetings Actual</th><th>Meetings %</th><th>Supervisions Target</th><th>Supervisions Actual</th><th>Supervisions %</th><th>Feedback Target</th><th>Feedback Actual</th><th>Feedback %</th><th>Avg %</th></tr></thead>
               <tbody>
               ${supScores.map(sup => `
                 <tr>
                   <td><strong>${escapeHtml(sup.name)}</strong></td>
-                  <td>${sup.meetingsTarget}</td>
-                  <td>${sup.meetingsActual}</td>
+                  <td><input type="number" class="sup-meet-target" data-sup-id="${sup.id}" value="${sup.meetingsTarget}" style="width:60px;padding:5px;border-radius:6px;border:2px solid #d1d9e6;text-align:center;font-size:0.8rem;"></td>
+                  <td><input type="number" class="sup-meet-actual" data-sup-id="${sup.id}" value="${sup.meetingsActual}" style="width:60px;padding:5px;border-radius:6px;border:2px solid #d1d9e6;text-align:center;font-size:0.8rem;"></td>
                   <td>${sup.meetingsPct}%</td>
                   <td>${sup.supervisionsTarget}</td>
                   <td>${sup.supervisionsActual}</td>
@@ -4664,6 +4948,50 @@
           </div>
           ` : ''}
         `;
+
+        // Bind editable meeting target/actual inputs
+        container.querySelectorAll('.sup-meet-target').forEach(inp => {
+          inp.addEventListener('change', function() {
+            const supId = this.dataset.supId;
+            const val = parseFloat(this.value);
+            if (isNaN(val) || val < 0) return;
+            const sup = supervisors.find(s => s.id === supId);
+            if (!sup) return;
+            sup.meetingsTarget = val;
+            const key = getSupervisorPeriodKey(supId);
+            if (!supervisorPeriodData[key]) supervisorPeriodData[key] = { meetingsTarget: sup.meetingsTarget, meetingsActual: sup.meetingsActual };
+            else supervisorPeriodData[key].meetingsTarget = sup.meetingsTarget;
+            // Persist to localStorage for cross-session storage
+            try {
+              const stored = JSON.parse(localStorage.getItem('dm_phcu_supervisor_period') || '{}');
+              stored[key] = { meetingsTarget: sup.meetingsTarget, meetingsActual: sup.meetingsActual };
+              localStorage.setItem('dm_phcu_supervisor_period', JSON.stringify(stored));
+            } catch (e) { /* ignore */ }
+            renderAdminTab('supervisor');
+            showToast('Meeting target updated and calculations refreshed', 'success');
+          });
+        });
+        container.querySelectorAll('.sup-meet-actual').forEach(inp => {
+          inp.addEventListener('change', function() {
+            const supId = this.dataset.supId;
+            const val = parseFloat(this.value);
+            if (isNaN(val) || val < 0) return;
+            const sup = supervisors.find(s => s.id === supId);
+            if (!sup) return;
+            sup.meetingsActual = val;
+            const key = getSupervisorPeriodKey(supId);
+            if (!supervisorPeriodData[key]) supervisorPeriodData[key] = { meetingsTarget: sup.meetingsTarget, meetingsActual: sup.meetingsActual };
+            else supervisorPeriodData[key].meetingsActual = sup.meetingsActual;
+            try {
+              const stored = JSON.parse(localStorage.getItem('dm_phcu_supervisor_period') || '{}');
+              stored[key] = { meetingsTarget: sup.meetingsTarget, meetingsActual: sup.meetingsActual };
+              localStorage.setItem('dm_phcu_supervisor_period', JSON.stringify(stored));
+            } catch (e) { /* ignore */ }
+            renderAdminTab('supervisor');
+            showToast('Meeting actual updated and calculations refreshed', 'success');
+          });
+        });
+
         window._addSupervisor = function() {
           if (!canManageSupervisors()) { showToast('Access restricted. Admin only.', 'error'); return; }
           const name = document.getElementById('newSupervisorName').value.trim();
@@ -5099,183 +5427,204 @@
       };
     }
 
-    // ---------- DRAWER NAVIGATION (ROLE-BASED, RESTRICTED) ----------
-    function updateDrawerNav() {
-      const nav = document.getElementById('drawerNav');
-      if (!nav) return;
-      if (!isLoggedIn) { nav.innerHTML = ''; return; }
+    // ============================================================
+    // SIDEBAR: THREE MAIN GROUPS (ADMIN / HC / HP) + SUB-SIDEBARS
+    // ============================================================
+
+    function buildNavGroups() {
+      if (!isLoggedIn) return [];
 
       const isAdminUser = isAdmin();
       const isKebele = currentUser.role === 'kebele';
       const isKPUser = currentUser.role === 'kp';
-      const isQIUser = isQI();
 
-      let items = [];
-
-      // ADMIN SIDEBAR (exact order per spec)
-      if (isAdminUser) {
-        items.push({ type: 'item', label: 'Summary', icon: 'fa-clipboard-list', active: currentPage === 'summary', action: () => { openSummary(); } });
-        items.push({ type: 'item', label: 'Aggregate', icon: 'fa-chart-simple', active: currentPage === 'admin' && currentAdminTab === 'aggregate', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="aggregate"]')?.click(); }, 50); } });
-        items.push({ type: 'item', label: 'Ranking & Championship', icon: 'fa-ranking-star', active: currentPage === 'admin' && currentAdminTab === 'ranking', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="ranking"]')?.click(); }, 50); } });
-        items.push({ type: 'item', label: 'Submission', icon: 'fa-inbox', active: currentPage === 'admin' && currentAdminTab === 'submissions', action: () => { openAdmin(); } });
-        items.push({ type: 'item', label: 'Comparison', icon: 'fa-code-compare', active: currentPage === 'admin' && currentAdminTab === 'comparison', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="comparison"]')?.click(); }, 50); } });
-        items.push({ type: 'item', label: 'Supervisors', icon: 'fa-user-tie', active: currentPage === 'admin' && currentAdminTab === 'supervisor', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="supervisor"]')?.click(); }, 50); } });
-        items.push({ type: 'item', label: 'Feedback', icon: 'fa-comment-dots', active: currentPage === 'admin' && currentAdminTab === 'feedback', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="feedback"]')?.click(); }, 50); } });
-        items.push({ type: 'item', label: 'KoboTool', icon: 'fa-table', active: currentPage === 'admin' && currentAdminTab === 'kobotool', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="kobotool"]')?.click(); }, 50); } });
-        items.push({ type: 'item', label: 'Overview', icon: 'fa-chart-pie', active: currentPage === 'hc' && currentHcTab === 'overview', action: () => { openHC(); } });
-        items.push({ type: 'item', label: 'Data', icon: 'fa-database', active: currentPage === 'hc' && currentHcTab === 'data', action: () => { openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
-        items.push({ type: 'item', label: 'Analysis', icon: 'fa-chart-line', active: currentPage === 'hc' && currentHcTab === 'analysis', action: () => { openHC(); setTimeout(() => { renderHCTab('analysis'); }, 100); } });
-      }
-
-      // HC USER SIDEBAR (exact order per spec)
-      else if (currentUser.facility === 'HC' && !isAdminUser) {
-        items.push({ type: 'item', label: 'All Indicators', icon: 'fa-list-check', active: currentPage === 'hc', action: () => { openHC(); } });
-        items.push({ type: 'item', label: 'KP Clinic', icon: 'fa-heart-pulse', active: currentPage === 'kp', action: () => { openKP(); } });
-        items.push({ type: 'item', label: 'Finance', icon: 'fa-coins', active: false, action: () => { selectedSection = 'finance'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
-        items.push({ type: 'item', label: 'HIT', icon: 'fa-chart-simple', active: false, action: () => { selectedSection = 'hit'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
-        items.push({ type: 'item', label: 'MCH Clinic', icon: 'fa-baby', active: false, action: () => { selectedSection = 'mch'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
-        items.push({ type: 'item', label: 'ART Clinic', icon: 'fa-heart-pulse', active: false, action: () => { selectedSection = 'art'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
-        items.push({ type: 'item', label: 'TB Clinic', icon: 'fa-lungs', active: false, action: () => { selectedSection = 'tb'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
-        items.push({ type: 'item', label: 'EPI Clinic', icon: 'fa-syringe', active: false, action: () => { selectedSection = 'epi'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
-        items.push({ type: 'item', label: 'Under-5 Clinic', icon: 'fa-child', active: false, action: () => { selectedSection = 'under5'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
-        items.push({ type: 'item', label: 'OPD Clinic', icon: 'fa-stethoscope', active: false, action: () => { selectedSection = 'opd'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
-        items.push({ type: 'item', label: 'Pharmacy Clinic', icon: 'fa-prescription-bottle', active: false, action: () => { selectedSection = 'pharmacy'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
-        // Assessment & Service forms (exact order per spec, starting from CSC)
-        ADDITIONAL_NAV_ITEMS.forEach(item => {
-          if (!isNavVisible(item.key)) return;
-          items.push({ type: 'item', label: item.label, icon: item.icon || 'fa-clipboard-list', active: false, action: () => { let targetLevel = 'hc', facilityId = 'hc'; openKoboSource(item.key, targetLevel, facilityId); } });
-        });
-      }
-
-      // HP USER SIDEBAR (exact order per spec)
-      else if (isKebele) {
-        healthPosts.forEach(hp => {
-          items.push({
-            type: 'item', label: hp.name, icon: 'fa-house-medical',
-            active: currentPage === 'hp' && currentHpId === hp.id,
-            action: () => { openHPs(); window._hpSelect(hp.id, 'overview'); }
-          });
-        });
-      }
-
-      // KP USER SIDEBAR
-      else if (isKPUser) {
-        items.push({ type: 'item', label: 'Overview', icon: 'fa-chart-pie', active: currentPage === 'kp' && currentKpTab === 'overview', action: () => { openKP(); } });
-        items.push({ type: 'item', label: 'Data', icon: 'fa-database', active: currentPage === 'kp' && currentKpTab === 'data', action: () => { openKP(); setTimeout(() => { renderKPTab('data'); }, 100); } });
-        items.push({ type: 'item', label: 'Analysis', icon: 'fa-chart-line', active: currentPage === 'kp' && currentKpTab === 'analysis', action: () => { openKP(); setTimeout(() => { renderKPTab('analysis'); }, 100); } });
-        items.push({ type: 'item', label: 'Feedback', icon: 'fa-comment-dots', active: currentPage === 'kp' && currentKpTab === 'feedback', action: () => { openKP(); setTimeout(() => { renderKPTab('feedback'); }, 100); } });
-      }
-
-      nav.innerHTML = items.map(item => {
-        if (item.type === 'label') return `<div class="drawer-section-label">${item.text}</div>`;
-        if (item.type === 'divider') return `<div class="drawer-divider"></div>`;
-        return `<button class="drawer-item ${item.active ? 'active' : ''}" data-action>
-          <i class="fas ${item.icon}"></i>
-          <span>${item.label}</span>
-        </button>`;
-      }).join('');
-
-      const buttons = nav.querySelectorAll('.drawer-item');
-      let itemIndex = 0;
-      items.forEach(item => {
-        if (item.type === 'item') {
-          const btn = buttons[itemIndex];
-          if (btn && item.action) {
-            btn.addEventListener('click', () => { item.action(); window._closeDrawer(); });
+      // ----- ADMIN GROUP -----
+      const adminGroup = {
+        id: 'ADMIN',
+        label: 'ADMIN',
+        icon: 'fa-shield-halved',
+        enabled: isAdminUser,
+        visible: isAdminUser,
+        items: ADMIN_SUB_ITEMS.map(it => ({
+          key: 'admin-' + it.key,
+          label: it.label,
+          icon: it.icon,
+          highlight: it.highlight || null,
+          active: isAdminUser && (
+            (it.action === 'summary' && currentPage === 'summary') ||
+            (it.action === 'adminTab' && currentPage === 'admin' && currentAdminTab === it.tab) ||
+            (it.action === 'hcOverview' && currentPage === 'hc' && currentHcTab === 'overview') ||
+            (it.action === 'hcData' && currentPage === 'hc' && currentHcTab === 'data') ||
+            (it.action === 'hcAnalysis' && currentPage === 'hc' && currentHcTab === 'analysis') ||
+            (it.action === 'settings' && false)
+          ),
+          onClick: () => {
+            if (!isAdminUser) { showToast('Access restricted. Admin privileges required.', 'error'); return; }
+            activeNavGroup = 'ADMIN';
+            if (it.action === 'summary') { openSummary(); }
+            else if (it.action === 'adminTab') {
+              openAdmin();
+              setTimeout(() => {
+                const btn = document.querySelector('#adminTabBar [data-admintab="' + it.tab + '"]');
+                if (btn) btn.click();
+              }, 50);
+            }
+            else if (it.action === 'hcOverview') { openHC(); }
+            else if (it.action === 'hcData') { openHC(); setTimeout(() => { renderHCTab('data'); }, 100); }
+            else if (it.action === 'hcAnalysis') { openHC(); setTimeout(() => { renderHCTab('analysis'); }, 100); }
+            else if (it.action === 'settings') { openSettings(); }
           }
-          itemIndex++;
-        }
-      });
+        }))
+      };
+
+      // ----- HC GROUP -----
+      const hcGroup = {
+        id: 'HC',
+        label: 'HC',
+        icon: 'fa-hospital',
+        enabled: !isKebele && !isKPUser,
+        visible: !isKebele && !isKPUser,
+        items: HC_SUB_ITEMS.map(it => {
+          let allowed = true;
+          if (!isAdminUser) {
+            if (it.action === 'hcAll' || it.action === 'kp') allowed = true;
+            else if (it.action === 'hcSection') {
+              allowed = (getUserEditSection() === it.section) || currentUser.role === 'qi';
+            } else if (it.action === 'kobo') {
+              allowed = isNavVisible(it.source);
+            }
+          } else {
+            allowed = true;
+          }
+          return {
+            key: 'hc-' + it.key,
+            label: it.label,
+            icon: it.icon,
+            active: allowed && activeHcItemKey === it.key && (currentPage === 'hc' || currentPage === 'kp'),
+            disabled: !allowed,
+            onClick: () => {
+              if (!allowed) { showToast('You are not authorized for this section.', 'error'); return; }
+              activeNavGroup = 'HC';
+              activeHcItemKey = it.key;
+              if (it.action === 'hcAll') { selectedSection = 'all'; updateAllIndicators(); openHC(); }
+              else if (it.action === 'kp') { openKP(); }
+              else if (it.action === 'hcSection') { selectedSection = it.section; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); }
+              else if (it.action === 'kobo') { openKoboSource(it.source, 'hc', 'hc'); }
+            }
+          };
+        })
+      };
+
+      // ----- HP GROUP -----
+      const hpGroup = {
+        id: 'HP',
+        label: 'HP',
+        icon: 'fa-house-medical',
+        enabled: !isKPUser,
+        visible: !isKPUser,
+        items: healthPosts.map(hp => {
+          let allowed = true;
+          if (isKebele) allowed = (currentUser.hpId === hp.id);
+          return {
+            key: 'hp-' + hp.id,
+            label: hp.name,
+            icon: 'fa-house-medical',
+            active: allowed && currentPage === 'hp' && currentHpId === hp.id,
+            disabled: !allowed,
+            onClick: () => {
+              if (!allowed) { showToast('You are not authorized to view this kebele.', 'error'); return; }
+              activeNavGroup = 'HP';
+              openHPs();
+              window._hpSelect(hp.id, 'overview');
+            }
+          };
+        })
+      };
+
+      const groups = [adminGroup, hcGroup, hpGroup].filter(g => g.visible);
+      return groups;
     }
 
-    // ---------- DESKTOP SIDEBAR (SAME AS DRAWER) ----------
-    function updateDesktopSidebarNav() {
-      const nav = document.getElementById('desktopSidebarNav');
-      if (!nav) return;
-      if (!isLoggedIn) { nav.innerHTML = ''; return; }
+    function renderNavGroupHtml(group) {
+      const isOpen = (activeNavGroup === group.id) && group.enabled;
+      const headerDisabled = !group.enabled;
+      const headerStyle = headerDisabled
+        ? 'background:linear-gradient(135deg,#64748b,#94a3b8);cursor:not-allowed;'
+        : '';
+      return `
+        <div class="nav-group ${isOpen ? 'open' : ''}" data-group="${group.id}">
+          <button class="nav-group-header" data-group-toggle="${group.id}" ${headerDisabled ? 'disabled' : ''} style="${headerStyle}">
+            <span class="ng-icon"><i class="fas ${group.icon}"></i></span>
+            <span class="ng-title">${group.label}</span>
+            <i class="fas fa-chevron-right ng-caret"></i>
+          </button>
+          <div class="ng-sub">
+            ${group.items.map(item => {
+              const cls = ['ng-item'];
+              if (item.active) cls.push('active');
+              if (item.disabled) cls.push('disabled');
+              if (item.highlight === 'agg') cls.push('ng-highlight-agg');
+              if (item.highlight === 'rank') cls.push('ng-highlight-rank');
+              return `<button class="${cls.join(' ')}" data-item-key="${item.key}">
+                <i class="fas ${item.icon}"></i>
+                <span>${item.label}</span>
+              </button>`;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
 
-      const isAdminUser = isAdmin();
-      const isKebele = currentUser.role === 'kebele';
-      const isKPUser = currentUser.role === 'kp';
-      const isQIUser = isQI();
-
-      let items = [];
-
-      // ADMIN SIDEBAR (exact order per spec)
-      if (isAdminUser) {
-        items.push({ type: 'item', label: 'Summary', icon: 'fa-clipboard-list', active: currentPage === 'summary', action: () => { openSummary(); } });
-        items.push({ type: 'item', label: 'Aggregate', icon: 'fa-chart-simple', active: currentPage === 'admin' && currentAdminTab === 'aggregate', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="aggregate"]')?.click(); }, 50); } });
-        items.push({ type: 'item', label: 'Ranking & Championship', icon: 'fa-ranking-star', active: currentPage === 'admin' && currentAdminTab === 'ranking', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="ranking"]')?.click(); }, 50); } });
-        items.push({ type: 'item', label: 'Submission', icon: 'fa-inbox', active: currentPage === 'admin' && currentAdminTab === 'submissions', action: () => { openAdmin(); } });
-        items.push({ type: 'item', label: 'Comparison', icon: 'fa-code-compare', active: currentPage === 'admin' && currentAdminTab === 'comparison', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="comparison"]')?.click(); }, 50); } });
-        items.push({ type: 'item', label: 'Supervisors', icon: 'fa-user-tie', active: currentPage === 'admin' && currentAdminTab === 'supervisor', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="supervisor"]')?.click(); }, 50); } });
-        items.push({ type: 'item', label: 'Feedback', icon: 'fa-comment-dots', active: currentPage === 'admin' && currentAdminTab === 'feedback', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="feedback"]')?.click(); }, 50); } });
-        items.push({ type: 'item', label: 'KoboTool', icon: 'fa-table', active: currentPage === 'admin' && currentAdminTab === 'kobotool', action: () => { openAdmin(); setTimeout(() => { document.querySelector('#adminTabBar [data-admintab="kobotool"]')?.click(); }, 50); } });
-        items.push({ type: 'item', label: 'Overview', icon: 'fa-chart-pie', active: currentPage === 'hc' && currentHcTab === 'overview', action: () => { openHC(); } });
-        items.push({ type: 'item', label: 'Data', icon: 'fa-database', active: currentPage === 'hc' && currentHcTab === 'data', action: () => { openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
-        items.push({ type: 'item', label: 'Analysis', icon: 'fa-chart-line', active: currentPage === 'hc' && currentHcTab === 'analysis', action: () => { openHC(); setTimeout(() => { renderHCTab('analysis'); }, 100); } });
-      }
-
-      // HC USER SIDEBAR (exact order per spec)
-      else if (currentUser.facility === 'HC' && !isAdminUser) {
-        items.push({ type: 'item', label: 'All Indicators', icon: 'fa-list-check', active: currentPage === 'hc', action: () => { openHC(); } });
-        items.push({ type: 'item', label: 'KP Clinic', icon: 'fa-heart-pulse', active: currentPage === 'kp', action: () => { openKP(); } });
-        items.push({ type: 'item', label: 'Finance', icon: 'fa-coins', active: false, action: () => { selectedSection = 'finance'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
-        items.push({ type: 'item', label: 'HIT', icon: 'fa-chart-simple', active: false, action: () => { selectedSection = 'hit'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
-        items.push({ type: 'item', label: 'MCH Clinic', icon: 'fa-baby', active: false, action: () => { selectedSection = 'mch'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
-        items.push({ type: 'item', label: 'ART Clinic', icon: 'fa-heart-pulse', active: false, action: () => { selectedSection = 'art'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
-        items.push({ type: 'item', label: 'TB Clinic', icon: 'fa-lungs', active: false, action: () => { selectedSection = 'tb'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
-        items.push({ type: 'item', label: 'EPI Clinic', icon: 'fa-syringe', active: false, action: () => { selectedSection = 'epi'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
-        items.push({ type: 'item', label: 'Under-5 Clinic', icon: 'fa-child', active: false, action: () => { selectedSection = 'under5'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
-        items.push({ type: 'item', label: 'OPD Clinic', icon: 'fa-stethoscope', active: false, action: () => { selectedSection = 'opd'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
-        items.push({ type: 'item', label: 'Pharmacy Clinic', icon: 'fa-prescription-bottle', active: false, action: () => { selectedSection = 'pharmacy'; updateAllIndicators(); openHC(); setTimeout(() => { renderHCTab('data'); }, 100); } });
-        // Assessment & Service forms (exact order per spec, starting from CSC)
-        ADDITIONAL_NAV_ITEMS.forEach(item => {
-          if (!isNavVisible(item.key)) return;
-          items.push({ type: 'item', label: item.label, icon: item.icon || 'fa-clipboard-list', active: false, action: () => { let targetLevel = 'hc', facilityId = 'hc'; openKoboSource(item.key, targetLevel, facilityId); } });
+    function bindNavGroupEvents(rootEl, groups) {
+      if (!rootEl) return;
+      rootEl.querySelectorAll('[data-group-toggle]').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const gid = this.getAttribute('data-group-toggle');
+          const grp = groups.find(g => g.id === gid);
+          if (!grp || !grp.enabled) {
+            showToast('Access restricted for this section.', 'error');
+            return;
+          }
+          activeNavGroup = gid;
+          renderSidebarNavigation();
         });
-      }
+      });
 
-      // HP USER SIDEBAR (exact order per spec)
-      else if (isKebele) {
-        healthPosts.forEach(hp => {
-          items.push({
-            type: 'item', label: hp.name, icon: 'fa-house-medical',
-            active: currentPage === 'hp' && currentHpId === hp.id,
-            action: () => { openHPs(); window._hpSelect(hp.id, 'overview'); }
+      groups.forEach(grp => {
+        const grpEl = rootEl.querySelector('.nav-group[data-group="' + grp.id + '"]');
+        if (!grpEl) return;
+        const itemBtns = grpEl.querySelectorAll('.ng-item');
+        grp.items.forEach((item, idx) => {
+          const btn = itemBtns[idx];
+          if (!btn) return;
+          btn.addEventListener('click', function() {
+            if (item.disabled) { showToast('You are not authorized for this section.', 'error'); return; }
+            item.onClick();
+            if (typeof window._closeDrawer === 'function') window._closeDrawer();
+            renderSidebarNavigation();
           });
         });
-      }
-
-      // KP USER SIDEBAR
-      else if (isKPUser) {
-        items.push({ type: 'item', label: 'Overview', icon: 'fa-chart-pie', active: currentPage === 'kp' && currentKpTab === 'overview', action: () => { openKP(); } });
-        items.push({ type: 'item', label: 'Data', icon: 'fa-database', active: currentPage === 'kp' && currentKpTab === 'data', action: () => { openKP(); setTimeout(() => { renderKPTab('data'); }, 100); } });
-        items.push({ type: 'item', label: 'Analysis', icon: 'fa-chart-line', active: currentPage === 'kp' && currentKpTab === 'analysis', action: () => { openKP(); setTimeout(() => { renderKPTab('analysis'); }, 100); } });
-        items.push({ type: 'item', label: 'Feedback', icon: 'fa-comment-dots', active: currentPage === 'kp' && currentKpTab === 'feedback', action: () => { openKP(); setTimeout(() => { renderKPTab('feedback'); }, 100); } });
-      }
-
-      nav.innerHTML = items.map(item => {
-        if (item.type === 'label') return `<div class="drawer-section-label">${item.text}</div>`;
-        if (item.type === 'divider') return `<div class="drawer-divider"></div>`;
-        return `<button class="drawer-item ${item.active ? 'active' : ''}" data-action>
-          <i class="fas ${item.icon}"></i>
-          <span>${item.label}</span>
-        </button>`;
-      }).join('');
-
-      const buttons = nav.querySelectorAll('.drawer-item');
-      let itemIndex = 0;
-      items.forEach(item => {
-        if (item.type === 'item') {
-          const btn = buttons[itemIndex];
-          if (btn && item.action) btn.addEventListener('click', () => { item.action(); });
-          itemIndex++;
-        }
       });
     }
 
-    // Sidebar toggle
+    function renderSidebarNavigation() {
+      const groups = buildNavGroups();
+      const html = groups.map(renderNavGroupHtml).join('');
+      const desktopNav = document.getElementById('desktopSidebarNav');
+      const drawerNav = document.getElementById('drawerNav');
+      if (desktopNav) {
+        desktopNav.innerHTML = html;
+        bindNavGroupEvents(desktopNav, groups);
+      }
+      if (drawerNav) {
+        drawerNav.innerHTML = html;
+        bindNavGroupEvents(drawerNav, groups);
+      }
+    }
+
+    function updateDrawerNav() { renderSidebarNavigation(); }
+    function updateDesktopSidebarNav() { renderSidebarNavigation(); }
+
     function toggleSidebar() {
       const sidebar = document.getElementById('desktopSidebar');
       const body = document.body;
@@ -5371,7 +5720,70 @@
       showToast('Kobo source opened: ' + sourceKey, 'info');
     }
 
-    // ---------- LOGIN (UPDATED) ----------
+    // ============================================================
+    // LOGIN (MODIFIED: any non-empty password works)
+    // ============================================================
+
+    function completeLogin(username, name) {
+      if (username === 'Admin') {
+        currentUser = { name: name || 'Admin', role: 'admin', facility: 'All' };
+        document.getElementById('settingsBtn').style.display = 'flex';
+      } else if (username.startsWith('Kebele')) {
+        const kebeleNum = username.replace('Kebele ', '').trim();
+        const hp = healthPosts.find(h => h.kebele === kebeleNum);
+        currentUser = { name: name || username, role: 'kebele', facility: hp ? hp.name : 'HP', hpId: hp ? hp.id : null, kebele: kebeleNum };
+        document.getElementById('settingsBtn').style.display = 'none';
+      } else if (username === 'KP Clinic') {
+        currentUser = { name: name || username, role: 'kp', facility: 'KP' };
+        document.getElementById('settingsBtn').style.display = 'none';
+      } else if (['Finance', 'HIT', 'QI', 'MCH Clinic', 'ART', 'TB Clinic', 'EPI Clinic', 'Under-5 Clinic', 'OPD Clinic', 'Pharmacy Department'].includes(username)) {
+        currentUser = { name: name || username, role: username.toLowerCase().replace(' clinic', '').replace(' department', ''), facility: 'HC' };
+        document.getElementById('settingsBtn').style.display = 'none';
+      } else {
+        showToast('Unknown user type', 'error');
+        return false;
+      }
+
+      isLoggedIn = true;
+      saveSession(currentUser);
+
+      if (isAdmin()) activeNavGroup = 'ADMIN';
+      else if (currentUser.role === 'kebele') activeNavGroup = 'HP';
+      else if (currentUser.role === 'kp') activeNavGroup = 'HC';
+      else activeNavGroup = 'HC';
+
+      document.getElementById('page-login').classList.remove('active');
+
+      const kpCard = document.getElementById('kpCard');
+      if (kpCard) kpCard.style.display = isAdmin() ? 'none' : '';
+
+      if (currentUser.role === 'admin') openAdmin();
+      else if (currentUser.role === 'kebele') { if (currentUser.hpId) { openHPs(); window._hpSelect(currentUser.hpId, 'overview'); } else openHPs(); }
+      else if (currentUser.role === 'kp') openKP();
+      else openHC();
+
+      updateHomeCounts();
+      renderSidebarNavigation();
+      return true;
+    }
+
+    function tryRestoreSession() {
+      const saved = loadSession();
+      if (!saved) return false;
+      if (saved.role === 'admin') {
+        currentUser = { name: saved.name || 'Admin', role: 'admin', facility: 'All' };
+        document.getElementById('settingsBtn').style.display = 'flex';
+        isLoggedIn = true;
+        document.getElementById('page-login').classList.remove('active');
+        activeNavGroup = 'ADMIN';
+        openAdmin();
+        updateHomeCounts();
+        renderSidebarNavigation();
+        return true;
+      }
+      return false;
+    }
+
     function handleLogin() {
       const username = document.getElementById('usernameSelect').value;
       const name = document.getElementById('nameInput').value.trim();
@@ -5398,85 +5810,15 @@
       if (!password) { passwordError.classList.add('show'); document.getElementById('passwordInput').classList.add('error'); valid = false; }
       if (!valid) return;
 
-      if (username === 'Admin') {
-        if (password !== ADMIN_PASSWORD) {
-          passwordError.textContent = 'Invalid admin password';
-          passwordError.classList.add('show');
-          document.getElementById('passwordInput').classList.add('error');
-          return;
-        }
-        currentUser = { name: name || 'Admin', role: 'admin', facility: 'All' };
-        document.getElementById('settingsBtn').style.display = 'flex';
-      } else {
-        const storedPassword = getUserPassword(username);
-        if (storedPassword === null) {
-          setUserPassword(username, password);
-          showToast('Password set successfully for ' + username, 'success');
-        } else {
-          if (password !== storedPassword) {
-            passwordError.textContent = 'Invalid password for this user';
-            passwordError.classList.add('show');
-            document.getElementById('passwordInput').classList.add('error');
-            return;
-          }
-        }
+      // MODIFIED: Any non-empty password works for all users (including Admin)
+      // Skip all password storage/validation and device verification
 
-        if (!isDeviceVerified(username)) {
-          if (deviceGroup.style.display === 'none' || !deviceGroup.style.display) {
-            deviceGroup.style.display = 'block';
-            deviceError.classList.add('show');
-            deviceError.textContent = 'New device detected. Please enter device verification code.';
-            document.getElementById('deviceInput').classList.add('error');
-            return;
-          }
-          if (!deviceCode) {
-            deviceError.classList.add('show');
-            deviceError.textContent = 'Device verification code is required';
-            document.getElementById('deviceInput').classList.add('error');
-            return;
-          }
-          if (deviceCode !== DEVICE_VERIFICATION_CODE) {
-            deviceError.classList.add('show');
-            deviceError.textContent = 'Invalid device verification code';
-            document.getElementById('deviceInput').classList.add('error');
-            return;
-          }
-          markDeviceVerified(username);
-          showToast('New device verified successfully!', 'success');
-        }
-
-        if (username.startsWith('Kebele')) {
-          const kebeleNum = username.replace('Kebele ', '').trim();
-          const hp = healthPosts.find(h => h.kebele === kebeleNum);
-          currentUser = { name: name || username, role: 'kebele', facility: hp ? hp.name : 'HP', hpId: hp ? hp.id : null, kebele: kebeleNum };
-          document.getElementById('settingsBtn').style.display = 'none';
-        } else if (username === 'KP Clinic') {
-          currentUser = { name: name || username, role: 'kp', facility: 'KP' };
-          document.getElementById('settingsBtn').style.display = 'none';
-        } else if (['Finance', 'HIT', 'QI', 'MCH Clinic', 'ART', 'TB Clinic', 'EPI Clinic', 'Under-5 Clinic', 'OPD Clinic', 'Pharmacy Department'].includes(username)) {
-          currentUser = { name: name || username, role: username.toLowerCase().replace(' clinic', '').replace(' department', ''), facility: 'HC' };
-          document.getElementById('settingsBtn').style.display = 'none';
-        } else {
-          return;
-        }
-      }
-
-      isLoggedIn = true;
-      document.getElementById('page-login').classList.remove('active');
-
-      // Hide KP card from Admin home if admin
-      const kpCard = document.getElementById('kpCard');
-      if (kpCard) kpCard.style.display = isAdmin() ? 'none' : '';
-
-      if (currentUser.role === 'admin') openAdmin();
-      else if (currentUser.role === 'kebele') { if (currentUser.hpId) { openHPs(); window._hpSelect(currentUser.hpId, 'overview'); } else openHPs(); }
-      else if (currentUser.role === 'kp') openKP();
-      else openHC();
-
-      updateHomeCounts();
-      updateDrawerNav();
-      updateDesktopSidebarNav();
+      completeLogin(username, name || username);
     }
+
+    // ============================================================
+    // END LOGIN
+    // ============================================================
 
     // ---------- FULLSCREEN / COMPRESS ----------
     function toggleFullscreen() {
@@ -5967,7 +6309,6 @@
         if (e.key === 'Enter') { e.preventDefault(); document.getElementById('nameInput').focus(); }
       });
 
-      // Home cards now direct to respective pages (HC and HPs are direct)
       document.getElementById('hcCard').addEventListener('click', openHC);
       document.getElementById('hcCard').addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openHC(); } });
       document.getElementById('hpCard').addEventListener('click', openHPs);
@@ -5983,11 +6324,17 @@
       updateAllIndicators();
       updateHomeCounts();
       updateSectionForPage('login');
-      // Ensure only login page is visible
       document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
       document.getElementById('page-login').classList.add('active');
 
-      console.log('Debremarkos PHCU KPI initialized with role-based sidebar, supervisor indicators, and access restrictions.');
+      // Load persisted supervisor period data
+      try {
+        const stored = JSON.parse(localStorage.getItem('dm_phcu_supervisor_period') || '{}');
+        Object.keys(stored).forEach(key => { supervisorPeriodData[key] = stored[key]; });
+        loadSupervisorPeriodData();
+      } catch (e) { /* ignore */ }
+
+      console.log('Debremarkos PHCU KPI initialized — login simplified, supervisor editable, period filter everywhere.');
     });
 
   })();
