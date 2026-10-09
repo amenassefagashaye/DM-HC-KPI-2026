@@ -56,7 +56,6 @@
       --header-height: 72px;
       --kp-color: #7c3aed;
       --kp-light: #a78bfa;
-      /* NEW: main group colors */
       --grp-admin: #6d28d9;
       --grp-admin-light: #8b5cf6;
       --grp-hc: #0b3b5c;
@@ -1194,18 +1193,16 @@
     }
     .app-footer .footer-section .accent { color: #ffe082; }
 
+    /* MODIFIED: Toast with no background, only text */
     .toast {
       position: fixed;
       bottom: 90px;
       left: 50%;
       transform: translateX(-50%) translateY(20px);
-      background: var(--primary);
-      color: white;
-      padding: 12px 24px;
-      border-radius: 40px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      color: #1e293b;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      font-weight: 700;
       opacity: 0;
       transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 9999;
@@ -1213,12 +1210,16 @@
       font-family: 'Times New Roman', 'Noto Sans Ethiopic', serif;
       max-width: 90%;
       text-align: center;
+      background: none;
+      border: none;
+      box-shadow: none;
+      text-shadow: 0 0 8px #ffffff, 0 0 8px #ffffff, 0 0 8px #ffffff, 0 0 8px #ffffff;
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .toast.success { background: var(--green); }
-    .toast.error { background: var(--red); }
-    .toast.info { background: var(--primary); }
-    .toast.warning { background: var(--orange-red); }
+    .toast.success { color: #1e4a1e; }
+    .toast.error { color: #9a1f1f; }
+    .toast.info { color: var(--primary); }
+    .toast.warning { color: #a53f00; }
 
     .mt-1 { margin-top: 6px; } .mt-2 { margin-top: 12px; } .mt-3 { margin-top: 18px; }
     .mb-1 { margin-bottom: 6px; } .mb-2 { margin-bottom: 12px; } .mb-3 { margin-bottom: 18px; }
@@ -1684,11 +1685,13 @@
     .summary-card.overdue { border-left-color: var(--red); }
     .summary-card.indicator { border-left-color: var(--secondary); }
 
+    /* MODIFIED: Period filter bar with symmetrical distribution */
     .period-filter-bar {
       display: flex;
       gap: 6px;
       flex-wrap: wrap;
       align-items: center;
+      justify-content: space-evenly;
       margin-bottom: 14px;
       background: white;
       padding: 10px 12px;
@@ -1702,6 +1705,7 @@
       margin-right: 4px;
       font-family: 'Times New Roman', 'Noto Sans Ethiopic', serif;
       white-space: nowrap;
+      flex: 0 0 auto;
     }
     .period-filter-bar .pf-btn {
       padding: 6px 12px;
@@ -1716,6 +1720,10 @@
       font-family: 'Times New Roman', 'Noto Sans Ethiopic', serif;
       min-height: 34px;
       white-space: nowrap;
+      flex: 1 1 auto;
+      min-width: 60px;
+      max-width: 120px;
+      text-align: center;
     }
     .period-filter-bar .pf-btn:hover { border-color: var(--primary-light); background: #f0f7ff; }
     .period-filter-bar .pf-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
@@ -1822,9 +1830,6 @@
       font-size: 1rem;
     }
 
-    /* ============================================================
-       NEW: THREE MAIN SIDEBAR GROUPS + SUB-SIDEBARS
-       ============================================================ */
     .nav-group {
       border-radius: 10px;
       margin-bottom: 8px;
@@ -1923,37 +1928,62 @@
       pointer-events: none;
     }
 
-    /* Distinct contrast backgrounds for Aggregate & Ranking */
     .ng-sub .ng-item.ng-highlight-agg {
-      background: linear-gradient(135deg, var(--agg-bg), #0369a1);
-      color: #ffffff;
-      border-color: var(--agg-bg);
-      box-shadow: 0 3px 10px rgba(2,132,199,0.3);
+      background: #ffffff;
+      color: #0b3b5c;
+      border-color: #d1d9e6;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
     }
-    .ng-sub .ng-item.ng-highlight-agg i { color: #e0f2fe; }
+    .ng-sub .ng-item.ng-highlight-agg i { color: #0b3b5c; }
     .ng-sub .ng-item.ng-highlight-agg:hover {
-      background: linear-gradient(135deg, var(--agg-bg-hover), #075985);
-      color: #ffffff;
+      background: #f0f7ff;
+      color: #0b3b5c;
+      border-color: #0b3b5c;
     }
-    .ng-sub .ng-item.ng-highlight-agg:hover i { color: #ffffff; }
+    .ng-sub .ng-item.ng-highlight-agg:hover i { color: #0b3b5c; }
     .ng-sub .ng-item.ng-highlight-agg.active {
-      box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px var(--agg-bg);
+      box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px #0b3b5c;
     }
 
     .ng-sub .ng-item.ng-highlight-rank {
-      background: linear-gradient(135deg, var(--rank-bg), #92400e);
-      color: #ffffff;
-      border-color: var(--rank-bg);
-      box-shadow: 0 3px 10px rgba(180,83,9,0.3);
+      background: #ffffff;
+      color: #b45309;
+      border-color: #d1d9e6;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
     }
-    .ng-sub .ng-item.ng-highlight-rank i { color: #fef3c7; }
+    .ng-sub .ng-item.ng-highlight-rank i { color: #b45309; }
     .ng-sub .ng-item.ng-highlight-rank:hover {
-      background: linear-gradient(135deg, var(--rank-bg-hover), #78350f);
-      color: #ffffff;
+      background: #fffbeb;
+      color: #92400e;
+      border-color: #b45309;
     }
-    .ng-sub .ng-item.ng-highlight-rank:hover i { color: #ffffff; }
+    .ng-sub .ng-item.ng-highlight-rank:hover i { color: #92400e; }
     .ng-sub .ng-item.ng-highlight-rank.active {
-      box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px var(--rank-bg);
+      box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px #b45309;
+    }
+
+    /* MODIFIED: Editable input styling */
+    .editable-input {
+      width: 65px;
+      padding: 5px 6px;
+      border-radius: 6px;
+      border: 2px solid #d1d9e6;
+      text-align: center;
+      font-size: 0.78rem;
+      font-family: 'Times New Roman', 'Noto Sans Ethiopic', serif;
+      background: var(--bg-subtle);
+      transition: var(--transition);
+      min-height: 32px;
+    }
+    .editable-input:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(11,59,92,0.08);
+    }
+    .editable-input.error {
+      border-color: var(--red);
+      background: #fff5f5;
     }
 
     @media (max-width: 991px) {
@@ -1989,7 +2019,7 @@
       .selector-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
       .rank-mode-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
       .summary-grid { grid-template-columns: repeat(2, 1fr); }
-      .period-filter-bar .pf-custom { margin-left: 0; width: 100%; }
+      .period-filter-bar .pf-custom { margin-left: 0; width: 100%; justify-content: center; }
       .section-filter-bar .sf-select { min-width: 130px; font-size: 0.72rem; }
     }
 
@@ -2033,8 +2063,9 @@
       .summary-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
       .summary-card .sc-value { font-size: 1.2rem; }
       .summary-card .sc-label { font-size: 0.6rem; }
-      .period-filter-bar .pf-btn { font-size: 0.65rem; padding: 5px 9px; min-height: 30px; }
+      .period-filter-bar .pf-btn { font-size: 0.65rem; padding: 5px 9px; min-height: 30px; min-width: 45px; }
       .section-filter-bar .sf-select { min-width: 110px; font-size: 0.68rem; padding: 6px 10px; min-height: 32px; }
+      .editable-input { width: 55px; font-size: 0.72rem; min-height: 28px; }
     }
     @media (max-width: 360px) {
       .app-header .header-title { font-size: 0.68rem; }
@@ -2049,8 +2080,9 @@
       .rank-mode-grid { grid-template-columns: 1fr; }
       .mobile-drawer { width: 270px; }
       .summary-grid { grid-template-columns: 1fr 1fr; }
-      .period-filter-bar .pf-btn { font-size: 0.6rem; padding: 4px 7px; min-height: 28px; }
+      .period-filter-bar .pf-btn { font-size: 0.6rem; padding: 4px 7px; min-height: 28px; min-width: 40px; }
       .section-filter-bar .sf-select { min-width: 90px; font-size: 0.62rem; }
+      .editable-input { width: 48px; font-size: 0.68rem; min-height: 26px; }
     }
     @media (orientation: landscape) and (max-height: 500px) {
       .app-header { padding: 4px 10px; }
@@ -2271,9 +2303,9 @@
     </div>
     <div class="tab-bar" id="adminTabBar">
       <button class="tab-btn active" data-admintab="submissions" title="Submissions" aria-label="Submissions"><i class="fas fa-inbox"></i></button>
-      <button class="tab-btn" data-admintab="aggregate" title="Aggregate" aria-label="Aggregate"><i class="fas fa-chart-simple"></i></button>
+      <button class="tab-btn" data-admintab="aggregate" title="Aggregate" aria-label="Aggregate"><i class="fas fa-chart-simple"></i> <span class="btn-label">Aggregate</span></button>
       <button class="tab-btn" data-admintab="comparison" title="Comparison" aria-label="Comparison"><i class="fas fa-code-compare"></i></button>
-      <button class="tab-btn" data-admintab="ranking" title="Ranking" aria-label="Ranking"><i class="fas fa-ranking-star"></i></button>
+      <button class="tab-btn" data-admintab="ranking" title="Ranking" aria-label="Ranking"><i class="fas fa-ranking-star"></i> <span class="btn-label">Ranking</span></button>
       <button class="tab-btn" data-admintab="supervisor" title="Supervisor" aria-label="Supervisor"><i class="fas fa-user-tie"></i></button>
       <button class="tab-btn" data-admintab="summary" title="Summary" aria-label="Summary"><i class="fas fa-clipboard-list"></i></button>
       <button class="tab-btn" data-admintab="feedback" title="Feedback" aria-label="Feedback"><i class="fas fa-comment-dots"></i></button>
@@ -2339,9 +2371,7 @@
     let customToDate = null;
     let isLoggedIn = false;
 
-    // NEW: which main group is expanded in the sidebar
-    let activeNavGroup = 'ADMIN'; // 'ADMIN' | 'HC' | 'HP'
-    // NEW: which HC sub-item is currently selected (label key)
+    let activeNavGroup = 'ADMIN';
     let activeHcItemKey = 'all-indicators';
 
     // ---------- PASSWORD & DEVICE VERIFICATION ----------
@@ -2351,8 +2381,60 @@
     const STORAGE_KEY_DEVICES = 'dm_phcu_devices';
     const STORAGE_KEY_PASSWORD_RESET = 'dm_phcu_password_reset';
     const STORAGE_KEY_SESSION = 'dm_phcu_session';
+    const STORAGE_KEY_DATA = 'dm_phcu_data_v1';
 
-    // ---------- PASSWORD STORAGE (FULLY FUNCTIONAL) ----------
+    // ---------- PERSISTENCE ----------
+    function loadPersistedData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_DATA);
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch (e) { return null; }
+    }
+
+    function savePersistedData() {
+      try {
+        const data = {
+          hcIndicators: hcIndicators.map(function(k) { return { id: k.id, achievement: k.achievement, plan: k.plan }; }),
+          hpIndicators: {},
+          healthPosts: healthPosts.map(function(h) { return { id: h.id, status: h.status }; }),
+          submissions: submissions,
+          timestamp: Date.now()
+        };
+        Object.keys(hpIndicators).forEach(function(hpId) {
+          data.hpIndicators[hpId] = hpIndicators[hpId].map(function(k) { return { id: k.id, achievement: k.achievement, plan: k.plan }; });
+        });
+        localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(data));
+      } catch (e) { /* ignore */ }
+    }
+
+    function restorePersistedData() {
+      const data = loadPersistedData();
+      if (!data) return;
+      if (data.hcIndicators) {
+        data.hcIndicators.forEach(function(saved) {
+          const ind = hcIndicators.find(function(k) { return k.id === saved.id; });
+          if (ind) { ind.achievement = saved.achievement; ind.plan = saved.plan; }
+        });
+      }
+      if (data.hpIndicators) {
+        Object.keys(data.hpIndicators).forEach(function(hpId) {
+          if (!hpIndicators[hpId]) return;
+          data.hpIndicators[hpId].forEach(function(saved) {
+            const ind = hpIndicators[hpId].find(function(k) { return k.id === saved.id; });
+            if (ind) { ind.achievement = saved.achievement; ind.plan = saved.plan; }
+          });
+        });
+      }
+      if (data.healthPosts) {
+        data.healthPosts.forEach(function(saved) {
+          const hp = healthPosts.find(function(h) { return h.id === saved.id; });
+          if (hp) hp.status = saved.status;
+        });
+      }
+      if (data.submissions) submissions = data.submissions;
+    }
+
     function loadUserPasswords() {
       try { return JSON.parse(localStorage.getItem(STORAGE_KEY_USERS)) || {}; }
       catch (e) { return {}; }
@@ -2374,7 +2456,6 @@
       return getUserPassword(username) !== null;
     }
 
-    // ---------- PASSWORD RESET FLAG ----------
     function loadPasswordResetFlags() {
       try { return JSON.parse(localStorage.getItem(STORAGE_KEY_PASSWORD_RESET)) || {}; }
       catch (e) { return {}; }
@@ -2393,7 +2474,6 @@
       savePasswordResetFlags(flags);
     }
 
-    // ---------- ADMIN: RESET ALL USER PASSWORDS ----------
     function resetAllUserPasswords() {
       const users = loadUserPasswords();
       const flags = loadPasswordResetFlags();
@@ -2407,7 +2487,6 @@
       return Object.keys(flags).length;
     }
 
-    // ---------- SESSION PERSISTENCE (non-plaintext) ----------
     function saveSession(user) {
       try {
         const session = { role: user.role, facility: user.facility, hpId: user.hpId || null, kebele: user.kebele || null, name: user.name, savedAt: Date.now() };
@@ -2420,7 +2499,6 @@
     }
     function clearSession() { localStorage.removeItem(STORAGE_KEY_SESSION); }
 
-    // ---------- DEVICE VERIFICATION ----------
     function loadVerifiedDevices() {
       try { return JSON.parse(localStorage.getItem(STORAGE_KEY_DEVICES)) || {}; }
       catch (e) { return {}; }
@@ -2431,10 +2509,8 @@
       const devices = loadVerifiedDevices(); devices[username] = true; saveVerifiedDevices(devices);
     }
 
-    // ---------- SELECTED SECTION ----------
     let selectedSection = 'all';
 
-    // ---------- NAVIGATION VISIBILITY CONFIG ----------
     let navVisibility = {
       homeHC: true, homeHPs: true, homeAdmin: true, homeKP: true,
       hcOverview: true, hcData: true, hcAnalysis: true, hcFeedback: true,
@@ -2491,7 +2567,6 @@
       drawerKoboTool: { label: 'Drawer: KoboTool Section', icon: 'fa-table' }
     };
 
-    // ---------- SUPERVISOR DATA ----------
     let supervisors = [
       {
         id: 'sup1', name: 'Supervisor A', group: 1, kebeles: ['04', '06', '15'],
@@ -2507,7 +2582,6 @@
       }
     ];
 
-    // NEW: Store supervisor meeting data per period (keyed by supervisor id + period)
     const supervisorPeriodData = {};
 
     function getSupervisorPeriodKey(supervisorId) {
@@ -2526,7 +2600,6 @@
       });
     }
 
-    // ---------- ROLE PERMISSION SYSTEM ----------
     function isAdmin() { return currentUser.role === 'admin'; }
     function isQI() { return currentUser.role === 'qi'; }
     function isKP() { return currentUser.role === 'kp'; }
@@ -2577,7 +2650,6 @@
       return navVisibility[key] !== false;
     }
 
-    // ---------- ALL USERS ----------
     const ALL_USERS = [
       { id: 'admin', label: 'Admin', icon: 'fa-shield-halved', role: 'admin', facility: 'All' },
       { id: 'kebele04', label: 'Kebele 04', icon: 'fa-house-medical', role: 'kebele', kebele: '04', hpId: 'hp5' },
@@ -2600,7 +2672,6 @@
       { id: 'pharmacy', label: 'Pharmacy Department', icon: 'fa-prescription-bottle', role: 'pharmacy', facility: 'HC' }
     ];
 
-    // ---------- KOBOTOOLBOX SOURCES ----------
     const KOBOTOOLBOX_SOURCES = {
       'CSC':                   { url: 'https://ee.kobotoolbox.org/x/m7IWSF7i', level: 'hp',   indicatorMatch: 'CSC Rate' },
       'HEP':                   { url: 'https://ee.kobotoolbox.org/x/oMhdV4Hm', level: 'hp',   indicatorMatch: 'HEP' },
@@ -2628,7 +2699,6 @@
 
     let koboSummaries = {};
 
-    // ---------- ADDITIONAL NAV ITEMS (for HC sidebar) ----------
     const ADDITIONAL_NAV_ITEMS = [
       { label: 'CSC', key: 'CSC', icon: 'fa-users' },
       { label: 'HEP', key: 'HEP', icon: 'fa-heart-pulse' },
@@ -2652,7 +2722,6 @@
       { label: 'HR – Chapter 10', key: 'HR-Chapter-10', icon: 'fa-user-doctor' }
     ];
 
-    // ---------- HC SUB-SIDEBAR ITEMS (exact 31-item list per spec) ----------
     const HC_SUB_ITEMS = [
       { key: 'all-indicators',    label: 'All Indicators',        icon: 'fa-list-check',        action: 'hcAll' },
       { key: 'kp-clinic',         label: 'KP Clinic',             icon: 'fa-heart-pulse',       action: 'kp' },
@@ -2687,7 +2756,6 @@
       { key: 'hr-ch10',           label: 'HR – Chapter 10',       icon: 'fa-user-doctor',       action: 'kobo', source: 'HR-Chapter-10' }
     ];
 
-    // ---------- ADMIN SUB-SIDEBAR ITEMS (exact 12-item list per spec) ----------
     const ADMIN_SUB_ITEMS = [
       { key: 'summary',      label: 'Summary',                icon: 'fa-clipboard-list',  action: 'summary' },
       { key: 'aggregate',    label: 'Aggregate',              icon: 'fa-chart-simple',    action: 'adminTab', tab: 'aggregate', highlight: 'agg' },
@@ -2703,7 +2771,6 @@
       { key: 'settings',     label: 'Settings',               icon: 'fa-gear',            action: 'settings' }
     ];
 
-    // ---------- AUTO-SUGGESTION ----------
     const AUTO_SUGGEST_DATA = {
       names: ['Assefa Gashaye', 'Amanuel', 'Bruktawit', 'Chala', 'Desta', 'Eden', 'Fikru', 'Hanna', 'Kebede', 'Mulu', 'Selam', 'Tigist', 'Yohannes'],
       departments: ['Finance', 'HIT', 'QI', 'MCH Clinic', 'ART', 'TB Clinic', 'EPI Clinic', 'Under-5 Clinic', 'OPD Clinic', 'KP Clinic', 'Pharmacy Department', 'Laboratory'],
@@ -2850,7 +2917,6 @@
       listEl.classList.remove('open');
     }
 
-    // ---------- PERIOD FILTER ----------
     function getPeriodFilterLabel() {
       const labels = {
         daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly',
@@ -2930,7 +2996,6 @@
       }
     };
 
-    // ---------- SECTION FILTER BAR ----------
     function renderSectionFilterBar(context) {
       if (!isQI() && !isAdmin()) return '';
       const sections = [
@@ -2967,7 +3032,6 @@
       showToast('Section set to: ' + section, 'info');
     };
 
-    // ---------- SECTION-BASED INDICATOR FILTERING ----------
     const SECTION_INDICATOR_MAP = {
       finance: ['Reimbursement'],
       hit: ['Data Quality Score', 'Data Use Score', 'HIS Capacity & Infrastructure'],
@@ -2992,7 +3056,6 @@
       return allIndicators.filter(i => mapped.includes(i.name) || (i.category && i.category === userSection));
     }
 
-    // ---------- CENTRALIZED CONFIGURATION ----------
     let hcAgendas = [
       { id: 'finance', name: 'Health Financing', weight: 5, score: 81, icon: 'fa-coins', color: '#2e7d32' },
       { id: 'ir', name: 'Information Revolution', weight: 15, score: 74, icon: 'fa-chart-simple', color: '#f9a825' },
@@ -3066,7 +3129,6 @@
       { id: 62, agenda: 'qe', name: 'Total HIV Positive from KP Clinic', weight: 2, plan: 130, achievement: 92, unit: 'cases', direction: 'higher', verified: false, category: 'kp' }
     ];
 
-    // ---------- HEALTH POSTS ----------
     let healthPosts = [
       { id: 'hp1', name: 'Kebele 05 Urban', code: 'HP-05U', kebele: '05 Urban', responsible: 'Amanuel', irScore: 0, lgScore: 0, qeScore: 0, overall: 0, status: 'Draft' },
       { id: 'hp2', name: 'Kebele 06', code: 'HP-06', kebele: '06', responsible: 'Bruktawit', irScore: 0, lgScore: 0, qeScore: 0, overall: 0, status: 'Draft' },
@@ -3127,7 +3189,6 @@
 
     let submissions = [];
 
-    // ---------- HELPERS ----------
     function showToast(message, type = 'success') {
       const toast = document.getElementById('toast');
       toast.textContent = message;
@@ -3191,7 +3252,6 @@
       return '#' + rank;
     }
 
-    // ---------- UPDATE ALL INDICATORS (PERIOD-AWARE) ----------
     function updateAllIndicators() {
       const mult = getPeriodMultiplier();
       hcIndicators.forEach(k => {
@@ -3256,7 +3316,6 @@
       return Math.round(weightedSum / totalWeight);
     }
 
-    // ---------- GET INDICATORS FOR A SPECIFIC SECTION ----------
     function getIndicatorsForSection(sectionId, sourceIndicators) {
       if (isQI()) return sourceIndicators;
       if (isAdmin()) {
@@ -3269,7 +3328,6 @@
       return sourceIndicators.filter(i => mapped.includes(i.name) || (i.category && i.category === userSection));
     }
 
-    // ---------- SUPERVISOR CALCULATIONS ----------
     function calcSupervisorIndicatorScore(actual, target) {
       if (!target || target === 0) return 0;
       let val = (actual / target) * 100;
@@ -3300,7 +3358,6 @@
       });
     }
 
-    // ---------- SUMMARY CALCULATIONS ----------
     function getSummaryStats() {
       const mult = getPeriodMultiplier();
       let totalIndicators = hcIndicators.length;
@@ -3350,7 +3407,6 @@
       };
     }
 
-    // ---------- RENDER SUMMARY ----------
     function renderSummary() {
       const container = document.getElementById('summaryContent');
       if (!container) return;
@@ -3464,7 +3520,6 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // ---------- HEADER TITLE ----------
     function updateHeaderTitle(title, subtitle) {
       const t = document.getElementById('headerTitle');
       const s = document.getElementById('headerSubtitle');
@@ -3496,7 +3551,6 @@
       }
     }
 
-    // ---------- PAGE NAVIGATION ----------
     function showPage(pageId) {
       if (!isLoggedIn && pageId !== 'login') return;
       document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
@@ -3596,7 +3650,6 @@
       updateDesktopSidebarNav();
     }
 
-    // ---------- ROLE FILTERING ----------
     function getUserIndicators(user, indicators, allAgendas) {
       if (user.role === 'admin') return indicators;
       if (user.role === 'qi') return indicators;
@@ -3614,7 +3667,6 @@
       return indicators;
     }
 
-    // ---------- RENDER HC ----------
     function renderHC() {
       if (!isLoggedIn) return;
       updateAllIndicators();
@@ -3759,9 +3811,11 @@
             html += `<tr>
               <td>${k.name}</td>
               <td>${k.weight}%</td>
-              <td>${k.plan}</td>
               <td>${editable
-                ? `<input type="number" class="hc-ach-input" data-id="${k.id}" value="${k.achievement || ''}" style="width:60px;padding:5px;border-radius:6px;border:2px solid #d1d9e6;text-align:center;font-size:0.8rem;">`
+                ? `<input type="number" class="editable-input hc-plan-input" data-id="${k.id}" value="${k.plan}" step="any">`
+                : `<span>${k.plan}</span>`}</td>
+              <td>${editable
+                ? `<input type="number" class="editable-input hc-ach-input" data-id="${k.id}" value="${k.achievement || ''}" step="any">`
                 : `<span>${Math.round(k.achievement * mult * 100) / 100}</span>`}</td>
               <td><strong>${perf}%</strong></td>
               <td><span class="status-badge ${getStatusClass(perf)}">${getStatusText(perf)}</span></td>
@@ -3784,9 +3838,26 @@
             if (k && !isNaN(val)) {
               k.achievement = val;
               updateAllIndicators();
+              savePersistedData();
               renderHC();
               renderHCTab('data');
-              showToast('Data updated', 'success');
+              showToast('Actual updated', 'success');
+            }
+          });
+        });
+        container.querySelectorAll('.hc-plan-input').forEach(inp => {
+          if (!canEditHc) return;
+          inp.addEventListener('change', function() {
+            let id = parseInt(this.dataset.id);
+            let val = parseFloat(this.value);
+            let k = hcIndicators.find(d => d.id === id);
+            if (k && !isNaN(val)) {
+              k.plan = val;
+              updateAllIndicators();
+              savePersistedData();
+              renderHC();
+              renderHCTab('data');
+              showToast('Target updated', 'success');
             }
           });
         });
@@ -3862,7 +3933,6 @@
       }
     }
 
-    // ---------- FEEDBACK SECTION ----------
     function renderFeedbackSection(context, container, indicators) {
       const mult = getPeriodMultiplier();
       let strengths = [], weaknesses = [], threats = [], wayForward = [];
@@ -3924,7 +3994,6 @@
       if (container) copyToClipboard(container.innerText, 'All dashboard content copied!');
     };
 
-    // ---------- RENDER KP CLINIC ----------
     function renderKP() {
       if (!isLoggedIn) return;
       updateAllIndicators();
@@ -3932,7 +4001,6 @@
       if (!container) return;
       const kpIndicators = hcIndicators.filter(i => i.category === 'kp');
       const kpScore = getKPScore();
-      const mult = getPeriodMultiplier();
       container.innerHTML = `
         <div class="kp-section-header">
           <i class="fas fa-heart-pulse"></i> KP Clinic — Key Population
@@ -3970,13 +4038,6 @@
         return;
       }
       if (tab === 'overview') {
-        let strengths = [], weaknesses = [], threats = [];
-        kpIndicators.forEach(k => {
-          let p = calcPerformance(k.plan, k.achievement * mult, k.direction);
-          if (p >= 85) strengths.push({ name: k.name, perf: p });
-          else if (p >= 50 && p < 75) weaknesses.push({ name: k.name, perf: p });
-          else if (p < 50) threats.push({ name: k.name, perf: p });
-        });
         container.innerHTML = `
           ${renderPeriodFilterBar('kp')}
           <div class="card">
@@ -4010,9 +4071,11 @@
           let perf = calcPerformance(k.plan, k.achievement * mult, k.direction);
           html += `<tr>
             <td>${k.name}</td>
-            <td>${k.plan}</td>
             <td>${canEditKp
-              ? `<input type="number" class="kp-ach-input" data-id="${k.id}" value="${k.achievement || ''}" style="width:60px;padding:5px;border-radius:6px;border:2px solid #d1d9e6;text-align:center;font-size:0.8rem;">`
+              ? `<input type="number" class="editable-input kp-plan-input" data-id="${k.id}" value="${k.plan}" step="any">`
+              : `<span>${k.plan}</span>`}</td>
+            <td>${canEditKp
+              ? `<input type="number" class="editable-input kp-ach-input" data-id="${k.id}" value="${k.achievement || ''}" step="any">`
               : `<span>${Math.round(k.achievement * mult * 100) / 100}</span>`}</td>
             <td><strong>${perf}%</strong></td>
             <td><span class="status-badge ${getStatusClass(perf)}">${getStatusText(perf)}</span></td>
@@ -4034,9 +4097,26 @@
             if (k && !isNaN(val)) {
               k.achievement = val;
               updateAllIndicators();
+              savePersistedData();
               renderKP();
               renderKPTab('data');
-              showToast('Data updated', 'success');
+              showToast('Actual updated', 'success');
+            }
+          });
+        });
+        container.querySelectorAll('.kp-plan-input').forEach(inp => {
+          if (!canEditKp) return;
+          inp.addEventListener('change', function() {
+            let id = parseInt(this.dataset.id);
+            let val = parseFloat(this.value);
+            let k = hcIndicators.find(d => d.id === id);
+            if (k && !isNaN(val)) {
+              k.plan = val;
+              updateAllIndicators();
+              savePersistedData();
+              renderKP();
+              renderKPTab('data');
+              showToast('Target updated', 'success');
             }
           });
         });
@@ -4082,7 +4162,6 @@
       }
     }
 
-    // ---------- KP SUBMIT / COPY / SHARE ----------
     window._kpSubmitData = function() {
       if (!canSubmitData('kp', 'kp')) {
         showToast('You do not have permission to submit KP data.', 'error');
@@ -4105,6 +4184,7 @@
         approval: 'Pending'
       });
       updateHomeCounts();
+      savePersistedData();
       showToast('KP Clinic data submitted to Admin', 'success');
     };
 
@@ -4142,7 +4222,6 @@
       shareContent(text, 'KP Clinic Performance Report');
     };
 
-    // ---------- RENDER HPs ----------
     function renderHPs() {
       if (!isLoggedIn) return;
       updateAllIndicators();
@@ -4323,9 +4402,11 @@
           return `<tr>
             <td class="amharic">${k.name}</td>
             <td>${k.weight}%</td>
-            <td>${k.plan}</td>
             <td>${editable
-              ? `<input type="number" class="hp-ach-input" data-id="${k.id}" data-hp="${hpId}" value="${k.achievement || ''}" style="width:60px;padding:5px;border-radius:6px;border:2px solid #d1d9e6;text-align:center;font-size:0.8rem;">`
+              ? `<input type="number" class="editable-input hp-plan-input" data-id="${k.id}" data-hp="${hpId}" value="${k.plan}" step="any">`
+              : `<span>${k.plan}</span>`}</td>
+            <td>${editable
+              ? `<input type="number" class="editable-input hp-ach-input" data-id="${k.id}" data-hp="${hpId}" value="${k.achievement || ''}" step="any">`
               : `<span>${Math.round(k.achievement * mult * 100) / 100}</span>`}</td>
             <td><strong>${perf}%</strong></td>
             <td><span class="status-badge ${getStatusClass(perf)} amharic">${getStatusTextAm(perf)}</span></td>
@@ -4360,8 +4441,25 @@
             if (item && !isNaN(val)) {
               item.achievement = val;
               updateAllIndicators();
+              savePersistedData();
               renderHPDetail(hpId, 'data');
               showToast('መረጃ ተቀይሯል', 'success');
+            }
+          });
+        });
+        container.querySelectorAll('.hp-plan-input').forEach(inp => {
+          if (!canEditHp) return;
+          inp.addEventListener('change', function() {
+            let id = parseInt(this.dataset.id);
+            let hpId = this.dataset.hp;
+            let val = parseFloat(this.value);
+            let item = (hpIndicators[hpId] || []).find(d => d.id === id);
+            if (item && !isNaN(val)) {
+              item.plan = val;
+              updateAllIndicators();
+              savePersistedData();
+              renderHPDetail(hpId, 'data');
+              showToast('ዒላማ ተቀይሯል', 'success');
             }
           });
         });
@@ -4435,7 +4533,6 @@
       }
     }
 
-    // ---------- RENDER ADMIN ----------
     function renderAdmin() {
       if (!isLoggedIn || !canAccessAdmin()) return;
       const container = document.getElementById('adminContent');
@@ -4876,15 +4973,15 @@
               </tbody></table></div>
           </div>
           <div class="card">
-            <div class="card-header">📋 Supervisor Indicator Details with Editable Meeting Target and Meeting Actual</div>
+            <div class="card-header">📋 Supervisor Indicator Details with Editable Target and Actual</div>
             <div class="table-wrap"><table>
               <thead><tr><th>Supervisor</th><th>Meetings Target</th><th>Meetings Actual</th><th>Meetings %</th><th>Supervisions Target</th><th>Supervisions Actual</th><th>Supervisions %</th><th>Feedback Target</th><th>Feedback Actual</th><th>Feedback %</th><th>Avg %</th></tr></thead>
               <tbody>
               ${supScores.map(sup => `
                 <tr>
                   <td><strong>${escapeHtml(sup.name)}</strong></td>
-                  <td><input type="number" class="sup-meet-target" data-sup-id="${sup.id}" value="${sup.meetingsTarget}" style="width:60px;padding:5px;border-radius:6px;border:2px solid #d1d9e6;text-align:center;font-size:0.8rem;"></td>
-                  <td><input type="number" class="sup-meet-actual" data-sup-id="${sup.id}" value="${sup.meetingsActual}" style="width:60px;padding:5px;border-radius:6px;border:2px solid #d1d9e6;text-align:center;font-size:0.8rem;"></td>
+                  <td><input type="number" class="editable-input sup-meet-target" data-sup-id="${sup.id}" value="${sup.meetingsTarget}"></td>
+                  <td><input type="number" class="editable-input sup-meet-actual" data-sup-id="${sup.id}" value="${sup.meetingsActual}"></td>
                   <td>${sup.meetingsPct}%</td>
                   <td>${sup.supervisionsTarget}</td>
                   <td>${sup.supervisionsActual}</td>
@@ -4949,7 +5046,6 @@
           ` : ''}
         `;
 
-        // Bind editable meeting target/actual inputs
         container.querySelectorAll('.sup-meet-target').forEach(inp => {
           inp.addEventListener('change', function() {
             const supId = this.dataset.supId;
@@ -4961,7 +5057,6 @@
             const key = getSupervisorPeriodKey(supId);
             if (!supervisorPeriodData[key]) supervisorPeriodData[key] = { meetingsTarget: sup.meetingsTarget, meetingsActual: sup.meetingsActual };
             else supervisorPeriodData[key].meetingsTarget = sup.meetingsTarget;
-            // Persist to localStorage for cross-session storage
             try {
               const stored = JSON.parse(localStorage.getItem('dm_phcu_supervisor_period') || '{}');
               stored[key] = { meetingsTarget: sup.meetingsTarget, meetingsActual: sup.meetingsActual };
@@ -5053,7 +5148,6 @@
       openKoboSource(sourceKey, targetLevel, facilityId);
     };
 
-    // ---------- EVENT BINDINGS ----------
     document.querySelectorAll('#hcTabBar .tab-btn').forEach(btn => {
       btn.addEventListener('click', function() {
         document.querySelectorAll('#hcTabBar .tab-btn').forEach(b => b.classList.remove('active'));
@@ -5202,6 +5296,7 @@
         status: 'Submitted', adminReviewer: '', reviewDate: '', adminComments: '', approval: 'Pending'
       });
       updateHomeCounts();
+      savePersistedData();
       renderHPDetail(hpId, 'data');
       showToast('መረጃ ለአስተዳዳሪ ተልኳል', 'success');
     };
@@ -5220,6 +5315,7 @@
         status: 'Submitted', adminReviewer: '', reviewDate: '', adminComments: '', approval: 'Pending'
       });
       updateHomeCounts();
+      savePersistedData();
       showToast('HC data submitted to Admin', 'success');
     };
 
@@ -5232,6 +5328,7 @@
       submissions[idx].status = 'Approved';
       submissions[idx].reviewDate = new Date().toLocaleString();
       submissions[idx].adminReviewer = currentUser.name;
+      savePersistedData();
       renderAdminTab('submissions');
       showToast('Submission approved', 'success');
     };
@@ -5245,6 +5342,7 @@
       submissions[idx].status = 'Returned';
       submissions[idx].reviewDate = new Date().toLocaleString();
       submissions[idx].adminReviewer = currentUser.name;
+      savePersistedData();
       renderAdminTab('submissions');
       showToast('Submission returned for correction', 'warning');
     };
@@ -5427,10 +5525,6 @@
       };
     }
 
-    // ============================================================
-    // SIDEBAR: THREE MAIN GROUPS (ADMIN / HC / HP) + SUB-SIDEBARS
-    // ============================================================
-
     function buildNavGroups() {
       if (!isLoggedIn) return [];
 
@@ -5438,7 +5532,6 @@
       const isKebele = currentUser.role === 'kebele';
       const isKPUser = currentUser.role === 'kp';
 
-      // ----- ADMIN GROUP -----
       const adminGroup = {
         id: 'ADMIN',
         label: 'ADMIN',
@@ -5477,7 +5570,6 @@
         }))
       };
 
-      // ----- HC GROUP -----
       const hcGroup = {
         id: 'HC',
         label: 'HC',
@@ -5515,7 +5607,6 @@
         })
       };
 
-      // ----- HP GROUP -----
       const hpGroup = {
         id: 'HP',
         label: 'HP',
@@ -5651,7 +5742,6 @@
       document.body.style.overflow = '';
     };
 
-    // ---------- KOBOTOOLBOX ----------
     function fetchKoboSummary(sourceKey, facilityId) {
       const source = KOBOTOOLBOX_SOURCES[sourceKey];
       if (!source) return 0;
@@ -5719,10 +5809,6 @@
       if (currentPage === 'kp') renderKP();
       showToast('Kobo source opened: ' + sourceKey, 'info');
     }
-
-    // ============================================================
-    // LOGIN (MODIFIED: any non-empty password works)
-    // ============================================================
 
     function completeLogin(username, name) {
       if (username === 'Admin') {
@@ -5810,17 +5896,9 @@
       if (!password) { passwordError.classList.add('show'); document.getElementById('passwordInput').classList.add('error'); valid = false; }
       if (!valid) return;
 
-      // MODIFIED: Any non-empty password works for all users (including Admin)
-      // Skip all password storage/validation and device verification
-
       completeLogin(username, name || username);
     }
 
-    // ============================================================
-    // END LOGIN
-    // ============================================================
-
-    // ---------- FULLSCREEN / COMPRESS ----------
     function toggleFullscreen() {
       const doc = document.documentElement;
       const btn = document.getElementById('fullscreenBtn');
@@ -5847,7 +5925,6 @@
       }
     }
 
-    // ---------- SETTINGS / INDICATOR MANAGEMENT ----------
     function openSettings() {
       if (!canManageSettings()) { showToast('Access denied. Admin only.', 'error'); return; }
       renderIndicatorManagement();
@@ -6036,11 +6113,11 @@
                     <div class="im-field-row">
                       <div class="im-field">
                         <label>Target</label>
-                        <input type="number" id="im-plan-${k.id}" value="${k.plan}">
+                        <input type="number" id="im-plan-${k.id}" value="${k.plan}" step="any">
                       </div>
                       <div class="im-field">
                         <label>Actual</label>
-                        <input type="number" id="im-ach-${k.id}" value="${k.achievement || 0}">
+                        <input type="number" id="im-ach-${k.id}" value="${k.achievement || 0}" step="any">
                       </div>
                     </div>
                     <div class="im-field-row">
@@ -6169,6 +6246,7 @@
       if (!ind.name) { showToast('Indicator name is required', 'error'); return; }
 
       updateAllIndicators();
+      savePersistedData();
       renderIndicatorManagement();
       if (currentPage === 'hc') renderHC();
       if (currentPage === 'admin') renderAdmin();
@@ -6203,6 +6281,7 @@
       });
 
       updateAllIndicators();
+      savePersistedData();
       renderIndicatorManagement();
       if (currentPage === 'hc') renderHC();
       if (currentPage === 'admin') renderAdmin();
@@ -6218,6 +6297,7 @@
       if (idx > -1) {
         hcIndicators.splice(idx, 1);
         updateAllIndicators();
+        savePersistedData();
         renderIndicatorManagement();
         if (currentPage === 'hc') renderHC();
         if (currentPage === 'admin') renderAdmin();
@@ -6233,6 +6313,7 @@
       if (idx > 0) {
         [hcIndicators[idx - 1], hcIndicators[idx]] = [hcIndicators[idx], hcIndicators[idx - 1]];
         updateAllIndicators();
+        savePersistedData();
         renderIndicatorManagement();
         if (currentPage === 'hc') renderHC();
         if (currentPage === 'admin') renderAdmin();
@@ -6248,6 +6329,7 @@
       if (idx > -1 && idx < hcIndicators.length - 1) {
         [hcIndicators[idx], hcIndicators[idx + 1]] = [hcIndicators[idx + 1], hcIndicators[idx]];
         updateAllIndicators();
+        savePersistedData();
         renderIndicatorManagement();
         if (currentPage === 'hc') renderHC();
         if (currentPage === 'admin') renderAdmin();
@@ -6257,7 +6339,6 @@
       }
     };
 
-    // ---------- INIT ----------
     document.addEventListener('DOMContentLoaded', function() {
       document.body.classList.add('compressed');
 
@@ -6321,20 +6402,20 @@
       integrateKoboData();
       applyKoboOverrides();
 
+      restorePersistedData();
       updateAllIndicators();
       updateHomeCounts();
       updateSectionForPage('login');
       document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
       document.getElementById('page-login').classList.add('active');
 
-      // Load persisted supervisor period data
       try {
         const stored = JSON.parse(localStorage.getItem('dm_phcu_supervisor_period') || '{}');
         Object.keys(stored).forEach(key => { supervisorPeriodData[key] = stored[key]; });
         loadSupervisorPeriodData();
       } catch (e) { /* ignore */ }
 
-      console.log('Debremarkos PHCU KPI initialized — login simplified, supervisor editable, period filter everywhere.');
+      console.log('Debremarkos PHCU KPI initialized — editable actual/target, no toast background, symmetrical period filters, icons on aggregate/ranking.');
     });
 
   })();
