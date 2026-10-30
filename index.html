@@ -1640,6 +1640,78 @@
       line-height: 1.5;
     }
     .device-verify-notice i { color: #0284c7; margin-right: 6px; }
+
+    /* ===== NEW: Per-Kebele CRC/Checklist selector ===== */
+    .kebele-selector-bar {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 14px;
+      background: white;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow);
+      border-left: 4px solid var(--secondary);
+    }
+    .kebele-selector-bar .ks-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #475569;
+      margin-right: 4px;
+      font-family: 'Times New Roman', 'Noto Sans Ethiopic', serif;
+      white-space: nowrap;
+    }
+    .kebele-selector-bar .ks-select {
+      padding: 8px 12px;
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      background: white;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--secondary);
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: 'Times New Roman', 'Noto Sans Ethiopic', serif;
+      min-height: 36px;
+      min-width: 180px;
+      -webkit-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232c7a7b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 34px;
+    }
+    .kebele-selector-bar .ks-select:focus { outline: none; border-color: var(--secondary-light); box-shadow: 0 0 0 4px rgba(44,122,123,0.08); }
+    .kebele-selector-bar .ks-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      font-family: 'Times New Roman', 'Noto Sans Ethiopic', serif;
+      background: #e8f0f8;
+      color: var(--secondary);
+      white-space: nowrap;
+    }
+
+    /* ===== NEW: Auto-save flash animation ===== */
+    @keyframes saveFlash {
+      0% { background-color: rgba(46, 125, 50, 0.08); }
+      100% { background-color: transparent; }
+    }
+    .save-flash { animation: saveFlash 0.8s ease-out; }
+
+    /* ===== NEW: Saved badge on form fields ===== */
+    .field-saved-mark {
+      display: inline-block;
+      font-size: 0.6rem;
+      color: var(--green);
+      margin-left: 4px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      font-weight: 700;
+    }
+    .field-saved-mark.show { opacity: 1; }
   </style>
 </head>
 <body class="compressed sidebar-open">
@@ -2039,6 +2111,10 @@
     let selectedSection = 'all';
     let currentPresentationPreview = null;
 
+    // NEW: Per-kebele CRC/Checklist active selection for HP pages
+    let currentHpChecklistKebele = null;
+    let currentHpCrcKebele = null;
+
     // ============================================================
     // STORAGE KEYS
     // ============================================================
@@ -2053,17 +2129,22 @@
     const STORAGE_KEY_VERIFICATION_HASH = 'dm_phcu_verification_hash';
     const STORAGE_KEY_PRESENTATION_SETTINGS = 'dm_phcu_presentation_settings';
     const STORAGE_KEY_INDICATOR_DB = 'dm_phcu_indicator_db';
+    const STORAGE_KEY_HC_INDICATORS = 'dm_phcu_hc_indicators_v2';
+    const STORAGE_KEY_HP_INDICATORS = 'dm_phcu_hp_indicators_v2';
+    const STORAGE_KEY_HC_AGENDAS = 'dm_phcu_hc_agendas_v2';
+    const STORAGE_KEY_HEALTH_POSTS = 'dm_phcu_health_posts_v2';
+    const STORAGE_KEY_SUBMISSIONS = 'dm_phcu_submissions_v2';
+    const STORAGE_KEY_SUPERVISORS = 'dm_phcu_supervisors_v2';
+    const STORAGE_KEY_NAV_VISIBILITY = 'dm_phcu_nav_visibility_v2';
+    const STORAGE_KEY_KOBO_SUMMARIES = 'dm_phcu_kobo_summaries_v2';
 
     // ============================================================
     // DEVICE VERIFICATION CONFIG
     // ============================================================
-    // The verification password is stored as a salted SHA-256 hash.
-    // In a static/client-only app this cannot be made fully secret.
-    // A trusted backend must validate this in production.
     const VERIFICATION_PASSWORD = 'kpidm2026';
     const VERIFICATION_SALT = 'dm_phcu_2026_salt_v1';
     const MAX_DEVICE_ATTEMPTS = 5;
-    const DEVICE_LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes
+    const DEVICE_LOCKOUT_MS = 15 * 60 * 1000;
     const DEVICE_TRUST_DAYS = 30;
 
     // ============================================================
@@ -2216,7 +2297,7 @@
     ];
 
     // ============================================================
-    // HC SUB ITEMS (includes Checklist, CRC, Help)
+    // HC SUB ITEMS
     // ============================================================
     const HC_SUB_ITEMS = [
       { key: 'all-indicators',    label: 'All Indicators',        icon: 'fa-list-check',        action: 'hcAll' },
@@ -2256,7 +2337,7 @@
     ];
 
     // ============================================================
-    // ADMIN SUB ITEMS (includes Checklist, CRC, Help, Presentation)
+    // ADMIN SUB ITEMS
     // ============================================================
     const ADMIN_SUB_ITEMS = [
       { key: 'summary',      label: 'Summary',                icon: 'fa-clipboard-list',  action: 'summary' },
@@ -2691,10 +2772,47 @@
     } catch (e) { /* ignore */ }
 
     function persistChecklist() {
-      try { localStorage.setItem(STORAGE_KEY_CHECKLIST, JSON.stringify(checklistData)); } catch (e) {}
+      try { localStorage.setItem(STORAGE_KEY_CHECKLIST, JSON.stringify(checklistData)); } catch (e) { console.warn('Checklist save failed', e); }
     }
     function persistCrc() {
-      try { localStorage.setItem(STORAGE_KEY_CRC, JSON.stringify(crcData)); } catch (e) {}
+      try { localStorage.setItem(STORAGE_KEY_CRC, JSON.stringify(crcData)); } catch (e) { console.warn('CRC save failed', e); }
+    }
+
+    // ============================================================
+    // PERSISTENCE: HC INDICATORS, HP INDICATORS, HEALTH POSTS, ETC.
+    // ============================================================
+    function persistAllCoreData() {
+      try {
+        localStorage.setItem(STORAGE_KEY_HC_INDICATORS, JSON.stringify(hcIndicators));
+        localStorage.setItem(STORAGE_KEY_HP_INDICATORS, JSON.stringify(hpIndicators));
+        localStorage.setItem(STORAGE_KEY_HC_AGENDAS, JSON.stringify(hcAgendas));
+        localStorage.setItem(STORAGE_KEY_HEALTH_POSTS, JSON.stringify(healthPosts));
+        localStorage.setItem(STORAGE_KEY_SUBMISSIONS, JSON.stringify(submissions));
+        localStorage.setItem(STORAGE_KEY_SUPERVISORS, JSON.stringify(supervisors));
+        localStorage.setItem(STORAGE_KEY_NAV_VISIBILITY, JSON.stringify(navVisibility));
+        localStorage.setItem(STORAGE_KEY_KOBO_SUMMARIES, JSON.stringify(koboSummaries));
+      } catch (e) { console.warn('Core data save failed', e); }
+    }
+
+    function loadAllCoreData() {
+      try {
+        const hci = localStorage.getItem(STORAGE_KEY_HC_INDICATORS);
+        if (hci) hcIndicators = JSON.parse(hci);
+        const hpi = localStorage.getItem(STORAGE_KEY_HP_INDICATORS);
+        if (hpi) hpIndicators = JSON.parse(hpi);
+        const hca = localStorage.getItem(STORAGE_KEY_HC_AGENDAS);
+        if (hca) hcAgendas = JSON.parse(hca);
+        const hps = localStorage.getItem(STORAGE_KEY_HEALTH_POSTS);
+        if (hps) healthPosts = JSON.parse(hps);
+        const subs = localStorage.getItem(STORAGE_KEY_SUBMISSIONS);
+        if (subs) submissions = JSON.parse(subs);
+        const sups = localStorage.getItem(STORAGE_KEY_SUPERVISORS);
+        if (sups) supervisors = JSON.parse(sups);
+        const nav = localStorage.getItem(STORAGE_KEY_NAV_VISIBILITY);
+        if (nav) navVisibility = Object.assign(navVisibility, JSON.parse(nav));
+        const kobo = localStorage.getItem(STORAGE_KEY_KOBO_SUMMARIES);
+        if (kobo) koboSummaries = JSON.parse(kobo);
+      } catch (e) { console.warn('Core data load failed', e); }
     }
 
     // ============================================================
@@ -2965,9 +3083,15 @@
         this._cache[key] = entry;
         try {
           localStorage.setItem(STORAGE_KEY_DRAFTS, JSON.stringify(this._cache));
+          // Also try IndexedDB for larger records
+          if (this._idb) {
+            try {
+              const tx = this._idb.transaction('drafts', 'readwrite');
+              tx.objectStore('drafts').put({ key: key, data: entry, timestamp: entry.timestamp });
+            } catch (e) { /* ignore idb errors */ }
+          }
           return { ok: true, timestamp: entry.timestamp };
         } catch (e) {
-          // Quota or storage error
           return { ok: false, error: e.message || 'localStorage write failed' };
         }
       },
@@ -2989,7 +3113,6 @@
       }
     };
 
-    // Try to open IndexedDB for larger records
     function initIndexedDB() {
       try {
         const req = indexedDB.open('dm_phcu_db', 1);
@@ -3007,7 +3130,6 @@
       } catch (e) { draftStore._idb = null; }
     }
     initIndexedDB();
-
     draftStore.load();
 
     function makeDraftKey(type, id) {
@@ -3026,7 +3148,6 @@
       const result = draftStore.save(key, data);
       if (result.ok) {
         showToast((label || 'Draft') + ' saved successfully', 'success');
-        // refresh status indicator if present
         const el = document.querySelector('[data-save-status-for="' + key + '"]');
         if (el) el.outerHTML = '<span data-save-status-for="' + key + '">' + renderSaveStatusIndicator(key) + '</span>';
       } else {
@@ -3051,12 +3172,44 @@
     };
 
     // ============================================================
+    // AUTO-SAVE HELPER (debounced)
+    // ============================================================
+    const autoSaveTimers = {};
+    function autoSave(key, getDataFn, label, delayMs) {
+      delayMs = delayMs || 600;
+      if (autoSaveTimers[key]) clearTimeout(autoSaveTimers[key]);
+      autoSaveTimers[key] = setTimeout(function() {
+        try {
+          const data = getDataFn();
+          const result = draftStore.save(key, data);
+          if (result.ok) {
+            const el = document.querySelector('[data-save-status-for="' + key + '"]');
+            if (el) el.outerHTML = '<span data-save-status-for="' + key + '">' + renderSaveStatusIndicator(key) + '</span>';
+          }
+        } catch (e) { /* silent fail */ }
+        delete autoSaveTimers[key];
+      }, delayMs);
+    }
+
+    // Flash a saved indicator next to a field
+    function flashSavedMark(el) {
+      if (!el) return;
+      let mark = el.parentElement.querySelector('.field-saved-mark');
+      if (!mark) {
+        mark = document.createElement('span');
+        mark.className = 'field-saved-mark';
+        mark.textContent = '✓ saved';
+        el.parentElement.appendChild(mark);
+      }
+      mark.classList.add('show');
+      clearTimeout(mark._timer);
+      mark._timer = setTimeout(function() { mark.classList.remove('show'); }, 1800);
+    }
+
+    // ============================================================
     // DEVICE VERIFICATION SYSTEM
     // ============================================================
     function sha256Hex(str) {
-      // Synchronous SHA-256 via pure JS (fallback if crypto.subtle unavailable)
-      // For modern browsers, we use async crypto.subtle where possible.
-      // This synchronous helper is a compact implementation for hashing.
       function rightRotate(value, amount) { return (value >>> amount) | (value << (32 - amount)); }
       var mathPow = Math.pow;
       var maxWord = mathPow(2, 32);
@@ -3122,10 +3275,6 @@
     }
 
     function computeVerificationHash(password) {
-      // Use Web Crypto if available, else fallback
-      if (window.crypto && window.crypto.subtle && window.TextEncoder) {
-        // Return a promise-based result via cached synchronous fallback for simplicity here
-      }
       return sha256Hex(password + '|' + VERIFICATION_SALT);
     }
 
@@ -3138,8 +3287,6 @@
     }
 
     function getDeviceFingerprint() {
-      // Composite, non-identifying device fingerprint for local trust tracking only.
-      // NOT proof of identity. Used only as a local convenience key.
       const parts = [
         navigator.userAgent || '',
         navigator.language || '',
@@ -3166,7 +3313,6 @@
       const existing = devices.findIndex(d => d.fingerprint === fp);
       const entry = { fingerprint: fp, trustedAt: Date.now() };
       if (existing >= 0) devices[existing] = entry; else devices.push(entry);
-      // Keep only last 10 devices
       saveTrustedDevices(devices.slice(-10));
     }
 
@@ -3508,7 +3654,7 @@
           inp.addEventListener('change', function() {
             let id = parseInt(this.dataset.id); let val = parseFloat(this.value);
             let k = hcIndicators.find(d => d.id === id);
-            if (k && !isNaN(val)) { k.achievement = val; updateAllIndicators(); renderHC(); renderHCTab('data'); showToast('Data updated', 'success'); }
+            if (k && !isNaN(val)) { k.achievement = val; updateAllIndicators(); persistAllCoreData(); renderHC(); renderHCTab('data'); showToast('Data updated', 'success'); flashSavedMark(this); }
           });
         });
         container.querySelectorAll('.hc-target-input').forEach(inp => {
@@ -3516,7 +3662,7 @@
           inp.addEventListener('change', function() {
             let id = parseInt(this.dataset.id); let val = parseFloat(this.value);
             let k = hcIndicators.find(d => d.id === id);
-            if (k && !isNaN(val) && val > 0) { k.plan = val; updateAllIndicators(); renderHC(); renderHCTab('data'); showToast('Target updated by Admin', 'success'); }
+            if (k && !isNaN(val) && val > 0) { k.plan = val; updateAllIndicators(); persistAllCoreData(); renderHC(); renderHCTab('data'); showToast('Target updated by Admin', 'success'); flashSavedMark(this); }
           });
         });
       } else if (tab === 'analysis') {
@@ -3704,7 +3850,7 @@
           inp.addEventListener('change', function() {
             let id = parseInt(this.dataset.id); let val = parseFloat(this.value);
             let k = hcIndicators.find(d => d.id === id);
-            if (k && !isNaN(val)) { k.achievement = val; updateAllIndicators(); renderKP(); renderKPTab('data'); showToast('Data updated', 'success'); }
+            if (k && !isNaN(val)) { k.achievement = val; updateAllIndicators(); persistAllCoreData(); renderKP(); renderKPTab('data'); showToast('Data updated', 'success'); flashSavedMark(this); }
           });
         });
         container.querySelectorAll('.kp-target-input').forEach(inp => {
@@ -3712,7 +3858,7 @@
           inp.addEventListener('change', function() {
             let id = parseInt(this.dataset.id); let val = parseFloat(this.value);
             let k = hcIndicators.find(d => d.id === id);
-            if (k && !isNaN(val) && val > 0) { k.plan = val; updateAllIndicators(); renderKP(); renderKPTab('data'); showToast('Target updated by Admin', 'success'); }
+            if (k && !isNaN(val) && val > 0) { k.plan = val; updateAllIndicators(); persistAllCoreData(); renderKP(); renderKPTab('data'); showToast('Target updated by Admin', 'success'); flashSavedMark(this); }
           });
         });
       } else if (tab === 'analysis') {
@@ -3744,7 +3890,7 @@
       if (!canSubmitData('kp', 'kp')) { showToast('You do not have permission to submit KP data.', 'error'); return; }
       if (!confirm('Submit KP Clinic data to Admin for review?')) return;
       submissions.push({ facility: 'KP Clinic', facilityType: 'KP', kebele: '—', user: currentUser.name, role: currentUser.role, period: new Date().toISOString().slice(0, 7), enteredAt: new Date().toLocaleString(), submittedAt: new Date().toLocaleString(), status: 'Submitted', adminReviewer: '', reviewDate: '', adminComments: '', approval: 'Pending' });
-      updateHomeCounts(); showToast('KP Clinic data submitted to Admin', 'success');
+      persistAllCoreData(); updateHomeCounts(); showToast('KP Clinic data submitted to Admin', 'success');
     };
     window._kpCopyData = function() {
       const mult = getPeriodMultiplier(); const kpIndicators = hcIndicators.filter(i => i.category === 'kp'); const kpScore = getKPScore();
@@ -3886,7 +4032,7 @@
           inp.addEventListener('change', function() {
             let id = parseInt(this.dataset.id); let hpId2 = this.dataset.hp; let val = parseFloat(this.value);
             let item = (hpIndicators[hpId2] || []).find(d => d.id === id);
-            if (item && !isNaN(val)) { item.achievement = val; updateAllIndicators(); renderHPDetail(hpId2, 'data'); showToast('መረጃ ተቀይሯል', 'success'); }
+            if (item && !isNaN(val)) { item.achievement = val; updateAllIndicators(); persistAllCoreData(); renderHPDetail(hpId2, 'data'); showToast('መረጃ ተቀይሯል', 'success'); flashSavedMark(this); }
           });
         });
         container.querySelectorAll('.hp-target-input').forEach(inp => {
@@ -3894,7 +4040,7 @@
           inp.addEventListener('change', function() {
             let id = parseInt(this.dataset.id); let hpId2 = this.dataset.hp; let val = parseFloat(this.value);
             let item = (hpIndicators[hpId2] || []).find(d => d.id === id);
-            if (item && !isNaN(val) && val > 0) { item.plan = val; updateAllIndicators(); renderHPDetail(hpId2, 'data'); showToast('ዒላማ በአስተዳዳሪ ተቀይሯል', 'success'); }
+            if (item && !isNaN(val) && val > 0) { item.plan = val; updateAllIndicators(); persistAllCoreData(); renderHPDetail(hpId2, 'data'); showToast('ዒላማ በአስተዳዳሪ ተቀይሯል', 'success'); flashSavedMark(this); }
           });
         });
       } else if (tab === 'analysis') {
@@ -4021,25 +4167,25 @@
       if (!confirm('ለ ' + hp.name + ' የመረጃ ማስገቢያ ማረጋገጫ? መረጃው ለአስተዳዳሪ ይላካል።')) return;
       hp.status = 'Submitted';
       submissions.push({ facility: hp.name, facilityType: 'HP', hpId: hpId, kebele: hp.kebele, user: currentUser.name, role: currentUser.role, period: new Date().toISOString().slice(0, 7), enteredAt: new Date().toLocaleString(), submittedAt: new Date().toLocaleString(), status: 'Submitted', adminReviewer: '', reviewDate: '', adminComments: '', approval: 'Pending' });
-      updateHomeCounts(); renderHPDetail(hpId, 'data'); showToast('መረጃ ለአስተዳዳሪ ተልኳል', 'success');
+      persistAllCoreData(); updateHomeCounts(); renderHPDetail(hpId, 'data'); showToast('መረጃ ለአስተዳዳሪ ተልኳል', 'success');
     };
     window._hcSubmitData = function() {
       if (!canSubmitData('hc', 'hc')) { showToast('You do not have permission to submit HC data.', 'error'); return; }
       if (!confirm('Submit HC data to Admin for review?')) return;
       submissions.push({ facility: 'Debremarkos HC', facilityType: 'HC', kebele: '—', user: currentUser.name, role: currentUser.role, period: new Date().toISOString().slice(0, 7), enteredAt: new Date().toLocaleString(), submittedAt: new Date().toLocaleString(), status: 'Submitted', adminReviewer: '', reviewDate: '', adminComments: '', approval: 'Pending' });
-      updateHomeCounts(); showToast('HC data submitted to Admin', 'success');
+      persistAllCoreData(); updateHomeCounts(); showToast('HC data submitted to Admin', 'success');
     };
     window._adminApprove = function(idx) {
       if (!canApproveSubmissions()) { showToast('Access restricted. Admin privileges required.', 'error'); return; }
       if (!submissions[idx]) return;
       submissions[idx].status = 'Approved'; submissions[idx].reviewDate = new Date().toLocaleString(); submissions[idx].adminReviewer = currentUser.name;
-      renderAdminTab('submissions'); showToast('Submission approved', 'success');
+      persistAllCoreData(); renderAdminTab('submissions'); showToast('Submission approved', 'success');
     };
     window._adminReturn = function(idx) {
       if (!canApproveSubmissions()) { showToast('Access restricted. Admin privileges required.', 'error'); return; }
       if (!submissions[idx]) return;
       submissions[idx].status = 'Returned'; submissions[idx].reviewDate = new Date().toLocaleString(); submissions[idx].adminReviewer = currentUser.name;
-      renderAdminTab('submissions'); showToast('Submission returned for correction', 'warning');
+      persistAllCoreData(); renderAdminTab('submissions'); showToast('Submission returned for correction', 'warning');
     };
     window._hpCopyData = function(hpId) {
       const mult = getPeriodMultiplier(); const hp = healthPosts.find(h => h.id === hpId); if (!hp) return;
@@ -4349,6 +4495,7 @@
       if (targetLevel === 'hc') koboSummaries[sourceKey].hc = fetchKoboSummary(sourceKey, 'hc');
       else if (targetLevel === 'hp' && facilityId) koboSummaries[sourceKey].hp[facilityId] = fetchKoboSummary(sourceKey, facilityId);
       applyKoboOverrides();
+      persistAllCoreData();
       if (currentPage === 'hc') renderHC(); if (currentPage === 'hp' && currentHpId) renderHPDetail(currentHpId, currentHpTab); if (currentPage === 'admin') renderAdmin(); if (currentPage === 'summary') renderSummary(); if (currentPage === 'kp') renderKP();
       showToast('Kobo source opened: ' + sourceKey, 'info');
     }
@@ -4470,12 +4617,35 @@
 
     function renderChecklistForm(facilityType, containerId) {
       const container = document.getElementById(containerId); if (!container) return;
-      const existing = facilityType === 'hc' ? (checklistData.hc || []) : (checklistData.hp || {});
-      let html = `<div class="card" style="border-left:6px solid var(--secondary);"><div class="amharic" style="font-weight:800;font-size:1.05rem;color:var(--secondary);text-align:center;">የተቀናጀ የድጋፍ ሱፐርቪዥን (ISS) የግምገማ ቼክሊስት</div><div class="amharic text-muted" style="font-size:0.75rem;text-align:center;">ደብረ ማርቆስ ጤና ጣቢያ — ${facilityType === 'hc' ? 'Health Center' : 'Health Post'}</div></div>`;
+      // For HP, default to current user's kebele if not set
+      if (facilityType === 'hp') {
+        if (!currentHpChecklistKebele) {
+          if (currentUser.role === 'kebele' && currentUser.kebele) currentHpChecklistKebele = currentUser.kebele;
+          else if (healthPosts.length) currentHpChecklistKebele = healthPosts[0].kebele;
+        }
+      }
+      const kebeleKey = facilityType === 'hp' ? currentHpChecklistKebele : 'hc';
+      const existing = facilityType === 'hc'
+        ? (checklistData.hc || [])
+        : ((checklistData.hp && checklistData.hp[kebeleKey]) ? checklistData.hp[kebeleKey] : {});
+
+      // Build kebele selector bar for HP
+      let kebeleBar = '';
+      if (facilityType === 'hp') {
+        kebeleBar = `<div class="kebele-selector-bar">
+          <span class="ks-label"><i class="fas fa-house-medical"></i> Kebele:</span>
+          <select class="ks-select" onchange="window._setHpChecklistKebele(this.value)">
+            ${healthPosts.map(hp => `<option value="${hp.kebele}" ${currentHpChecklistKebele === hp.kebele ? 'selected' : ''}>${hp.name} (${hp.responsible})</option>`).join('')}
+          </select>
+          <span class="ks-badge">${CHECKLIST_SECTIONS.length} sections</span>
+        </div>`;
+      }
+
+      let html = kebeleBar + `<div class="card" style="border-left:6px solid var(--secondary);"><div class="amharic" style="font-weight:800;font-size:1.05rem;color:var(--secondary);text-align:center;">የተቀናጀ የድጋፍ ሱፐርቪዥን (ISS) የግምገማ ቼክሊስት</div><div class="amharic text-muted" style="font-size:0.75rem;text-align:center;">ደብረ ማርቆስ ጤና ጣቢያ — ${facilityType === 'hc' ? 'Health Center' : 'Health Post: ' + (healthPosts.find(h => h.kebele === kebeleKey)?.name || kebeleKey)}</div></div>`;
       CHECKLIST_SECTIONS.forEach(sec => {
         let secScore = 0; let secMax = 0;
         sec.items.forEach((item, idx) => {
-          const key = facilityType === 'hc' ? 'sec' + sec.id + '_item' + idx : 'sec' + sec.id + '_item' + idx;
+          const key = 'sec' + sec.id + '_item' + idx;
           const val = existing[key] || '';
           if (val === 'yes') { secScore += 2; secMax += 2; }
           else if (val === 'partial') { secScore += 1; secMax += 2; }
@@ -4487,26 +4657,39 @@
           const key = 'sec' + sec.id + '_item' + idx;
           const val = existing[key] || '';
           html += `<tr><td>${sec.id}.${idx + 1}</td><td class="amharic">${item}</td>
-            <td style="text-align:center;"><input type="radio" name="${facilityType}_${key}" value="yes" ${val === 'yes' ? 'checked' : ''} onchange="window._setChecklistValue('${facilityType}','${key}','yes')"></td>
-            <td style="text-align:center;"><input type="radio" name="${facilityType}_${key}" value="partial" ${val === 'partial' ? 'checked' : ''} onchange="window._setChecklistValue('${facilityType}','${key}','partial')"></td>
-            <td style="text-align:center;"><input type="radio" name="${facilityType}_${key}" value="no" ${val === 'no' ? 'checked' : ''} onchange="window._setChecklistValue('${facilityType}','${key}','no')"></td>
-            <td style="text-align:center;"><input type="radio" name="${facilityType}_${key}" value="na" ${val === 'na' ? 'checked' : ''} onchange="window._setChecklistValue('${facilityType}','${key}','na')"></td>
+            <td style="text-align:center;"><input type="radio" name="${facilityType}_${key}" value="yes" ${val === 'yes' ? 'checked' : ''} onchange="window._setChecklistValue('${facilityType}','${key}','yes','${kebeleKey}')"></td>
+            <td style="text-align:center;"><input type="radio" name="${facilityType}_${key}" value="partial" ${val === 'partial' ? 'checked' : ''} onchange="window._setChecklistValue('${facilityType}','${key}','partial','${kebeleKey}')"></td>
+            <td style="text-align:center;"><input type="radio" name="${facilityType}_${key}" value="no" ${val === 'no' ? 'checked' : ''} onchange="window._setChecklistValue('${facilityType}','${key}','no','${kebeleKey}')"></td>
+            <td style="text-align:center;"><input type="radio" name="${facilityType}_${key}" value="na" ${val === 'na' ? 'checked' : ''} onchange="window._setChecklistValue('${facilityType}','${key}','na','${kebeleKey}')"></td>
           </tr>`;
         });
         html += `</tbody></table></div></div>`;
       });
-      html += `<div class="action-bar"><button class="btn btn-green amharic" onclick="window._submitChecklist('${facilityType}')"><i class="fas fa-paper-plane"></i> አስገባ</button><button class="btn btn-copy amharic" onclick="window._copyChecklist('${facilityType}')"><i class="fas fa-copy"></i> ቅዳ</button></div>`;
+      html += `<div class="action-bar"><button class="btn btn-green amharic" onclick="window._submitChecklist('${facilityType}','${kebeleKey}')"><i class="fas fa-paper-plane"></i> አስገባ</button><button class="btn btn-copy amharic" onclick="window._copyChecklist('${facilityType}','${kebeleKey}')"><i class="fas fa-copy"></i> ቅዳ</button></div>`;
       container.innerHTML = html;
     }
 
-    window._setChecklistValue = function(facilityType, key, value) {
-      if (facilityType === 'hc') { if (!checklistData.hc) checklistData.hc = []; checklistData.hc[key] = value; }
-      else { if (!checklistData.hp) checklistData.hp = {}; checklistData.hp[key] = value; }
+    window._setHpChecklistKebele = function(kebele) {
+      currentHpChecklistKebele = kebele;
+      renderChecklistForm('hp', 'checklistHpContent');
+    };
+
+    window._setChecklistValue = function(facilityType, key, value, kebeleKey) {
+      if (facilityType === 'hc') {
+        if (!checklistData.hc) checklistData.hc = {};
+        checklistData.hc[key] = value;
+      } else {
+        if (!checklistData.hp) checklistData.hp = {};
+        if (!checklistData.hp[kebeleKey]) checklistData.hp[kebeleKey] = {};
+        checklistData.hp[kebeleKey][key] = value;
+      }
       persistChecklist();
     };
 
-    window._submitChecklist = function(facilityType) {
-      const data = facilityType === 'hc' ? (checklistData.hc || []) : (checklistData.hp || {});
+    window._submitChecklist = function(facilityType, kebeleKey) {
+      const data = facilityType === 'hc'
+        ? (checklistData.hc || {})
+        : ((checklistData.hp && checklistData.hp[kebeleKey]) ? checklistData.hp[kebeleKey] : {});
       let totalScore = 0, totalMax = 0;
       CHECKLIST_SECTIONS.forEach(sec => {
         sec.items.forEach((item, idx) => {
@@ -4518,16 +4701,24 @@
         });
       });
       const pct = totalMax > 0 ? Math.round((totalScore / totalMax) * 100) : 0;
-      const submission = { facilityType, submittedAt: new Date().toLocaleString(), submittedBy: currentUser.name, score: pct, totalScore, totalMax };
+      const submission = {
+        facilityType,
+        kebele: facilityType === 'hp' ? kebeleKey : '—',
+        submittedAt: new Date().toLocaleString(),
+        submittedBy: currentUser.name,
+        score: pct, totalScore, totalMax
+      };
       if (facilityType === 'hc') { if (!checklistData.hcSubmissions) checklistData.hcSubmissions = []; checklistData.hcSubmissions.push(submission); }
       else { if (!checklistData.hpSubmissions) checklistData.hpSubmissions = []; checklistData.hpSubmissions.push(submission); }
       persistChecklist();
       showToast('ቼክሊስት ለአስተዳዳሪ ተልኳል — ' + pct + '%', 'success');
     };
 
-    window._copyChecklist = function(facilityType) {
-      const data = facilityType === 'hc' ? (checklistData.hc || []) : (checklistData.hp || {});
-      let text = 'ISS Checklist — ' + (facilityType === 'hc' ? 'HC' : 'HP') + '\nDate: ' + new Date().toLocaleString() + '\n\n';
+    window._copyChecklist = function(facilityType, kebeleKey) {
+      const data = facilityType === 'hc'
+        ? (checklistData.hc || {})
+        : ((checklistData.hp && checklistData.hp[kebeleKey]) ? checklistData.hp[kebeleKey] : {});
+      let text = 'ISS Checklist — ' + (facilityType === 'hc' ? 'HC' : 'HP: ' + kebeleKey) + '\nDate: ' + new Date().toLocaleString() + '\n\n';
       CHECKLIST_SECTIONS.forEach(sec => {
         text += `Section ${sec.id}: ${sec.title}\n`;
         sec.items.forEach((item, idx) => {
@@ -4553,10 +4744,10 @@
           <div class="kpi-card" style="border-left-color:var(--primary);"><div class="label">HC Checklist Score</div><div class="value">${hcScore}%</div><div class="sub">${hcSubmissions.length} submissions</div></div>
           <div class="kpi-card" style="border-left-color:var(--secondary);"><div class="label">HP Checklist Score</div><div class="value">${hpScore}%</div><div class="sub">${hpSubmissions.length} submissions</div></div>
         </div>
-        <div class="card"><div class="card-header">📋 Submission History</div><div class="table-wrap"><table><thead><tr><th>Facility</th><th>Submitted By</th><th>Date</th><th>Score</th><th>Status</th></tr></thead><tbody>`;
-      if (hcSubmissions.length === 0 && hpSubmissions.length === 0) { html += '<tr><td colspan="5" class="no-data">No checklist submissions yet.</td></tr>'; }
+        <div class="card"><div class="card-header">📋 Submission History</div><div class="table-wrap"><table><thead><tr><th>Facility</th><th>Kebele</th><th>Submitted By</th><th>Date</th><th>Score</th><th>Status</th></tr></thead><tbody>`;
+      if (hcSubmissions.length === 0 && hpSubmissions.length === 0) { html += '<tr><td colspan="6" class="no-data">No checklist submissions yet.</td></tr>'; }
       [...hcSubmissions.map(s => ({...s, facility: 'HC'})), ...hpSubmissions.map(s => ({...s, facility: 'HP'}))].sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt)).forEach(s => {
-        html += `<tr><td><strong>${s.facility}</strong></td><td>${escapeHtml(s.submittedBy)}</td><td style="font-size:0.72rem;">${escapeHtml(s.submittedAt)}</td><td><strong>${s.score}%</strong></td><td><span class="status-badge ${getStatusClass(s.score)}">${getStatusText(s.score)}</span></td></tr>`;
+        html += `<tr><td><strong>${s.facility}</strong></td><td>${s.kebele || '—'}</td><td>${escapeHtml(s.submittedBy)}</td><td style="font-size:0.72rem;">${escapeHtml(s.submittedAt)}</td><td><strong>${s.score}%</strong></td><td><span class="status-badge ${getStatusClass(s.score)}">${getStatusText(s.score)}</span></td></tr>`;
       });
       html += `</tbody></table></div></div>`;
       container.innerHTML = html;
@@ -4575,7 +4766,30 @@
 
     function renderCrcForm(facilityType, containerId) {
       const container = document.getElementById(containerId); if (!container) return;
-      const existing = facilityType === 'hc' ? (crcData.hc || {}) : (crcData.hp || {});
+      // For HP, default kebele
+      if (facilityType === 'hp') {
+        if (!currentHpCrcKebele) {
+          if (currentUser.role === 'kebele' && currentUser.kebele) currentHpCrcKebele = currentUser.kebele;
+          else if (healthPosts.length) currentHpCrcKebele = healthPosts[0].kebele;
+        }
+      }
+      const kebeleKey = facilityType === 'hp' ? currentHpCrcKebele : 'hc';
+      const existing = facilityType === 'hc'
+        ? (crcData.hc || {})
+        : ((crcData.hp && crcData.hp[kebeleKey]) ? crcData.hp[kebeleKey] : {});
+
+      // Kebele selector bar for HP
+      let kebeleBar = '';
+      if (facilityType === 'hp') {
+        kebeleBar = `<div class="kebele-selector-bar">
+          <span class="ks-label"><i class="fas fa-house-medical"></i> Kebele:</span>
+          <select class="ks-select" onchange="window._setHpCrcKebele(this.value)">
+            ${healthPosts.map(hp => `<option value="${hp.kebele}" ${currentHpCrcKebele === hp.kebele ? 'selected' : ''}>${hp.name} (${hp.responsible})</option>`).join('')}
+          </select>
+          <span class="ks-badge">11 sections</span>
+        </div>`;
+      }
+
       const sections = [
         { id: 'general', title: 'ክፍል 1: አጠቃላይ የሪፖርት መረጃ', fields: [
           { id: 'crcId', label: 'ልዩ የCRC መለያ ቁጥር', type: 'text' },
@@ -4642,41 +4856,63 @@
           { id: 'resolvedRumors', label: 'የተፈቱ ወሬዎች', type: 'number' }
         ]}
       ];
-      let html = `<div class="card" style="border-left:6px solid var(--primary);"><div class="amharic" style="font-weight:800;font-size:1.05rem;color:var(--primary);text-align:center;">የቅሬታ፣ አስተያየት እና ወሬ ምዝገባ፣ ምርመራ፣ ምላሽና ክትትል ቅጽ (CRC)</div><div class="amharic text-muted" style="font-size:0.75rem;text-align:center;">ደብረ ማርቆስ ጤና ጣቢያ — ${facilityType === 'hc' ? 'Health Center' : 'Health Post'}</div></div>`;
+      let html = kebeleBar + `<div class="card" style="border-left:6px solid var(--primary);"><div class="amharic" style="font-weight:800;font-size:1.05rem;color:var(--primary);text-align:center;">የቅሬታ፣ አስተያየት እና ወሬ ምዝገባ፣ ምርመራ፣ ምላሽና ክትትል ቅጽ (CRC)</div><div class="amharic text-muted" style="font-size:0.75rem;text-align:center;">ደብረ ማርቆስ ጤና ጣቢያ — ${facilityType === 'hc' ? 'Health Center' : 'Health Post: ' + (healthPosts.find(h => h.kebele === kebeleKey)?.name || kebeleKey)}</div></div>`;
       sections.forEach(sec => {
         html += `<div class="card"><div class="card-header amharic">${sec.title}</div>`;
         sec.fields.forEach(f => {
           const val = existing[f.id] || '';
           html += `<div class="input-group"><label class="amharic">${f.label}</label>`;
-          if (f.type === 'select') { html += `<select class="amharic" onchange="window._setCrcValue('${facilityType}','${f.id}',this.value)"><option value="">— ይምረጡ —</option>${f.options.map(o => `<option value="${o}" ${val === o ? 'selected' : ''}>${o}</option>`).join('')}</select>`; }
-          else if (f.type === 'textarea') { html += `<textarea class="amharic" rows="3" onchange="window._setCrcValue('${facilityType}','${f.id}',this.value)">${escapeHtml(val)}</textarea>`; }
-          else { html += `<input type="${f.type}" class="amharic" value="${escapeHtml(val)}" onchange="window._setCrcValue('${facilityType}','${f.id}',this.value)">`; }
+          if (f.type === 'select') { html += `<select class="amharic" onchange="window._setCrcValue('${facilityType}','${f.id}',this.value,'${kebeleKey}')"><option value="">— ይምረጡ —</option>${f.options.map(o => `<option value="${o}" ${val === o ? 'selected' : ''}>${o}</option>`).join('')}</select>`; }
+          else if (f.type === 'textarea') { html += `<textarea class="amharic" rows="3" onchange="window._setCrcValue('${facilityType}','${f.id}',this.value,'${kebeleKey}')">${escapeHtml(val)}</textarea>`; }
+          else { html += `<input type="${f.type}" class="amharic" value="${escapeHtml(val)}" onchange="window._setCrcValue('${facilityType}','${f.id}',this.value,'${kebeleKey}')">`; }
           html += `</div>`;
         });
         html += `</div>`;
       });
-      html += `<div class="action-bar"><button class="btn btn-green amharic" onclick="window._submitCrc('${facilityType}')"><i class="fas fa-paper-plane"></i> አስገባ</button><button class="btn btn-copy amharic" onclick="window._copyCrc('${facilityType}')"><i class="fas fa-copy"></i> ቅዳ</button></div>`;
+      html += `<div class="action-bar"><button class="btn btn-green amharic" onclick="window._submitCrc('${facilityType}','${kebeleKey}')"><i class="fas fa-paper-plane"></i> አስገባ</button><button class="btn btn-copy amharic" onclick="window._copyCrc('${facilityType}','${kebeleKey}')"><i class="fas fa-copy"></i> ቅዳ</button></div>`;
       container.innerHTML = html;
     }
 
-    window._setCrcValue = function(facilityType, fieldId, value) {
-      if (facilityType === 'hc') { if (!crcData.hc) crcData.hc = {}; crcData.hc[fieldId] = value; }
-      else { if (!crcData.hp) crcData.hp = {}; crcData.hp[fieldId] = value; }
+    window._setHpCrcKebele = function(kebele) {
+      currentHpCrcKebele = kebele;
+      renderCrcForm('hp', 'crcHpContent');
+    };
+
+    window._setCrcValue = function(facilityType, fieldId, value, kebeleKey) {
+      if (facilityType === 'hc') {
+        if (!crcData.hc) crcData.hc = {};
+        crcData.hc[fieldId] = value;
+      } else {
+        if (!crcData.hp) crcData.hp = {};
+        if (!crcData.hp[kebeleKey]) crcData.hp[kebeleKey] = {};
+        crcData.hp[kebeleKey][fieldId] = value;
+      }
       persistCrc();
     };
 
-    window._submitCrc = function(facilityType) {
-      const data = facilityType === 'hc' ? (crcData.hc || {}) : (crcData.hp || {});
-      const submission = { facilityType, submittedAt: new Date().toLocaleString(), submittedBy: currentUser.name, caseType: data.caseType || '—', status: data.finalStatus || '—' };
+    window._submitCrc = function(facilityType, kebeleKey) {
+      const data = facilityType === 'hc'
+        ? (crcData.hc || {})
+        : ((crcData.hp && crcData.hp[kebeleKey]) ? crcData.hp[kebeleKey] : {});
+      const submission = {
+        facilityType,
+        kebele: facilityType === 'hp' ? kebeleKey : '—',
+        submittedAt: new Date().toLocaleString(),
+        submittedBy: currentUser.name,
+        caseType: data.caseType || '—',
+        status: data.finalStatus || '—'
+      };
       if (facilityType === 'hc') { if (!crcData.hcSubmissions) crcData.hcSubmissions = []; crcData.hcSubmissions.push(submission); }
       else { if (!crcData.hpSubmissions) crcData.hpSubmissions = []; crcData.hpSubmissions.push(submission); }
       persistCrc();
       showToast('CRC ሪፖርት ለአስተዳዳሪ ተልኳል', 'success');
     };
 
-    window._copyCrc = function(facilityType) {
-      const data = facilityType === 'hc' ? (crcData.hc || {}) : (crcData.hp || {});
-      let text = 'CRC Report — ' + (facilityType === 'hc' ? 'HC' : 'HP') + '\nDate: ' + new Date().toLocaleString() + '\n\n';
+    window._copyCrc = function(facilityType, kebeleKey) {
+      const data = facilityType === 'hc'
+        ? (crcData.hc || {})
+        : ((crcData.hp && crcData.hp[kebeleKey]) ? crcData.hp[kebeleKey] : {});
+      let text = 'CRC Report — ' + (facilityType === 'hc' ? 'HC' : 'HP: ' + kebeleKey) + '\nDate: ' + new Date().toLocaleString() + '\n\n';
       Object.keys(data).forEach(key => { if (typeof data[key] !== 'object') text += `${key}: ${data[key]}\n`; });
       copyToClipboard(text, 'CRC copied!');
     };
@@ -4691,10 +4927,10 @@
           <div class="kpi-card" style="border-left-color:var(--primary);"><div class="label">HC CRC Reports</div><div class="value">${hcSubmissions.length}</div><div class="sub">Health Center</div></div>
           <div class="kpi-card" style="border-left-color:var(--secondary);"><div class="label">HP CRC Reports</div><div class="value">${hpSubmissions.length}</div><div class="sub">Health Posts</div></div>
         </div>
-        <div class="card"><div class="card-header">📋 Submission History</div><div class="table-wrap"><table><thead><tr><th>Facility</th><th>Submitted By</th><th>Date</th><th>Case Type</th><th>Status</th></tr></thead><tbody>`;
-      if (hcSubmissions.length === 0 && hpSubmissions.length === 0) { html += '<tr><td colspan="5" class="no-data">No CRC submissions yet.</td></tr>'; }
+        <div class="card"><div class="card-header">📋 Submission History</div><div class="table-wrap"><table><thead><tr><th>Facility</th><th>Kebele</th><th>Submitted By</th><th>Date</th><th>Case Type</th><th>Status</th></tr></thead><tbody>`;
+      if (hcSubmissions.length === 0 && hpSubmissions.length === 0) { html += '<tr><td colspan="6" class="no-data">No CRC submissions yet.</td></tr>'; }
       [...hcSubmissions.map(s => ({...s, facility: 'HC'})), ...hpSubmissions.map(s => ({...s, facility: 'HP'}))].sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt)).forEach(s => {
-        html += `<tr><td><strong>${s.facility}</strong></td><td>${escapeHtml(s.submittedBy)}</td><td style="font-size:0.72rem;">${escapeHtml(s.submittedAt)}</td><td>${escapeHtml(s.caseType)}</td><td><span class="status-badge status-review">${escapeHtml(s.status)}</span></td></tr>`;
+        html += `<tr><td><strong>${s.facility}</strong></td><td>${s.kebele || '—'}</td><td>${escapeHtml(s.submittedBy)}</td><td style="font-size:0.72rem;">${escapeHtml(s.submittedAt)}</td><td>${escapeHtml(s.caseType)}</td><td><span class="status-badge status-review">${escapeHtml(s.status)}</span></td></tr>`;
       });
       html += `</tbody></table></div></div>`;
       container.innerHTML = html;
@@ -4712,7 +4948,6 @@
       const phcuScore = getPHCUScore();
       const kpIndicators = hcIndicators.filter(i => i.category === 'kp');
 
-      // Build slide model from existing data only
       const slides = [];
       slides.push({
         type: 'title',
@@ -4900,7 +5135,6 @@
 
         slides.forEach(s => {
           const slide = pptx.addSlide();
-          // Header bar
           slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 0.55, fill: { color: '0B3B5C' } });
           slide.addText(s.title, { x: 0.3, y: 0.08, w: 12, h: 0.45, fontSize: 18, bold: true, color: 'FFFFFF', fontFace: 'Arial' });
 
@@ -4942,7 +5176,6 @@
             slide.addText('Strengths (≥85%): ' + (s.strengths.length ? s.strengths.join(', ') : 'None identified'), { x: 0.5, y: 2.3, w: 12, h: 1.0, fontSize: 12, fontFace: 'Arial', color: '1E4A1E' });
             slide.addText('Gaps (<50%): ' + (s.gaps.length ? s.gaps.join(', ') : 'None identified'), { x: 0.5, y: 3.5, w: 12, h: 1.0, fontSize: 12, fontFace: 'Arial', color: '9A1F1F' });
           }
-          // Footer
           slide.addText('DM PHCU 2026 — By: Assefa Gashaye | 0918203416', { x: 0.3, y: 7.0, w: 12, h: 0.3, fontSize: 9, color: '94A3B8', align: 'center', fontFace: 'Arial' });
         });
 
@@ -5062,7 +5295,7 @@
         ]
       };
 
-      // HP GROUP: Checklist, CRC, Help REMOVED from HP sidebar only (per prompt section 3)
+      // HP GROUP: Per-kebele Checklist & CRC sidebars added; core HP items + checklist + crc + help
       const hpGroup = {
         id: 'HP', label: 'HP', icon: 'fa-house-medical',
         enabled: !isKPUser, visible: !isKPUser,
@@ -5076,11 +5309,33 @@
               disabled: !allowed,
               onClick: () => { if (!allowed) { showToast('You are not authorized to view this kebele.', 'error'); return; } activeNavGroup = 'HP'; openHPs(); window._hpSelect(hp.id, 'overview'); }
             };
-          })
-          // NOTE: HP Checklist / CRC / Help intentionally omitted here per modification spec.
-          // The underlying pages (page-checklist-hp, page-crc-hp, page-help-hp) and their
-          // functions remain intact and can still be reached by direct authorized call,
-          // but they are not shown in the HP sidebar.
+          }),
+          // Per-kebele Checklist and CRC items
+          ...healthPosts.map(hp => {
+            let allowed = true;
+            if (isKebele) allowed = (currentUser.hpId === hp.id);
+            return {
+              key: 'hp-checklist-' + hp.id, label: 'Checklist — ' + hp.name, icon: 'fa-list-check',
+              active: allowed && currentPage === 'checklist-hp' && currentHpChecklistKebele === hp.kebele,
+              disabled: !allowed,
+              onClick: () => { if (!allowed) { showToast('You are not authorized for this kebele.', 'error'); return; } activeNavGroup = 'HP'; currentHpChecklistKebele = hp.kebele; showChecklistPage('hp'); renderChecklistForm('hp', 'checklistHpContent'); }
+            };
+          }),
+          ...healthPosts.map(hp => {
+            let allowed = true;
+            if (isKebele) allowed = (currentUser.hpId === hp.id);
+            return {
+              key: 'hp-crc-' + hp.id, label: 'CRC — ' + hp.name, icon: 'fa-clipboard-check',
+              active: allowed && currentPage === 'crc-hp' && currentHpCrcKebele === hp.kebele,
+              disabled: !allowed,
+              onClick: () => { if (!allowed) { showToast('You are not authorized for this kebele.', 'error'); return; } activeNavGroup = 'HP'; currentHpCrcKebele = hp.kebele; showCrcPage('hp'); renderCrcForm('hp', 'crcHpContent'); }
+            };
+          }),
+          {
+            key: 'hp-help', label: 'Help / እርዳታ', icon: 'fa-circle-question',
+            active: currentPage === 'help-hp',
+            onClick: () => { activeNavGroup = 'HP'; showHelpPage('hp'); }
+          }
         ]
       };
 
@@ -5262,7 +5517,6 @@
       if (!password) { passwordError.classList.add('show'); document.getElementById('passwordInput').classList.add('error'); valid = false; }
       if (!valid) return;
 
-      // Device verification check
       if (!isDeviceTrusted()) {
         if (isDeviceLockedOut()) {
           showToast('Too many failed device verification attempts. Try again later.', 'error');
@@ -5414,7 +5668,7 @@
       setTimeout(function() { setupAutocomplete(document.getElementById('newIndName'), document.getElementById('newIndNameAutocomplete'), 'indicator'); }, 100);
     }
 
-    window._toggleNavVisibility = function(key, visible) { if (!canManageSettings()) { showToast('Access restricted. Admin only.', 'error'); return; } navVisibility[key] = visible; showToast((visible ? 'Enabled' : 'Disabled') + ': ' + (NAV_CONTROL_LABELS[key]?.label || key), visible ? 'success' : 'warning'); };
+    window._toggleNavVisibility = function(key, visible) { if (!canManageSettings()) { showToast('Access restricted. Admin only.', 'error'); return; } navVisibility[key] = visible; persistAllCoreData(); showToast((visible ? 'Enabled' : 'Disabled') + ': ' + (NAV_CONTROL_LABELS[key]?.label || key), visible ? 'success' : 'warning'); };
     window._editIndicatorFull = function(id) { const form = document.getElementById('im-edit-' + id); if (form) form.classList.toggle('open'); };
     window._closeEditForm = function(id) { const form = document.getElementById('im-edit-' + id); if (form) form.classList.remove('open'); };
     window._saveIndicatorFull = function(id) {
@@ -5425,7 +5679,7 @@
       ind.weight = parseInt(document.getElementById('im-weight-' + id).value) || 0;
       ind.plan = parseFloat(document.getElementById('im-plan-' + id).value) || 0;
       ind.achievement = parseFloat(document.getElementById('im-ach-' + id).value) || 0;
-      updateAllIndicators(); renderIndicatorManagement();
+      updateAllIndicators(); persistAllCoreData(); renderIndicatorManagement();
       if (currentPage === 'hc') renderHC(); if (currentPage === 'admin') renderAdmin(); if (currentPage === 'summary') renderSummary(); if (currentPage === 'kp') renderKP();
       showToast('Indicator saved successfully!', 'success');
     };
@@ -5434,7 +5688,7 @@
       const name = document.getElementById('newIndName').value.trim(); if (!name) { showToast('Please enter indicator name', 'error'); return; }
       const newId = hcIndicators.length > 0 ? Math.max(...hcIndicators.map(k => k.id)) + 1 : 1;
       hcIndicators.push({ id: newId, agenda: document.getElementById('newIndAgenda').value, name, weight: parseInt(document.getElementById('newIndWeight').value) || 5, plan: parseFloat(document.getElementById('newIndPlan').value) || 100, achievement: 0, unit: document.getElementById('newIndUnit').value.trim() || '%', direction: document.getElementById('newIndDirection').value, frequency: document.getElementById('newIndFrequency').value, active: true, verified: false, performance: 0 });
-      updateAllIndicators(); renderIndicatorManagement();
+      updateAllIndicators(); persistAllCoreData(); renderIndicatorManagement();
       if (currentPage === 'hc') renderHC(); if (currentPage === 'admin') renderAdmin(); if (currentPage === 'summary') renderSummary(); if (currentPage === 'kp') renderKP();
       showToast('Indicator added successfully!', 'success');
     };
@@ -5442,7 +5696,7 @@
       if (!canManageIndicators()) { showToast('Access restricted. Admin only.', 'error'); return; }
       if (!confirm('Delete this indicator?')) return;
       const idx = hcIndicators.findIndex(k => k.id === id);
-      if (idx > -1) { hcIndicators.splice(idx, 1); updateAllIndicators(); renderIndicatorManagement(); if (currentPage === 'hc') renderHC(); if (currentPage === 'admin') renderAdmin(); if (currentPage === 'summary') renderSummary(); if (currentPage === 'kp') renderKP(); showToast('Indicator deleted', 'success'); }
+      if (idx > -1) { hcIndicators.splice(idx, 1); updateAllIndicators(); persistAllCoreData(); renderIndicatorManagement(); if (currentPage === 'hc') renderHC(); if (currentPage === 'admin') renderAdmin(); if (currentPage === 'summary') renderSummary(); if (currentPage === 'kp') renderKP(); showToast('Indicator deleted', 'success'); }
     };
 
     // ============================================================
@@ -5474,8 +5728,8 @@
           if (data.checklistData) checklistData = data.checklistData;
           if (data.crcData) crcData = data.crcData;
           if (data.supervisors) supervisors = data.supervisors;
-          if (data.navVisibility) navVisibility = data.navVisibility;
-          updateAllIndicators(); updateHomeCounts();
+          if (data.navVisibility) navVisibility = Object.assign(navVisibility, data.navVisibility);
+          updateAllIndicators(); updateHomeCounts(); persistAllCoreData(); persistChecklist(); persistCrc();
           if (currentPage === 'admin') renderAdmin(); if (currentPage === 'hc') renderHC(); if (currentPage === 'hp') renderHPs(); if (currentPage === 'kp') renderKP(); if (currentPage === 'summary') renderSummary();
           showToast('Backup restored successfully', 'success');
         } catch (err) { showToast('Restore failed: ' + err.message, 'error'); }
@@ -5490,6 +5744,7 @@
       submissions = []; checklistData = { hc: [], hp: {} }; crcData = { hc: [], hp: {} };
       supervisors = [{ id: 'sup1', name: 'Supervisor A', group: 1, kebeles: ['04', '06', '15'], meetingsTarget: 12, meetingsActual: 10, supervisionsTarget: 8, supervisionsActual: 7, feedbackTarget: 10, feedbackActual: 9 }, { id: 'sup2', name: 'Supervisor B', group: 2, kebeles: ['05 Urban', '05 Rural', '11', '17'], meetingsTarget: 12, meetingsActual: 9, supervisionsTarget: 8, supervisionsActual: 6, feedbackTarget: 10, feedbackActual: 8 }];
       try { localStorage.removeItem(STORAGE_KEY_BACKUP); localStorage.removeItem(STORAGE_KEY_CHECKLIST); localStorage.removeItem(STORAGE_KEY_CRC); } catch (e) {}
+      persistAllCoreData(); persistChecklist(); persistCrc();
       updateAllIndicators(); updateHomeCounts();
       if (currentPage === 'admin') renderAdmin(); if (currentPage === 'hc') renderHC(); if (currentPage === 'hp') renderHPs(); if (currentPage === 'kp') renderKP(); if (currentPage === 'summary') renderSummary();
       showToast('All system data cleared', 'success');
@@ -5517,6 +5772,10 @@
 
       document.body.addEventListener('click', function _firstClick() { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); document.body.removeEventListener('click', _firstClick); }, { once: true });
 
+      // Load persisted core data before any render
+      loadAllCoreData();
+      try { const stored = JSON.parse(localStorage.getItem('dm_phcu_supervisor_period') || '{}'); Object.keys(stored).forEach(key => { supervisorPeriodData[key] = stored[key]; }); } catch (e) {}
+
       document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
       document.getElementById('compressBtn').addEventListener('click', toggleCompress);
       document.getElementById('settingsBtn').addEventListener('click', openSettings);
@@ -5536,9 +5795,7 @@
       document.getElementById('passwordInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); handleLogin(); } });
       document.getElementById('usernameSelect').addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('nameInput').focus(); } });
 
-      // Show device verification group if device is not trusted
       updateDeviceGroupVisibility();
-      // Update when username changes (to recheck)
       document.getElementById('usernameSelect').addEventListener('change', updateDeviceGroupVisibility);
 
       document.getElementById('hcCard').addEventListener('click', openHC);
@@ -5555,9 +5812,12 @@
       document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
       document.getElementById('page-login').classList.add('active');
 
-      try { const stored = JSON.parse(localStorage.getItem('dm_phcu_supervisor_period') || '{}'); Object.keys(stored).forEach(key => { supervisorPeriodData[key] = stored[key]; }); loadSupervisorPeriodData(); } catch (e) {}
+      loadSupervisorPeriodData();
 
-      console.log('Debremarkos PHCU KPI initialized — Checklist, CRC, and Help per kebele; HP sidebar items removed; Admin Presentation added; Save/Draft system active; Device verification active.');
+      // AUTO-SAVE: Save supervisor period data whenever it changes
+      // (no direct change event, but persisted on change via other handlers)
+
+      console.log('Debremarkos PHCU KPI initialized — Per-kebele Checklist/CRC sidebars added; full save/auto-save persistence active.');
     });
 
   })();
